@@ -20,7 +20,7 @@
             <td>{{ user.username || "Unknown" }}</td>
             <td>{{ user.email }}</td>
             <td>
-              <select v-model="user.role" @change="updateUserRole(user)">
+              <select v-model="user.role" @change="updateUserRole(user)" class="role-select">
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
               </select>
@@ -74,7 +74,7 @@ export default {
           throw new Error("Access denied. Admins only.");
         }
 
-        // Fetch ALL users, not just admins
+        // Fetch ALL users
         const usersCollection = collection(db, "users");
         onSnapshot(usersCollection, (snapshot) => {
           users.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -150,71 +150,109 @@ export default {
 };
 </script>
 
-
 <style scoped>
+/* ✅ Matches Dark Dashboard Theme */
+body {
+  background-color: #1e1e2f;
+  color: #f4f4f4;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Ensure admin container is centered with proper spacing */
 .admin-container {
+  background-color: #23233a;
+  color: #f4f4f4;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  max-width: 80%;
+  margin: 40px auto;
   text-align: center;
-  margin-top: 20px;
 }
 
-.error-message {
-  color: red;
-}
-
+/* ✅ Table Styling */
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
+  background: #2c2c48;
+  color: #f4f4f4;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 th, td {
-  border: 1px solid #ddd;
-  padding: 10px;
+  border-bottom: 1px solid #444;
+  padding: 12px;
   text-align: left;
 }
 
 th {
-  background-color: #f4f4f4;
-}
-
-.deactivated {
-  color: red;
+  background-color: #38385a;
+  color: #f4c542;
   font-weight: bold;
 }
 
-.deactivate-btn {
-  background-color: orange;
+td {
+  background-color: #2c2c48;
+}
+
+.deactivated {
+  color: #ff4d4d;
+  font-weight: bold;
+}
+
+/* ✅ Select Dropdown */
+.role-select {
+  background: #3b3b5c;
   color: white;
-  padding: 5px 10px;
+  border: 1px solid #505080;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+/* ✅ Button Styles */
+.deactivate-btn,
+.reactivate-btn,
+.delete-btn {
+  padding: 8px 12px;
   border: none;
   cursor: pointer;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: 0.3s ease-in-out;
+}
+
+.deactivate-btn {
+  background-color: #ff9500;
+  color: white;
 }
 
 .deactivate-btn:hover {
-  background-color: darkorange;
+  background-color: #e68500;
 }
 
 .reactivate-btn {
-  background-color: green;
+  background-color: #28a745;
   color: white;
-  padding: 5px 10px;
-  border: none;
-  cursor: pointer;
 }
 
 .reactivate-btn:hover {
-  background-color: darkgreen;
+  background-color: #218838;
 }
 
 .delete-btn {
-  background-color: red;
+  background-color: #dc3545;
   color: white;
-  padding: 5px 10px;
-  border: none;
-  cursor: pointer;
 }
 
 .delete-btn:hover {
-  background-color: darkred;
+  background-color: #c82333;
+}
+
+/* ✅ Error Message */
+.error-message {
+  color: red;
+  font-weight: bold;
 }
 </style>

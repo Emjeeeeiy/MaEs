@@ -1,26 +1,36 @@
 <template>
   <div class="login-wrapper">
     <div class="login-container">
-      <h2>Login</h2>
+      <h2>Log In</h2><br><br>
       <form @submit.prevent="loginUser">
-        <input type="email" v-model="email" placeholder="Email" required />
-        <input type="password" v-model="password" placeholder="Password" required />
-        
-        <div class="button-group">
-          <button type="submit" class="login-btn">Login</button>
-          <button @click="loginWithGoogle" type="button" class="google-btn">
-            <img src="@/assets/google-icon.png" alt="Google Logo" /> Sign in with Google
+        <div class="input-group">
+          <input type="email" v-model="email" placeholder="Email" required />
+        </div>
+        <div class="input-group password-group">
+          <input
+            :type="showPassword ? 'text' : 'password'"
+            v-model="password"
+            placeholder="Password"
+            required
+          />
+          <button type="button" @click="toggleShowPassword" class="toggle-password-btn">
+            {{ showPassword ? 'Hide' : 'Show' }}
           </button>
         </div>
-
+        <button type="submit" class="btn primary-btn">Login</button>
+        <button @click="loginWithGoogle" type="button" class="btn google-btn">
+          <img src="@/assets/google-icon.png" alt="Google Logo" /> Sign in with Google
+        </button>
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
       </form>
-
-      <button v-if="showResendVerification" @click="resendVerification" class="resend-btn">
+      <button v-if="showResendVerification" @click="resendVerification" class="btn link-btn">
         Resend Verification Email
       </button>
-
-      <router-link to="/reset-password" class="forgot-password">Forgot Password?</router-link>
+      <hr/>
+      <router-link to="/reset-password" class="link">Forgot Password?</router-link>
+      <p class="register-msg">
+        Don't have an account? <router-link to="/register" class="link">Register here</router-link>
+      </p>
     </div>
   </div>
 </template>
@@ -43,6 +53,7 @@ const email = ref("");
 const password = ref("");
 const errorMessage = ref("");
 const showResendVerification = ref(false);
+const showPassword = ref(false);
 const router = useRouter();
 const auth = getAuth();
 
@@ -68,7 +79,7 @@ const loginUser = async () => {
         await signOut(auth);
         return;
       }
-
+      // Redirect based on role
       if (userData.role === "admin") {
         router.push("/admin-dashboard");
       } else {
@@ -125,137 +136,138 @@ const resendVerification = async () => {
     errorMessage.value = "Error sending verification email.";
   }
 };
+
+const toggleShowPassword = () => {
+  showPassword.value = !showPassword.value;
+};
 </script>
 
 <style scoped>
-/* ✅ Background and Wrapper */
+/* Overall background with gradient */
 .login-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  background: url('@/assets/let.png') no-repeat center center/cover;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #81c784, #388e3c);
 }
 
-/* ✅ Login Container (Similar to Register) */
+/* Card Container */
 .login-container {
-  text-align: center;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 60px;
-  border-radius: 12px;
-  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
-  max-width: 420px;
+  background: rgba(255, 255, 255, 0.97);
+  padding: 40px 30px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  max-width: 400px;
   width: 100%;
-  font-family: 'Poppins', sans-serif;
+  text-align: center;
 }
 
-/* ✅ Title */
+/* Headings & Tagline */
 h2 {
   color: #2e7d32;
-  font-weight: bold;
-  font-size: 40px;
-  margin-bottom: 15px;
+  margin-bottom: 5px;
+  font-size: 36px;
+}
+.tagline {
+  margin-bottom: 25px;
+  font-size: 16px;
+  color: #555;
 }
 
-/* ✅ Inputs */
+/* Input Group Styling */
+.input-group {
+  margin-bottom: 20px;
+}
 input {
   width: 100%;
   padding: 12px;
-  margin: 10px 0;
-  border: 1px solid #81c784;
+  border: 1px solid #bdbdbd;
   border-radius: 6px;
+  font-size: 15px;
   outline: none;
-  background: #f1f8e9;
-  font-size: 14px;
+  transition: border 0.2s;
+  background: #f9fbe7;
+}
+input:focus {
+  border-color: #2e7d32;
 }
 
-/* ✅ Button Group */
-.button-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  gap: 15px;
-  margin-top: 20px;
+/* Password Input with Toggle Button */
+.password-group {
+  position: relative;
 }
-
-/* ✅ Login Button */
-.login-btn {
-  width: 80%;
-  padding: 14px;
-  background-color: #388e3c;
-  color: white;
+.toggle-password-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
   border: none;
-  border-radius: 6px;
+  color: #388e3c;
+  font-weight: bold;
   cursor: pointer;
+}
+
+/* Buttons */
+.btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
   font-size: 16px;
+  cursor: pointer;
+  border: none;
+  margin-bottom: 15px;
   transition: background 0.3s, transform 0.2s;
 }
-
-.login-btn:hover {
-  background-color: #2e7d32;
-  transform: scale(1.05);
+.primary-btn {
+  background-color: #388e3c;
+  color: white;
 }
-
-/* ✅ Google Button */
-
+.primary-btn:hover {
+  background-color: #2e7d32;
+  transform: scale(1.02);
+}
 .google-btn {
+  background-color: #f1f1f1;
+  color: #555;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 14px;
-  background-color: #f4f4f4; /* Light background for better contrast */
-  color: #555; /* Darker text color for readability */
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  width: 80%;
-  transition: background 0.3s, transform 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
-
 .google-btn:hover {
-  background-color: #e0e0e0; /* Slightly darker on hover */
-  transform: scale(1.05);
+  background-color: #e0e0e0;
+  transform: scale(1.02);
 }
-
 .google-btn img {
   width: 22px;
-  margin-right: 12px;
-
+  margin-right: 10px;
 }
 
-/* ✅ Resend Verification Button */
-.resend-btn {
+/* Link Buttons and Messages */
+.link-btn {
   background: none;
   color: #2e7d32;
-  border: none;
-  cursor: pointer;
-  margin-top: 10px;
+  font-size: 14px;
+  padding: 0;
+  margin-bottom: 10px;
 }
-
-.resend-btn:hover {
-  text-decoration: underline;
-}
-
-/* ✅ Forgot Password Link */
-.forgot-password {
-  display: block;
-  margin-top: 10px;
+.link {
   color: #2e7d32;
   text-decoration: none;
-  font-size: 14px;
 }
-
-.forgot-password:hover {
+.link:hover {
   text-decoration: underline;
 }
-
-/* ✅ Error Message */
-.error-message {
-  color: red;
-  margin-top: 12px;
+.register-msg {
   font-size: 14px;
+  color: #555;
+}
+
+/* Error Message */
+.error-message {
+  color: #d32f2f;
+  font-size: 14px;
+  margin-top: 10px;
 }
 </style>

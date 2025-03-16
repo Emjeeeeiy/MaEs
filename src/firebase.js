@@ -1,16 +1,18 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { getStorage } from "firebase/storage"; 
+import { addDoc, serverTimestamp } from "firebase/firestore";
 
 // Your Firebase configuration (Replace with actual values if necessary)
 const firebaseConfig = {
-  apiKey: "AIzaSyDI4-BnlhJz5BQflocmopqpEIsc6WoHiE0",
-  authDomain: "ecomist-3082f.firebaseapp.com",
-  projectId: "ecomist-3082f",
-  storageBucket: "ecomist-3082f.appspot.com",
-  messagingSenderId: "1054000421761",
-  appId: "1:1054000421761:web:4a79a37b3b2fef9b996680",
+  apiKey: "AIzaSyB932LihfaOUYVCksqn9iVTglDq6QQrkhA",
+  authDomain: "hospital-billing-a5bef.firebaseapp.com",
+  projectId: "hospital-billing-a5bef",
+  storageBucket: "hospital-billing-a5bef.firebasestorage.app",
+  messagingSenderId: "298673867675",
+  appId: "1:298673867675:web:ceedde4d4ff09eecdb2f3e",
+  measurementId: "G-FKFY1TM68W"
 };
 
 // Initialize Firebase
@@ -30,7 +32,7 @@ const signInWithGoogle = async () => {
   }
 };
 
-// Function to Logout
+// Function to Logoutc
 const logout = async () => {
   try {
     await signOut(auth);
@@ -40,4 +42,5 @@ const logout = async () => {
   }
 };
 
-export { auth, db, storage, signInWithGoogle, logout };
+export { auth, db, storage, collection, getDocs, addDoc, serverTimestamp, signInWithGoogle, logout };
+

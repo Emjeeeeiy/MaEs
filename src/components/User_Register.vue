@@ -1,22 +1,31 @@
 <template>
   <div class="register-wrapper">
     <div class="register-container">
-      <h2>Register</h2>
+      <h2>Create Account</h2>
+      <p class="tagline">Join us and manage your hospital billing seamlessly</p>
       <form @submit.prevent="registerUser">
-        <input type="text" v-model="username" placeholder="Username" required />
-        <input type="email" v-model="email" placeholder="Email" required />
-        <input type="password" v-model="password" placeholder="Password" required />
-        <input type="password" v-model="confirmPassword" placeholder="Confirm Password" required />
-        
-        <div class="button-group">
-          <button type="submit" class="signup-btn">Register</button>
-          <button @click="registerWithGoogle" type="button" class="google-btn">
-            <img src="@/assets/google-icon.png" alt="Google Logo" /> Continue with Google
-          </button>
+        <div class="input-group">
+          <input type="text" v-model="username" placeholder="Username" required />
         </div>
-
+        <div class="input-group">
+          <input type="email" v-model="email" placeholder="Email" required />
+        </div>
+        <div class="input-group">
+          <input type="password" v-model="password" placeholder="Password" required />
+        </div>
+        <div class="input-group">
+          <input type="password" v-model="confirmPassword" placeholder="Confirm Password" required />
+        </div>
+        <button type="submit" class="btn primary-btn">Register</button>
+        <button @click="registerWithGoogle" type="button" class="btn google-btn">
+          <img src="@/assets/google-icon.png" alt="Google Logo" /> Continue with Google
+        </button>
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
       </form>
+      <p class="login-msg">
+        Already have an account?
+        <router-link to="/login" class="link">Login here</router-link>
+      </p>
     </div>
   </div>
 </template>
@@ -104,98 +113,111 @@ const registerWithGoogle = async () => {
 </script>
 
 <style scoped>
+/* Background with a modern gradient */
 .register-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  background: url('@/assets/let.png') no-repeat center center/cover;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #81c784, #388e3c);
 }
 
+/* Centered card container */
 .register-container {
-  text-align: center;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 60px;
-  border-radius: 12px;
-  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.98);
+  padding: 40px 30px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   max-width: 420px;
   width: 100%;
+  text-align: center;
   font-family: 'Poppins', sans-serif;
 }
 
+/* Headings & Tagline */
 h2 {
   color: #2e7d32;
-  font-weight: bold;
-  font-size: 50px;
-  margin-bottom: 15px;
+  font-size: 38px;
+  margin-bottom: 10px;
+}
+.tagline {
+  color: #555;
+  font-size: 15px;
+  margin-bottom: 25px;
 }
 
+/* Input Group Styling */
+.input-group {
+  margin-bottom: 15px;
+}
 input {
   width: 100%;
   padding: 12px;
-  margin: 10px 0;
-  border: 1px solid #81c784;
+  border: 1px solid #bdbdbd;
   border-radius: 6px;
+  font-size: 15px;
   outline: none;
-  background: #f1f8e9;
-  font-size: 14px;
+  transition: border 0.2s;
+  background: #f9fbe7;
+}
+input:focus {
+  border-color: #2e7d32;
 }
 
-.button-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+/* Buttons */
+.btn {
   width: 100%;
-  gap: 15px; /* Adds spacing between buttons */
-  margin-top: 20px;
-}
-
-button {
-  width: 80%;
-  padding: 14px;
-  background-color: #388e3c;
-  color: white;
-  border: none;
+  padding: 12px;
   border-radius: 6px;
-  cursor: pointer;
   font-size: 16px;
+  cursor: pointer;
+  border: none;
+  margin-bottom: 15px;
   transition: background 0.3s, transform 0.2s;
 }
-
-button:hover {
+.primary-btn {
+  background-color: #388e3c;
+  color: white;
+}
+.primary-btn:hover {
   background-color: #2e7d32;
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
-
-.error-message {
-  color: red;
-  margin-top: 12px;
-  font-size: 14px;
-}
-
 .google-btn {
+  background-color: #f1f1f1;
+  color: #555;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 14px;
-  background-color: #f4f4f4; /* Light background for better contrast */
-  color: #555; /* Darker text color for readability */
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  width: 80%;
-  transition: background 0.3s, transform 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
-
 .google-btn:hover {
-  background-color: #e0e0e0; /* Slightly darker on hover */
-  transform: scale(1.05);
+  background-color: #e0e0e0;
+  transform: scale(1.02);
 }
-
 .google-btn img {
   width: 22px;
-  margin-right: 12px;
+  margin-right: 10px;
+}
+
+/* Error Message */
+.error-message {
+  color: #d32f2f;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* Login Link Message */
+.login-msg {
+  font-size: 14px;
+  color: #555;
+  margin-top: 10px;
+}
+.link {
+  color: #2e7d32;
+  text-decoration: none;
+  font-weight: bold;
+}
+.link:hover {
+  text-decoration: underline;
 }
 </style>
