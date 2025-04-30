@@ -19,6 +19,12 @@
       <!-- Navigation Links -->
       <nav class="flex-1 px-4 py-4 space-y-2">
         <router-link
+          to="/admin-dashboard"
+          class="block px-4 py-2 rounded text-gray-700 hover:bg-green-200 hover:text-green-900 transition font-medium"
+        >
+          Admin Dashboard
+        </router-link>
+        <router-link
           to="/admin-management"
           class="block px-4 py-2 rounded text-gray-700 hover:bg-green-200 hover:text-green-900 transition font-medium"
         >
@@ -31,13 +37,13 @@
           Invoice Management
         </router-link>
         <router-link
-          to="/claims-management"
+          to="/admin-claims"
           class="block px-4 py-2 rounded text-gray-700 hover:bg-green-200 hover:text-green-900 transition font-medium"
         >
           Claims Management
         </router-link>
       </nav>
-  
+
       <!-- Logout -->
       <div class="px-4 py-4 border-t border-gray-300">
         <button

@@ -14,10 +14,7 @@
           alt="Profile"
           class="w-full h-full object-cover"
         />
-        <div
-          v-else
-          class="text-xl font-semibold text-green-700"
-        >
+        <div v-else class="text-xl font-semibold text-green-700">
           {{ username.charAt(0).toUpperCase() }}
         </div>
       </div>
@@ -59,10 +56,36 @@
     <!-- Logout Button -->
     <div class="px-4 py-5 border-t border-gray-200">
       <button
-        @click="logout"
-        class="w-full flex items-center text-left text-red-600 hover:text-red-700 transition"
+        @click="handleLogout"
+        :disabled="isLoggingOut"
+        class="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        <i class="fas fa-sign-out-alt mr-3 w-5"></i> Logout
+        <span v-if="!isLoggingOut">
+          <i class="fas fa-sign-out-alt mr-2"></i> Logout
+        </span>
+        <span v-else>
+          <svg
+            class="animate-spin h-5 w-5 mr-2 text-white inline"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v8H4z"
+            ></path>
+          </svg>
+          Logging out...
+        </span>
       </button>
     </div>
   </div>
@@ -79,8 +102,8 @@ const router = useRouter()
 const username = ref('User')
 const role = ref('Viewer')
 const profileImageUrl = ref('')
+const isLoggingOut = ref(false)
 
-// Fetch user info on auth state change
 const auth = getAuth()
 
 onMounted(() => {
@@ -97,8 +120,15 @@ onMounted(() => {
   })
 })
 
-const logout = async () => {
-  await signOut(auth)
-  router.push('/login')
+const handleLogout = async () => {
+  if (isLoggingOut.value) return
+  isLoggingOut.value = true
+  try {
+    await signOut(auth)
+    router.push('/login')
+  } catch (err) {
+    console.error('Logout failed:', err)
+    isLoggingOut.value = false
+  }
 }
 </script>

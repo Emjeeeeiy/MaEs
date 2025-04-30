@@ -9,9 +9,6 @@
       <Topbar class="sticky top-0 z-10 bg-white shadow-sm" />
 
       <main class="p-4 sm:p-6 xl:p-10 space-y-10 max-w-7xl mx-auto w-full">
-        <!-- Page Heading -->
-        <h1 class="text-2xl font-bold text-gray-800">User Dashboard</h1>
-
         <!-- Dashboard Cards -->
         <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
           <!-- Total Revenue -->
@@ -54,39 +51,37 @@
           </div>
         </section>
 
-        <!-- Invoices Table -->
-        <section class="bg-white rounded-xl shadow-md p-4 sm:p-6 overflow-hidden">
-          <h3 class="text-xl font-semibold text-gray-800 mb-4">
-            Recent Invoices
-          </h3>
+        <!-- Invoices Table (Smaller Version) -->
+        <section class="bg-white rounded-lg shadow p-3 sm:p-4 overflow-hidden">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3">Recent Invoices</h3>
           <div class="overflow-x-auto">
-            <table class="min-w-full table-auto border-collapse">
+            <table class="min-w-full table-auto border-collapse text-sm">
               <thead>
-                <tr class="bg-gray-100 text-gray-700 text-left text-sm">
-                  <th class="px-4 py-3">Invoice #</th>
-                  <th class="px-4 py-3">Amount</th>
-                  <th class="px-4 py-3">Status</th>
+                <tr class="bg-gray-100 text-gray-600 text-left">
+                  <th class="px-3 py-2">Invoice #</th>
+                  <th class="px-3 py-2">Amount</th>
+                  <th class="px-3 py-2">Status</th>
                 </tr>
               </thead>
               <tbody>
                 <tr
                   v-for="invoice in invoices"
                   :key="invoice.id"
-                  class="border-t hover:bg-gray-50 transition text-gray-800"
+                  class="border-t hover:bg-gray-50 transition text-gray-700"
                 >
-                  <td class="px-4 py-3 font-medium">{{ invoice.id }}</td>
-                  <td class="px-4 py-3 font-medium">
+                  <td class="px-3 py-2 font-medium">{{ invoice.id }}</td>
+                  <td class="px-3 py-2 font-medium">
                     ${{ invoice.totalAmount?.toLocaleString() }}
                   </td>
                   <td
-                    class="px-4 py-3 font-medium"
+                    class="px-3 py-2 font-medium"
                     :class="getStatusClass(invoice.status)"
                   >
                     {{ invoice.status }}
                   </td>
                 </tr>
                 <tr v-if="invoices.length === 0">
-                  <td colspan="3" class="px-4 py-4 text-center text-gray-400">
+                  <td colspan="3" class="px-3 py-3 text-center text-gray-400">
                     No invoices found.
                   </td>
                 </tr>
@@ -94,6 +89,7 @@
             </table>
           </div>
         </section>
+
       </main>
     </div>
   </div>

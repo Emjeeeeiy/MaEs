@@ -5,20 +5,21 @@
 
     <!-- Main content -->
     <div class="flex-1 p-6 space-y-8 max-w-7xl mx-auto w-full">
-      <header>
-        <h2 class="text-3xl font-bold text-gray-800 mb-1">Invoices Management</h2>
-        <p class="text-gray-500">Click on a user to view their invoices</p>
+      <!-- Header and User Search -->
+      <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 class="text-3xl font-bold text-gray-800 mb-1">Invoices Management</h2>
+          <p class="text-gray-500">Click on a user to view their invoices</p>
+        </div>
+        <div class="w-full md:w-80">
+          <input
+            v-model="userSearchQuery"
+            type="text"
+            placeholder="Search by name or email"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 focus:ring-2 focus:ring-green-400 focus:outline-none"
+          />
+        </div>
       </header>
-
-      <!-- User Search -->
-      <div class="max-w-lg">
-        <input
-          v-model="userSearchQuery"
-          type="text"
-          placeholder="Search by name or email"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-400 focus:outline-none"
-        />
-      </div>
 
       <!-- User Cards -->
       <section>
