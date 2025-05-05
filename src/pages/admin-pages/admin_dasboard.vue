@@ -99,11 +99,16 @@ const fetchDashboardData = async () => {
     });
 
     const usersSnap = await getDocs(collection(db, "users"));
-    totalPatients = usersSnap.size;
     usersSnap.forEach((doc) => {
       const data = doc.data();
-      if ((data.status || "").toLowerCase() === "discharged") {
-        dischargedPatients++;
+      const role = (data.role || "").toLowerCase();
+      const status = (data.status || "").toLowerCase();
+
+      if (role === "user") {
+        totalPatients++;
+        if (status === "discharged") {
+          dischargedPatients++;
+        }
       }
     });
 
