@@ -137,9 +137,14 @@ const fetchInvoicesByEmail = async (email) => {
       const status = (invoice.status || "").toLowerCase();
       const amount = Number(invoice.totalAmount) || 0;
 
-      if (status === "paid") totalRevenue.value += amount;
-      else if (status === "pending") pendingClaims.value += 1;
-      else if (status === "overdue") outstandingPayments.value += amount;
+      if (status === "paid") {
+        totalRevenue.value += amount;
+      } else if (status === "pending") {
+        pendingClaims.value += 1;
+        outstandingPayments.value += amount; // Include pending here
+      } else if (status === "overdue") {
+        outstandingPayments.value += amount;
+      }
     }
   } catch (error) {
     console.error("Error fetching invoices:", error);
