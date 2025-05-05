@@ -8,9 +8,9 @@
           </div>
   
           <nav class="flex gap-6 text-gray-700 font-medium">
-            <router-link to="/dashboard" class="hover:text-green-600">Dashboard</router-link>
             <router-link to="/profile" class="hover:text-green-600">Profile</router-link>
             <router-link to="/report" class="hover:text-green-600">Reports</router-link>
+            <router-link to="/feedback" class="hover:text-green-600">Feedback</router-link>
           </nav>
         </div>
       </div>

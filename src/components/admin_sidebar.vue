@@ -42,6 +42,12 @@
         >
           Claims Management
         </router-link>
+        <router-link
+          to="/admin-services"
+          class="block px-4 py-2 rounded text-gray-700 hover:bg-green-200 hover:text-green-900 transition font-medium"
+        >
+          Service Management
+        </router-link>
       </nav>
 
       <!-- Logout -->

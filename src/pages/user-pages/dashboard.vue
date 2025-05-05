@@ -51,7 +51,7 @@
           </div>
         </section>
 
-        <!-- Invoices Table (Smaller Version) -->
+        <!-- Invoices Table -->
         <section class="bg-white rounded-lg shadow p-3 sm:p-4 overflow-hidden">
           <h3 class="text-lg font-semibold text-gray-800 mb-3">Recent Invoices</h3>
           <div class="overflow-x-auto">
@@ -89,7 +89,6 @@
             </table>
           </div>
         </section>
-
       </main>
     </div>
   </div>
@@ -100,37 +99,54 @@ import Sidebar from "@/components/Sidebar.vue";
 import Topbar from "@/components/Topbar.vue";
 import { ref, onMounted } from "vue";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { db } from "../../firebase";
+import { db } from "@/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
-// Heroicons (Solid)
+// Heroicons
 import {
   BanknotesIcon,
   DocumentTextIcon,
   ExclamationCircleIcon,
 } from "@heroicons/vue/24/solid";
 
-// Dashboard values
-const totalRevenue = ref(1200000);
-const pendingClaims = ref(45);
-const outstandingPayments = ref(250000);
+// Refs
+const totalRevenue = ref(0);
+const pendingClaims = ref(0);
+const outstandingPayments = ref(0);
 const invoices = ref([]);
 
 const auth = getAuth();
 
+// Fetch invoices for current user and calculate totals
 const fetchInvoicesByEmail = async (email) => {
   try {
     const q = query(collection(db, "invoices"), where("email", "==", email));
-    const querySnapshot = await getDocs(q);
-    invoices.value = querySnapshot.docs.map((doc) => ({
+    const snapshot = await getDocs(q);
+    const docs = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }));
+    invoices.value = docs;
+
+    // Reset metrics
+    totalRevenue.value = 0;
+    pendingClaims.value = 0;
+    outstandingPayments.value = 0;
+
+    for (const invoice of docs) {
+      const status = (invoice.status || "").toLowerCase();
+      const amount = Number(invoice.totalAmount) || 0;
+
+      if (status === "paid") totalRevenue.value += amount;
+      else if (status === "pending") pendingClaims.value += 1;
+      else if (status === "overdue") outstandingPayments.value += amount;
+    }
   } catch (error) {
     console.error("Error fetching invoices:", error);
   }
 };
 
+// Watch auth state and fetch data
 onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user?.email) {
@@ -139,6 +155,7 @@ onMounted(() => {
   });
 });
 
+// Status color helper
 const getStatusClass = (status) => {
   switch ((status || "").toLowerCase()) {
     case "paid":

@@ -25,6 +25,13 @@
     <!-- Navigation -->
     <nav class="flex-1 px-4 py-6 space-y-1">
       <router-link
+        to="/dashboard"
+        class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-green-100 hover:text-green-700 transition"
+      >
+        <i class="fas fa-credit-card mr-3 w-5 text-green-500"></i> Dashboard
+      </router-link>
+
+      <router-link
         to="/payments"
         class="flex items-center px-4 py-2 rounded-lg text-gray-700 hover:bg-green-100 hover:text-green-700 transition"
       >
