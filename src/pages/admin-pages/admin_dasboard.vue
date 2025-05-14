@@ -10,7 +10,7 @@
         <div
           v-for="(card, index) in dashboardCards"
           :key="index"
-          class="bg-white border border-gray-200 rounded-2xl p-4 shadow hover:shadow-lg transition"
+          class="bg-white border border-black rounded-2xl p-4 shadow hover:shadow-lg transition"
         >
           <div class="flex items-center space-x-4">
             <div class="p-3 rounded-full text-white" :class="card.color">

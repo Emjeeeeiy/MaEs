@@ -10,7 +10,8 @@
 
       <!-- Payment Content -->
       <main class="p-6">
-        <div class="bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto">
+        <div class="bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto border border-black">
+          <!-- 🟢 Added "border border-black" here -->
           <h2 class="text-2xl font-semibold text-green-700 mb-6">Process Payment</h2>
 
           <div v-if="loading" class="text-gray-500">Loading unpaid invoices...</div>
@@ -46,6 +47,7 @@
             >
               Submit Payment
             </button>
+
             <p v-if="successMessage" class="text-green-600 mt-4 font-medium">{{ successMessage }}</p>
 
             <!-- Receipt -->
