@@ -10,32 +10,34 @@
 
       <!-- Payment Content -->
       <main class="p-6">
-        <div class="bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto border border-black">
-          <!-- 🟢 Added "border border-black" here -->
-          <h2 class="text-2xl font-semibold text-green-700 mb-6">Process Payment</h2>
+        <div class="bg-white rounded-xl shadow-md px-8 py-2 max-w-4xl mx-auto border border-black">
+          <h2 class="text-xl font-semibold text-green-700 mb-3">Process Payment</h2>
 
-          <div v-if="loading" class="text-gray-500">Loading unpaid invoices...</div>
+          <!-- Loading Animation -->
+          <div v-if="loading" class="flex justify-center py-8">
+            <LoadingAnimation />
+          </div>
 
           <div v-else>
-            <label class="block text-gray-700 font-medium mb-2">Select an Unpaid Invoice:</label>
+            <label class="block text-gray-700 text-sm font-medium mb-1">Select an Unpaid Invoice:</label>
             <select
               v-model="selectedInvoice"
-              class="w-full bg-gray-50 text-gray-800 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 mb-4"
+              class="w-full bg-gray-50 text-gray-800 border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 mb-3"
             >
               <option v-for="invoice in invoices" :key="invoice.id" :value="invoice">
                 Invoice #{{ invoice.id }} - ₱{{ invoice.totalAmount }}
               </option>
             </select>
 
-            <label class="block text-gray-700 font-medium mb-2">Enter Cash Payment:</label>
+            <label class="block text-gray-700 text-sm font-medium mb-1">Enter Cash Payment:</label>
             <input
               v-model.number="cashPaid"
               type="number"
               placeholder="Enter cash amount"
-              class="w-full bg-gray-50 text-gray-800 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 mb-4"
+              class="w-full bg-gray-50 text-gray-800 border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 mb-3"
             />
 
-            <div v-if="selectedInvoice" class="mb-4 text-gray-700">
+            <div v-if="selectedInvoice" class="mb-3 text-gray-700 text-sm">
               <p><strong>Total Amount:</strong> ₱{{ selectedInvoice.totalAmount }}</p>
               <p><strong>Change:</strong> ₱{{ changeDue }}</p>
             </div>
@@ -43,16 +45,16 @@
             <button
               @click="processPayment"
               :disabled="cashPaid < selectedInvoice?.totalAmount"
-              class="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 disabled:opacity-50 mb-4"
+              class="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 disabled:opacity-50 mb-3 text-sm"
             >
               Submit Payment
             </button>
 
-            <p v-if="successMessage" class="text-green-600 mt-4 font-medium">{{ successMessage }}</p>
+            <p v-if="successMessage" class="text-green-600 mt-2 font-medium text-sm">{{ successMessage }}</p>
 
             <!-- Receipt -->
-            <div v-if="showReceipt" class="bg-gray-100 mt-6 p-4 rounded-lg shadow text-black">
-              <h3 class="text-lg font-semibold mb-2">Receipt</h3>
+            <div v-if="showReceipt" class="bg-gray-100 mt-4 p-3 rounded-lg shadow text-black text-sm">
+              <h3 class="text-base font-semibold mb-2">Receipt</h3>
               <p><strong>Invoice ID:</strong> {{ receiptData.invoiceId }}</p>
               <p><strong>Amount Paid:</strong> ₱{{ receiptData.amountPaid }}</p>
               <p><strong>Change:</strong> ₱{{ receiptData.change }}</p>
@@ -60,7 +62,7 @@
 
               <button
                 @click="printReceipt"
-                class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                class="mt-3 bg-blue-600 text-white px-4 py-1.5 rounded-md hover:bg-blue-700 text-sm"
               >
                 Print Receipt
               </button>
@@ -75,6 +77,8 @@
 <script>
 import Sidebar from "@/components/Sidebar.vue";
 import Topbar from "@/components/Topbar.vue";
+import LoadingAnimation from "@/components/loading_animation.vue";
+
 import { db } from "@/firebase";
 import {
   collection,
@@ -93,6 +97,7 @@ export default {
   components: {
     Sidebar,
     Topbar,
+    LoadingAnimation,
   },
   data() {
     return {

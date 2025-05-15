@@ -13,7 +13,10 @@
         <div class="bg-white rounded-xl shadow-md p-6 max-w-3xl mx-auto border border-black">
           <h2 class="text-2xl font-semibold text-green-700 mb-6">Billing System</h2>
 
-          <div v-if="loading" class="text-gray-500">Loading services...</div>
+          <!-- Loading Animation -->
+          <div v-if="loading" class="flex justify-center py-8">
+            <LoadingAnimation />
+          </div>
 
           <div v-else>
             <label class="block text-gray-700 font-medium mb-2">Select Services:</label>
@@ -55,6 +58,8 @@
 <script>
 import Sidebar from "@/components/Sidebar.vue";
 import Topbar from "@/components/Topbar.vue";
+import LoadingAnimation from "@/components/loading_animation.vue";
+
 import { db } from "@/firebase";
 import { collection, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
@@ -64,6 +69,7 @@ export default {
   components: {
     Sidebar,
     Topbar,
+    LoadingAnimation,
   },
   data() {
     return {
@@ -89,9 +95,9 @@ export default {
           id: doc.id,
           ...doc.data(),
         }));
-        this.loading = false;
       } catch (error) {
         console.error("Error fetching services:", error);
+      } finally {
         this.loading = false;
       }
     },
@@ -103,8 +109,7 @@ export default {
       }
 
       const auth = getAuth();
-      const user = auth.currenthh
-      User;
+      const user = auth.currentUser;
 
       if (!user) {
         alert("You must be logged in to generate an invoice.");
@@ -128,6 +133,7 @@ export default {
         this.selectedServices = [];
       } catch (error) {
         console.error("Error generating invoice:", error);
+        alert("Failed to generate invoice. Please try again.");
       }
     },
   },

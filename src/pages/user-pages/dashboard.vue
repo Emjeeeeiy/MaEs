@@ -8,7 +8,13 @@
       <!-- Sticky Topbar -->
       <Topbar class="sticky top-0 z-10 bg-white shadow-sm" />
 
-      <main class="p-4 sm:p-6 xl:p-10 max-w-7xl mx-auto w-full">
+      <!-- Loading State -->
+      <div v-if="loadingInvoices" class="flex-1 flex justify-center items-center">
+        <LoadingAnimation />
+      </div>
+
+      <!-- Main Dashboard -->
+      <main v-else class="p-4 sm:p-6 xl:p-10 max-w-7xl mx-auto w-full">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <!-- Left: Invoice Table -->
           <section class="lg:col-span-2 bg-white rounded-lg shadow-lg p-6 sm:p-8 border border-black">
@@ -30,7 +36,7 @@
                   >
                     <td class="px-4 py-3 font-medium">{{ invoice.id }}</td>
                     <td class="px-4 py-3 font-medium">
-                      ${{ invoice.totalAmount?.toLocaleString() }}
+                      ₱{{ invoice.totalAmount?.toLocaleString() }}
                     </td>
                     <td
                       class="px-4 py-3 font-medium"
@@ -58,7 +64,7 @@
               <div>
                 <h3 class="text-gray-600 text-sm font-medium">Total Revenue</h3>
                 <p class="text-2xl font-semibold text-green-600">
-                  ${{ totalRevenue.toLocaleString() }}
+                  ₱{{ totalRevenue.toLocaleString() }}
                 </p>
               </div>
             </div>
@@ -82,14 +88,14 @@
               <div>
                 <h3 class="text-gray-600 text-sm font-medium">Outstanding Payments</h3>
                 <p class="text-2xl font-semibold text-red-600">
-                  ${{ outstandingPayments.toLocaleString() }}
+                  ₱{{ outstandingPayments.toLocaleString() }}
                 </p>
               </div>
             </div>
           </section>
         </div>
 
-        <!-- ✅ Bottom Two Cards Outside the Table -->
+        <!-- Bottom Summary Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
           <div class="bg-white border border-black rounded-xl p-4 shadow flex flex-col justify-center items-start space-y-1">
             <h3 class="text-gray-600 text-sm font-medium mb-1">Claim Summary</h3>
@@ -112,12 +118,13 @@
 <script setup>
 import Sidebar from "@/components/Sidebar.vue";
 import Topbar from "@/components/Topbar.vue";
+import LoadingAnimation from "@/components/loading_animation.vue"; // ✅ NEW
+
 import { ref, onMounted } from "vue";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "@/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
-// Icons
 import {
   BanknotesIcon,
   DocumentTextIcon,
@@ -133,6 +140,7 @@ const paidClaims = ref(0);
 const unpaidClaims = ref(0);
 const overdueCount = ref(0);
 const isLoggedIn = ref(false);
+const loadingInvoices = ref(true); // ✅ NEW
 
 const auth = getAuth();
 
@@ -142,7 +150,7 @@ const loadTawkChatbot = () => {
     window.Tawk_API = window.Tawk_API || {};
     window.Tawk_LoadStart = new Date();
     (function () {
-      var s1 = document.createElement("script"),
+      const s1 = document.createElement("script"),
         s0 = document.getElementsByTagName("script")[0];
       s1.async = true;
       s1.src = "https://embed.tawk.to/682390baa582f719105b0cc6/1ir5eqmhl";
@@ -153,21 +161,22 @@ const loadTawkChatbot = () => {
   }
 };
 
-// Remove Tawk.to script on logout
 const removeTawkChatbot = () => {
-  const scriptTag = document.querySelector('script[src="https://embed.tawk.to/682390baa582f719105b0cc6/1ir5eqmhl"]');
-  if (scriptTag) scriptTag.remove();
+  const script = document.querySelector(
+    'script[src="https://embed.tawk.to/682390baa582f719105b0cc6/1ir5eqmhl"]'
+  );
+  if (script) script.remove();
 };
 
-// Firebase invoice fetch
+// Fetch invoices
 const fetchInvoicesByEmail = async (email) => {
+  loadingInvoices.value = true;
   try {
     const q = query(collection(db, "invoices"), where("email", "==", email));
     const snapshot = await getDocs(q);
     const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     invoices.value = docs;
 
-    // Reset values
     totalRevenue.value = 0;
     pendingClaims.value = 0;
     outstandingPayments.value = 0;
@@ -175,28 +184,40 @@ const fetchInvoicesByEmail = async (email) => {
     unpaidClaims.value = 0;
     overdueCount.value = 0;
 
+    const today = new Date();
+
     for (const invoice of docs) {
       const status = (invoice.status || "").toLowerCase();
       const amount = Number(invoice.totalAmount) || 0;
 
+      const rawDate = invoice.date;
+      const dueDate =
+        rawDate?.toDate?.() || (typeof rawDate === "string" ? new Date(rawDate) : null);
+
       if (status === "paid") {
         totalRevenue.value += amount;
         paidClaims.value += 1;
-      } else if (status === "pending") {
-        pendingClaims.value += 1;
-        unpaidClaims.value += 1;
-        outstandingPayments.value += amount;
-      } else if (status === "overdue") {
-        overdueCount.value += 1;
-        outstandingPayments.value += amount;
+      } else {
+        if (status === "pending") {
+          pendingClaims.value += 1;
+          unpaidClaims.value += 1;
+          outstandingPayments.value += amount;
+        }
+
+        if (dueDate && dueDate < today && status !== "paid") {
+          overdueCount.value += 1;
+          outstandingPayments.value += amount;
+        }
       }
     }
   } catch (error) {
     console.error("Error fetching invoices:", error);
+  } finally {
+    loadingInvoices.value = false;
   }
 };
 
-// Status class helper
+// Status color class
 const getStatusClass = (status) => {
   switch ((status || "").toLowerCase()) {
     case "paid":
@@ -210,7 +231,7 @@ const getStatusClass = (status) => {
   }
 };
 
-// On mount: auth check + chatbot
+// Init on mount
 onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user?.email) {
@@ -218,7 +239,6 @@ onMounted(() => {
       isLoggedIn.value = true;
       loadTawkChatbot();
 
-      // Optional: set visitor info
       window.Tawk_API = window.Tawk_API || {};
       window.Tawk_API.visitor = {
         name: user.displayName || "User",

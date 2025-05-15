@@ -1,80 +1,75 @@
 <template>
   <div class="flex min-h-screen bg-gray-50">
-    <!-- Sidebar -->
     <Sidebar class="w-full lg:w-64 border-r border-gray-200" />
 
-    <!-- Main Content Area -->
     <div class="flex-1 flex flex-col">
-      <!-- Topbar -->
       <Topbar class="sticky top-0 z-10 bg-white shadow-sm" />
 
-      <!-- Edit Profile Content -->
       <main class="flex-1 p-6 max-w-4xl mx-auto w-full">
-        <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-2xl font-bold text-gray-800 mb-4">Edit Profile</h2>
+        <div
+          class="bg-white rounded-lg shadow p-6 border border-black"
+        >
+          <!-- Loading Animation -->
+          <div v-if="loading" class="flex justify-center py-16">
+            <LoadingAnimation />
+          </div>
 
-          <form @submit.prevent="updateProfile">
-            <!-- Profile Picture -->
-            <div class="flex items-center space-x-4 mb-6">
-              <img
-                v-if="previewImage"
-                :src="previewImage"
-                class="w-20 h-20 rounded-full object-cover border"
-              />
+          <!-- Profile Content -->
+          <template v-else>
+            <!-- Header -->
+            <div class="flex flex-col items-center mb-6">
               <div
-                v-else
-                class="w-20 h-20 flex items-center justify-center bg-green-600 text-white rounded-full text-3xl font-semibold"
+                class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center border border-gray-300"
               >
-                {{ username.charAt(0).toUpperCase() }}
+                <img
+                  v-if="profileImageUrl"
+                  :src="profileImageUrl"
+                  alt="Profile Picture"
+                  class="w-full h-full object-cover"
+                />
+                <div class="text-3xl font-semibold text-gray-500" v-else>
+                  {{ username.charAt(0).toUpperCase() }}
+                </div>
               </div>
-              <input type="file" @change="handleImageChange" class="text-sm" />
+              <h2 class="text-2xl font-bold text-gray-800 mt-3">My Profile</h2>
+              <p class="text-sm text-gray-500">Manage your account information</p>
             </div>
 
-            <!-- Form Fields -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 mb-4">
-              <div>
-                <label class="block text-sm font-medium">Full Name</label>
-                <input v-model="completeName" class="form-input mt-1 block w-full rounded border px-3 py-2 text-sm" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium">Age</label>
-                <input v-model="age" type="number" class="form-input mt-1 block w-full rounded border px-3 py-2 text-sm" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium">Birthday</label>
-                <input v-model="birthday" type="date" class="form-input mt-1 block w-full rounded border px-3 py-2 text-sm" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium">Phone</label>
-                <input v-model="cellphone" class="form-input mt-1 block w-full rounded border px-3 py-2 text-sm" />
-              </div>
-              <div>
-                <label class="block text-sm font-medium">Gender</label>
-                <select v-model="gender" class="form-select mt-1 block w-full rounded border px-3 py-2 text-sm">
-                  <option value="">Select</option>
-                  <option>Male</option>
-                  <option>Female</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium">Address</label>
-                <input v-model="address" class="form-input mt-1 block w-full rounded border px-3 py-2 text-sm" />
+            <!-- Details Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-gray-700 text-sm">
+              <div><span class="font-semibold">Username:</span> {{ username || "Not provided" }}</div>
+              <div><span class="font-semibold">Email:</span> {{ email || "Not provided" }}</div>
+              <div><span class="font-semibold">Full Name:</span> {{ completeName || "Not provided" }}</div>
+              <div><span class="font-semibold">Age:</span> {{ age || "Not provided" }}</div>
+              <div><span class="font-semibold">Birthday:</span> {{ birthday || "Not provided" }}</div>
+              <div><span class="font-semibold">Phone:</span> {{ cellphone || "Not provided" }}</div>
+              <div><span class="font-semibold">Gender:</span> {{ gender || "Not provided" }}</div>
+              <div><span class="font-semibold">Address:</span> {{ address || "Not provided" }}</div>
+              <div class="sm:col-span-2">
+                <span class="font-semibold">Status:</span>
+                <span
+                  :class="status === 'active' ? 'text-green-600 font-medium' : 'text-red-600 font-medium'"
+                >
+                  {{ status }}
+                </span>
               </div>
             </div>
 
-            <!-- Action -->
-            <div class="mt-4">
-              <button
-                type="submit"
-                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+            <!-- Actions -->
+            <div class="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+              <router-link
+                to="/edit_profile"
+                class="px-5 py-2.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition"
               >
-                Save Changes
-              </button>
+                Edit Profile
+              </router-link>
             </div>
-          </form>
 
-          <p v-if="errorMessage" class="mt-4 text-sm text-red-500">{{ errorMessage }}</p>
-          <p v-if="successMessage" class="mt-4 text-sm text-green-600">{{ successMessage }}</p>
+            <!-- Error Message -->
+            <p v-if="errorMessage" class="text-red-600 mt-4 text-center text-sm font-medium">
+              {{ errorMessage }}
+            </p>
+          </template>
         </div>
       </main>
     </div>
@@ -82,96 +77,58 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { auth, db, storage } from '@/firebase'
-import { doc, getDoc, updateDoc } from 'firebase/firestore'
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { ref, onMounted } from "vue";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "@/firebase";
+import Sidebar from "@/components/Sidebar.vue";
+import Topbar from "@/components/Topbar.vue";
+import LoadingAnimation from "@/components/loading_animation.vue";
 
-import Sidebar from '@/components/Sidebar.vue'
-import Topbar from '@/components/Topbar.vue'
-
-const router = useRouter()
-
-// Reactive values
-const username = ref('')
-const email = ref('')
-const completeName = ref('')
-const age = ref('')
-const birthday = ref('')
-const cellphone = ref('')
-const gender = ref('')
-const address = ref('')
-const profileImage = ref(null)
-const previewImage = ref('')
-const errorMessage = ref('')
-const successMessage = ref('')
+const username = ref("");
+const email = ref("");
+const completeName = ref("");
+const age = ref("");
+const birthday = ref("");
+const cellphone = ref("");
+const gender = ref("");
+const address = ref("");
+const profileImageUrl = ref("");
+const status = ref("");
+const errorMessage = ref("");
+const loading = ref(true);
 
 onMounted(async () => {
-  const user = auth.currentUser
+  const user = auth.currentUser;
   if (!user) {
-    errorMessage.value = 'User is not authenticated.'
-    return
+    errorMessage.value = "User is not authenticated.";
+    loading.value = false;
+    return;
   }
 
   try {
-    const userRef = doc(db, 'users', user.uid)
-    const docSnap = await getDoc(userRef)
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
 
-    if (docSnap.exists()) {
-      const data = docSnap.data()
-      username.value = data.username || ''
-      email.value = data.email || ''
-      completeName.value = data.completeName || ''
-      age.value = data.age || ''
-      birthday.value = data.birthday || ''
-      cellphone.value = data.cellphone || ''
-      gender.value = data.gender || ''
-      address.value = data.address || ''
-      previewImage.value = data.profileImageUrl || ''
+    if (userSnap.exists()) {
+      const data = userSnap.data();
+      username.value = data.username || "";
+      email.value = data.email || "";
+      completeName.value = data.completeName || "";
+      age.value = data.age || "";
+      birthday.value = data.birthday || "";
+      cellphone.value = data.cellphone || "";
+      gender.value = data.gender || "";
+      address.value = data.address || "";
+      profileImageUrl.value = data.profileImageUrl || "";
+      status.value = data.status || "active";
     } else {
-      errorMessage.value = 'User profile not found.'
+      errorMessage.value = "User profile not found.";
     }
-  } catch (err) {
-    errorMessage.value = 'Failed to load profile data.'
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    errorMessage.value = "Error fetching profile data.";
+  } finally {
+    loading.value = false;
   }
-})
-
-const handleImageChange = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    profileImage.value = file
-    previewImage.value = URL.createObjectURL(file)
-  }
-}
-
-const updateProfile = async () => {
-  const user = auth.currentUser
-  if (!user) return
-
-  try {
-    const userRef = doc(db, 'users', user.uid)
-    let profileImageUrl = previewImage.value
-
-    if (profileImage.value) {
-      const storageReference = storageRef(storage, `profile_pictures/${user.uid}`)
-      await uploadBytes(storageReference, profileImage.value)
-      profileImageUrl = await getDownloadURL(storageReference)
-    }
-
-    await updateDoc(userRef, {
-      completeName: completeName.value,
-      age: age.value,
-      birthday: birthday.value,
-      cellphone: cellphone.value,
-      gender: gender.value,
-      address: address.value,
-      profileImageUrl
-    })
-
-    successMessage.value = 'Profile updated successfully!'
-  } catch (err) {
-    errorMessage.value = 'Failed to update profile.'
-  }
-}
+});
 </script>

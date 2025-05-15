@@ -36,15 +36,20 @@
           </div>
 
           <!-- Loading -->
-          <div v-if="loading" class="text-center text-gray-500 py-6 text-sm">Loading invoices...</div>
+          <div v-if="loading" class="flex justify-center py-8">
+            <LoadingAnimation />
+          </div>
 
           <!-- No invoices -->
-          <div v-else-if="filteredInvoices.length === 0" class="text-center text-gray-500 py-6 text-sm">
+          <div
+            v-else-if="filteredInvoices.length === 0"
+            class="text-center text-gray-500 py-6 text-sm"
+          >
             No invoices found.
           </div>
 
           <!-- Compact Invoice Cards -->
-          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             <div
               v-for="invoice in filteredInvoices"
               :key="invoice.id"
@@ -82,6 +87,7 @@
 <script>
 import Sidebar from "@/components/Sidebar.vue";
 import Topbar from "@/components/Topbar.vue";
+import LoadingAnimation from "@/components/loading_animation.vue";
 import { db } from "@/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -91,6 +97,7 @@ export default {
   components: {
     Sidebar,
     Topbar,
+    LoadingAnimation,
   },
   data() {
     return {

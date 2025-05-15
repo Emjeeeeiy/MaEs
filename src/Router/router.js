@@ -5,6 +5,7 @@ import { doc, getDoc } from 'firebase/firestore';
 
 import Login from '@/pages/login.vue';
 import Register from '../pages/register.vue';
+import reset_password from '../pages/reset_password.vue';
 import Dashboard from '../pages/user-pages/dashboard.vue';
 import Payments from '../pages/user-pages/payments.vue';
 import Billing from '../pages/user-pages/billing.vue';
@@ -18,11 +19,15 @@ import report from '../pages/user-pages/report.vue';
 import admin_claims from '../pages/admin-pages/admin_claims.vue';
 import feedback from '../pages/user-pages/feedback.vue';
 import admin_services from '../pages/admin-pages/admin_services.vue';
+import edit_profile from '../pages/user-pages/edit_profile.vue';
+import admin_feedback from '../pages/admin-pages/admin_feedback.vue';
+
 
 const routes = [
   { path: '/', redirect: '/login' },
   { path: '/login', name: 'Login', component: Login },
   { path: '/register', name: 'Register', component: Register },
+  { path: '/reset_password', name: 'ResetPassword', component: reset_password },
 
   // User Routes
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
@@ -33,6 +38,7 @@ const routes = [
   { path: '/profile', name: 'Profile', component: profile },
   { path : '/report', name: 'Report', component: report },
   { path: '/feedback', name: 'Feedback', component: feedback },
+  { path: '/edit_profile', name: 'EditProfile', component: edit_profile },  
 
   // Admin Routes
   { path: '/admin-dashboard', name: 'AdminDashboard', component: AdminDashboard, meta: { requiresAdmin: true, role: 'admin' },},
@@ -40,6 +46,8 @@ const routes = [
   { path: '/admin-management', name: 'AdminManagement', component: admin_management, meta: { requiresAdmin: true, role: 'admin' },},
   { path: '/admin-claims', name: 'AdminClaims', component: admin_claims, meta: { requiresAdmin: true, role: 'admin' },},  
   { path: '/admin-services', name: 'AdminServices', component: admin_services, meta: { requiresAdmin: true, role: 'admin' },},
+  { path: '/admin-feedback', name: 'AdminFeedback', component: admin_feedback, meta: { requiresAdmin: true, role: 'admin' },},
+
 ];
 
 const router = createRouter({

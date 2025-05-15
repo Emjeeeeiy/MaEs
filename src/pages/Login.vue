@@ -71,7 +71,7 @@
 
       <!-- Forgot Password -->
       <div class="text-center mt-4">
-        <router-link to="/reset-password" class="text-sm text-green-700 hover:underline">
+        <router-link to="/reset_password" class="text-sm text-green-700 hover:underline">
           Forgot Password?
         </router-link>
       </div>
