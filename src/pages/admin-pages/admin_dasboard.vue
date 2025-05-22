@@ -29,7 +29,7 @@
         <!-- Charts -->
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div class="bg-white rounded-2xl p-6 shadow border border-gray-200">
-            <h3 class="text-lg font-semibold mb-4 text-gray-700">Revenue Trend</h3>
+            <h3 class="text-lg font-semibold mb-4 text-gray-700">Revenue Trend (Daily)</h3>
             <div class="h-64">
               <canvas ref="lineChart" class="w-full h-full"></canvas>
             </div>
@@ -71,6 +71,9 @@ const pieChart = ref(null);
 const dashboardCards = ref([]);
 const loading = ref(true);
 
+const revenueByDay = ref({});
+const serviceCounts = ref({});
+
 const logout = async () => {
   try {
     await signOut(auth);
@@ -82,10 +85,12 @@ const logout = async () => {
 
 const fetchDashboardData = async () => {
   let totalRevenue = 0;
-  let pendingClaims = 0;
+  let unpaidClaims = 0;
   let outstandingPayments = 0;
   let totalPatients = 0;
   let dischargedPatients = 0;
+  revenueByDay.value = {};
+  serviceCounts.value = {};
 
   try {
     const invoicesSnap = await getDocs(collection(db, "invoices"));
@@ -93,14 +98,41 @@ const fetchDashboardData = async () => {
       const data = doc.data();
       const status = (data.status || "").toLowerCase();
       const amount = Number(data.totalAmount || 0);
+      const createdAt = data.createdAt?.seconds
+        ? new Date(data.createdAt.seconds * 1000)
+        : null;
 
       if (status === "paid") {
         totalRevenue += amount;
-      } else if (status === "pending") {
-        pendingClaims++;
+
+        // Group by day: "May 22, 2025"
+        if (createdAt) {
+          const day = createdAt.toLocaleDateString("en-US", {
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
+          });
+          if (!revenueByDay.value[day]) {
+            revenueByDay.value[day] = 0;
+          }
+          revenueByDay.value[day] += amount;
+        }
+      } else if (status === "pending" || status === "not paid") {
+        unpaidClaims++;
         outstandingPayments += amount;
       } else if (status === "unpaid" || status === "overdue") {
         outstandingPayments += amount;
+      }
+
+      // Service Count for Pie Chart
+      if (Array.isArray(data.services)) {
+        data.services.forEach((service) => {
+          const name = service.serviceName || "Unknown";
+          if (!serviceCounts.value[name]) {
+            serviceCounts.value[name] = 0;
+          }
+          serviceCounts.value[name]++;
+        });
       }
     });
 
@@ -126,8 +158,8 @@ const fetchDashboardData = async () => {
         color: "bg-yellow-400",
       },
       {
-        title: "Pending Claims",
-        value: pendingClaims,
+        title: "Unpaid Claims",
+        value: unpaidClaims,
         icon: CreditCardIcon,
         color: "bg-red-400",
       },
@@ -151,24 +183,27 @@ const fetchDashboardData = async () => {
       },
     ];
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error fetching dashboard data:", error);
   }
 };
 
 const drawCharts = () => {
-  if (!lineChart.value || !pieChart.value) {
-    console.warn("Canvas elements not found yet");
-    return;
-  }
+  if (!lineChart.value || !pieChart.value) return;
+
+  // Line Chart - Revenue by Day
+  const days = Object.keys(revenueByDay.value).sort(
+    (a, b) => new Date(a) - new Date(b)
+  );
+  const revenues = days.map((day) => revenueByDay.value[day]);
 
   new Chart(lineChart.value, {
     type: "line",
     data: {
-      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      labels: days,
       datasets: [
         {
-          label: "Revenue",
-          data: [10000, 15000, 20000, 18000, 22000, 25000],
+          label: "Daily Revenue",
+          data: revenues,
           borderColor: "#facc15",
           backgroundColor: "rgba(250, 204, 21, 0.2)",
           borderWidth: 3,
@@ -180,17 +215,32 @@ const drawCharts = () => {
     options: {
       maintainAspectRatio: false,
       responsive: true,
+      scales: {
+        x: {
+          ticks: {
+            autoSkip: true,
+            maxTicksLimit: 10,
+          },
+        },
+      },
     },
   });
+
+  // Pie Chart - Services Used
+  const serviceNames = Object.keys(serviceCounts.value);
+  const serviceValues = serviceNames.map((key) => serviceCounts.value[key]);
+  const colors = [
+    "#facc15", "#4ade80", "#3b82f6", "#fb923c", "#a78bfa", "#f472b6", "#f87171",
+  ];
 
   new Chart(pieChart.value, {
     type: "pie",
     data: {
-      labels: ["Emergency", "Surgery", "Consultation", "Pharmacy"],
+      labels: serviceNames,
       datasets: [
         {
-          data: [40, 25, 20, 15],
-          backgroundColor: ["#facc15", "#4ade80", "#3b82f6", "#fb923c"],
+          data: serviceValues,
+          backgroundColor: colors.slice(0, serviceNames.length),
         },
       ],
     },
@@ -203,9 +253,9 @@ const drawCharts = () => {
 
 onMounted(async () => {
   await fetchDashboardData();
-  await nextTick(); // Wait for card DOM
-  loading.value = false; // Trigger re-render of charts
-  await nextTick(); // Wait for canvas DOM
+  await nextTick();
+  loading.value = false;
+  await nextTick();
   drawCharts();
 });
 </script>

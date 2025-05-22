@@ -16,8 +16,6 @@ import admin_management from '../pages/admin-pages/admin_management.vue';
 import settings from '../pages/user-pages/settings.vue';
 import profile from '../pages/user-pages/profile.vue';
 import report from '../pages/user-pages/report.vue';
-import admin_claims from '../pages/admin-pages/admin_claims.vue';
-import feedback from '../pages/user-pages/feedback.vue';
 import admin_services from '../pages/admin-pages/admin_services.vue';
 import edit_profile from '../pages/user-pages/edit_profile.vue';
 import admin_feedback from '../pages/admin-pages/admin_feedback.vue';
@@ -37,14 +35,12 @@ const routes = [
   { path: '/settings', name: 'Settings', component: settings },
   { path: '/profile', name: 'Profile', component: profile },
   { path : '/report', name: 'Report', component: report },
-  { path: '/feedback', name: 'Feedback', component: feedback },
   { path: '/edit_profile', name: 'EditProfile', component: edit_profile },  
 
   // Admin Routes
   { path: '/admin-dashboard', name: 'AdminDashboard', component: AdminDashboard, meta: { requiresAdmin: true, role: 'admin' },},
   { path: '/admin-invoices', name: 'AdminInvoices', component: AdminInvoices, meta: { requiresAdmin: true, role: 'admin' },},
-  { path: '/admin-management', name: 'AdminManagement', component: admin_management, meta: { requiresAdmin: true, role: 'admin' },},
-  { path: '/admin-claims', name: 'AdminClaims', component: admin_claims, meta: { requiresAdmin: true, role: 'admin' },},  
+  { path: '/admin-management', name: 'AdminManagement', component: admin_management, meta: { requiresAdmin: true, role: 'admin' },},  
   { path: '/admin-services', name: 'AdminServices', component: admin_services, meta: { requiresAdmin: true, role: 'admin' },},
   { path: '/admin-feedback', name: 'AdminFeedback', component: admin_feedback, meta: { requiresAdmin: true, role: 'admin' },},
 

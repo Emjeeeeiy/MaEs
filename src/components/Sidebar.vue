@@ -39,6 +39,13 @@
         </router-link>
 
         <router-link
+          to="/billing"
+          class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition"
+        >
+          <ClipboardDocumentCheckIcon class="w-5 h-5 mr-3 text-green-500" /> Billing
+        </router-link>
+
+        <router-link
           to="/payments"
           class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition"
         >
@@ -50,13 +57,6 @@
           class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition"
         >
           <DocumentTextIcon class="w-5 h-5 mr-3 text-green-500" /> Invoices
-        </router-link>
-
-        <router-link
-          to="/billing"
-          class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition"
-        >
-          <ClipboardDocumentCheckIcon class="w-5 h-5 mr-3 text-green-500" /> Billing
         </router-link>
       </nav>
     </div>

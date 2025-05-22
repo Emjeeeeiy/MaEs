@@ -23,7 +23,6 @@
               <table class="min-w-full table-auto border-collapse text-sm">
                 <thead>
                   <tr class="bg-gray-100 text-gray-600 text-left">
-                    <th class="px-4 py-2">Invoice #</th>
                     <th class="px-4 py-2">Amount</th>
                     <th class="px-4 py-2">Status</th>
                   </tr>
@@ -34,7 +33,6 @@
                     :key="invoice.id"
                     class="border-t hover:bg-gray-50 transition text-gray-700"
                   >
-                    <td class="px-4 py-3 font-medium">{{ invoice.id }}</td>
                     <td class="px-4 py-3 font-medium">
                       ₱{{ invoice.totalAmount?.toLocaleString() }}
                     </td>
@@ -46,7 +44,7 @@
                     </td>
                   </tr>
                   <tr v-if="invoices.length === 0">
-                    <td colspan="3" class="px-4 py-3 text-center text-gray-400">
+                    <td colspan="2" class="px-4 py-3 text-center text-gray-400">
                       No invoices found.
                     </td>
                   </tr>
@@ -74,9 +72,9 @@
                 <DocumentTextIcon class="w-8 h-8" />
               </div>
               <div>
-                <h3 class="text-gray-600 text-sm font-medium">Pending Claims</h3>
+                <h3 class="text-gray-600 text-sm font-medium">Unpaid Claims</h3>
                 <p class="text-2xl font-semibold text-yellow-600">
-                  {{ pendingClaims }}
+                  {{ unpaidClaims }}
                 </p>
               </div>
             </div>
@@ -86,9 +84,9 @@
                 <ExclamationCircleIcon class="w-8 h-8" />
               </div>
               <div>
-                <h3 class="text-gray-600 text-sm font-medium">Outstanding Payments</h3>
+                <h3 class="text-gray-600 text-sm font-medium">Unpaid Amount</h3>
                 <p class="text-2xl font-semibold text-red-600">
-                  ₱{{ outstandingPayments.toLocaleString() }}
+                  ₱{{ unpaidTotalAmount.toLocaleString() }}
                 </p>
               </div>
             </div>
@@ -104,7 +102,7 @@
           </div>
 
           <div class="bg-white border border-black rounded-xl p-4 shadow flex flex-col justify-center items-start">
-            <h3 class="text-gray-600 text-sm font-medium mb-1">Overdue Payments</h3>
+            <h3 class="text-gray-600 text-sm font-medium mb-1">Overdue Count</h3>
             <p class="text-xl font-semibold text-red-600">
               {{ overdueCount }}
             </p>
@@ -118,7 +116,7 @@
 <script setup>
 import Sidebar from "@/components/Sidebar.vue";
 import Topbar from "@/components/Topbar.vue";
-import LoadingAnimation from "@/components/loading_animation.vue"; // ✅ NEW
+import LoadingAnimation from "@/components/loading_animation.vue";
 
 import { ref, onMounted } from "vue";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -134,13 +132,12 @@ import {
 // Refs
 const invoices = ref([]);
 const totalRevenue = ref(0);
-const pendingClaims = ref(0);
-const outstandingPayments = ref(0);
 const paidClaims = ref(0);
 const unpaidClaims = ref(0);
 const overdueCount = ref(0);
+const unpaidTotalAmount = ref(0);
 const isLoggedIn = ref(false);
-const loadingInvoices = ref(true); // ✅ NEW
+const loadingInvoices = ref(true);
 
 const auth = getAuth();
 
@@ -178,11 +175,10 @@ const fetchInvoicesByEmail = async (email) => {
     invoices.value = docs;
 
     totalRevenue.value = 0;
-    pendingClaims.value = 0;
-    outstandingPayments.value = 0;
     paidClaims.value = 0;
     unpaidClaims.value = 0;
     overdueCount.value = 0;
+    unpaidTotalAmount.value = 0;
 
     const today = new Date();
 
@@ -198,15 +194,11 @@ const fetchInvoicesByEmail = async (email) => {
         totalRevenue.value += amount;
         paidClaims.value += 1;
       } else {
-        if (status === "pending") {
-          pendingClaims.value += 1;
-          unpaidClaims.value += 1;
-          outstandingPayments.value += amount;
-        }
+        unpaidClaims.value += 1;
+        unpaidTotalAmount.value += amount;
 
-        if (dueDate && dueDate < today && status !== "paid") {
+        if (dueDate && dueDate < today) {
           overdueCount.value += 1;
-          outstandingPayments.value += amount;
         }
       }
     }
@@ -225,6 +217,7 @@ const getStatusClass = (status) => {
     case "pending":
       return "text-yellow-600";
     case "overdue":
+    case "not paid":
       return "text-red-600";
     default:
       return "text-gray-500";

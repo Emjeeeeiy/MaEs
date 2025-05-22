@@ -46,13 +46,6 @@
           Invoice Management
         </router-link>
         <router-link
-          to="/admin-claims"
-          class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium"
-        >
-          <ClipboardDocumentCheckIcon class="w-5 h-5" />
-          Claims Management
-        </router-link>
-        <router-link
           to="/admin-services"
           class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium"
         >

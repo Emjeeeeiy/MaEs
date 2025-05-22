@@ -13,7 +13,6 @@
         <div class="bg-white rounded-xl shadow-md px-8 py-2 max-w-4xl mx-auto border border-black">
           <h2 class="text-xl font-semibold text-green-700 mb-3">Process Payment</h2>
 
-          <!-- Loading Animation -->
           <div v-if="loading" class="flex justify-center py-8">
             <LoadingAnimation />
           </div>
@@ -43,33 +42,58 @@
             </div>
 
             <button
-              @click="processPayment"
-              :disabled="cashPaid < selectedInvoice?.totalAmount"
+              @click="showPaymentMethodModal = true"
+              :disabled="!selectedInvoice || cashPaid < selectedInvoice.totalAmount"
               class="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 disabled:opacity-50 mb-3 text-sm"
             >
               Submit Payment
             </button>
 
             <p v-if="successMessage" class="text-green-600 mt-2 font-medium text-sm">{{ successMessage }}</p>
-
-            <!-- Receipt -->
-            <div v-if="showReceipt" class="bg-gray-100 mt-4 p-3 rounded-lg shadow text-black text-sm">
-              <h3 class="text-base font-semibold mb-2">Receipt</h3>
-              <p><strong>Invoice ID:</strong> {{ receiptData.invoiceId }}</p>
-              <p><strong>Amount Paid:</strong> ₱{{ receiptData.amountPaid }}</p>
-              <p><strong>Change:</strong> ₱{{ receiptData.change }}</p>
-              <p><strong>Date:</strong> {{ receiptData.paidAt }}</p>
-
-              <button
-                @click="printReceipt"
-                class="mt-3 bg-blue-600 text-white px-4 py-1.5 rounded-md hover:bg-blue-700 text-sm"
-              >
-                Print Receipt
-              </button>
-            </div>
           </div>
         </div>
       </main>
+    </div>
+
+    <!-- Payment Method Modal -->
+    <div v-if="showPaymentMethodModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md text-center">
+        <h3 class="text-lg font-semibold mb-4 text-gray-800">Select Payment Method</h3>
+
+        <div class="flex flex-col gap-3">
+          <button
+            @click="submitPayment('Cash')"
+            class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+          >
+            Cash
+          </button>
+          <button
+            @click="submitPayment('GCash')"
+            class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          >
+            GCash
+          </button>
+          <button
+            @click="submitPayment('PayMaya')"
+            class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
+          >
+            PayMaya
+          </button>
+          <button
+            @click="submitPayment('PayPal')"
+            class="w-full bg-gray-700 text-white py-2 rounded hover:bg-gray-800"
+          >
+            PayPal
+          </button>
+        </div>
+
+        <button
+          @click="showPaymentMethodModal = false"
+          class="mt-4 text-sm text-gray-500 hover:underline"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -86,9 +110,9 @@ import {
   addDoc,
   updateDoc,
   doc,
-  serverTimestamp,
   query,
   where,
+  serverTimestamp,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
@@ -107,13 +131,7 @@ export default {
       loading: true,
       successMessage: "",
       userEmail: null,
-      showReceipt: false,
-      receiptData: {
-        invoiceId: "",
-        amountPaid: 0,
-        change: 0,
-        paidAt: "",
-      },
+      showPaymentMethodModal: false,
     };
   },
   computed: {
@@ -131,7 +149,7 @@ export default {
         const q = query(
           collection(db, "invoices"),
           where("email", "==", this.userEmail),
-          where("status", "==", "Pending")
+          where("status", "==", "not paid")
         );
         const querySnapshot = await getDocs(q);
         this.invoices = querySnapshot.docs.map((doc) => ({
@@ -150,67 +168,44 @@ export default {
       }
     },
 
-    async processPayment() {
+    async submitPayment(method) {
+      this.showPaymentMethodModal = false;
+
       if (!this.selectedInvoice) {
         alert("Please select an invoice.");
-        return;
-      }
-      if (this.cashPaid < this.selectedInvoice.totalAmount) {
-        alert("Insufficient cash payment.");
         return;
       }
 
       const paymentData = {
         invoiceID: this.selectedInvoice.id,
         amountPaid: this.selectedInvoice.totalAmount,
-        method: "Cash",
-        status: "Completed",
+        method,
+        status: "Pending", // Payment is pending admin approval
         createdAt: serverTimestamp(),
         email: this.userEmail,
       };
 
       try {
+        // Add the payment record
         await addDoc(collection(db, "payments"), paymentData);
-        await updateDoc(doc(db, "invoices", this.selectedInvoice.id), {
-          status: "Paid",
+
+        // Update the invoice with new status and method
+        const invoiceRef = doc(db, "invoices", this.selectedInvoice.id);
+        await updateDoc(invoiceRef, {
+          status: "Pending",
+          paymentMethod: method,
         });
 
-        const currentDate = new Date().toLocaleString();
-        this.successMessage = `Payment successful! Change: ₱${this.changeDue}`;
-        this.receiptData = {
-          invoiceId: this.selectedInvoice.id,
-          amountPaid: this.selectedInvoice.totalAmount,
-          change: this.changeDue,
-          paidAt: currentDate,
-        };
-        this.showReceipt = true;
+        this.successMessage =
+          "Payment submitted and awaiting admin approval.";
 
         this.selectedInvoice = null;
         this.cashPaid = 0;
-
-        this.fetchUnpaidInvoices();
+        await this.fetchUnpaidInvoices();
       } catch (error) {
-        console.error("Error processing payment:", error);
+        console.error("Error submitting payment:", error);
+        alert("Error submitting payment.");
       }
-    },
-
-    printReceipt() {
-      const printContent = `
-        <div style="padding:20px; font-family:Arial; background-color:white; color:black;">
-          <h2>Hospital Billing Receipt</h2>
-          <p><strong>Invoice ID:</strong> ${this.receiptData.invoiceId}</p>
-          <p><strong>Amount Paid:</strong> ₱${this.receiptData.amountPaid}</p>
-          <p><strong>Change:</strong> ₱${this.receiptData.change}</p>
-          <p><strong>Date:</strong> ${this.receiptData.paidAt}</p>
-        </div>
-      `;
-
-      const win = window.open('', '', 'width=600,height=400');
-      win.document.write(printContent);
-      win.document.close();
-      win.focus();
-      win.print();
-      win.close();
     },
 
     getCurrentUser() {

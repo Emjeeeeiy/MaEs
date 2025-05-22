@@ -123,7 +123,7 @@ export default {
           cost: service.cost,
         })),
         totalAmount: this.totalCost,
-        status: "Pending",
+        status: "not paid", // ✅ Updated here
         createdAt: serverTimestamp(),
       };
 
@@ -148,3 +148,7 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* Optional styles can go here */
+</style>
