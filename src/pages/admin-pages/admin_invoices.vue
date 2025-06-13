@@ -1,140 +1,164 @@
 <template>
-  <div class="flex min-h-screen bg-gray-50">
-    <!-- Sidebar -->
-    <admin_sidebar class="w-64 border-r border-gray-200 shadow-md" />
+  <div class="flex min-h-screen bg-gray-100">
+    <admin_sidebar class="w-64 border-r border-gray-200" />
 
-    <!-- Main content -->
-    <div class="flex-1 p-6 space-y-6 max-w-full w-full">
-      <!-- Header -->
-      <header class="mb-6">
-        <h2 class="text-3xl font-bold text-gray-800 mb-1">Invoices Management</h2>
-        <p class="text-gray-500">Select a user to view their invoices</p>
-      </header>
+    <div class="flex-1 p-6">
+      <h1 class="text-3xl font-bold text-gray-800 mb-6">User Invoices</h1>
 
-      <!-- Main grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Users Table -->
-        <section class="col-span-1">
-          <h3 class="text-xl font-semibold text-gray-700 mb-2">Users</h3>
+      <!-- User Table -->
+      <div class="bg-white shadow rounded-lg overflow-x-auto border">
+        <table class="min-w-full text-sm text-left text-gray-700">
+          <thead class="bg-gray-100 text-xs text-gray-600 uppercase">
+            <tr>
+              <th class="px-4 py-3">Name</th>
+              <th class="px-4 py-3">Email</th>
+              <th class="px-4 py-3">Role</th>
+              <th class="px-4 py-3">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="user in filteredUsers"
+              :key="user.id"
+              class="border-t hover:bg-gray-50"
+            >
+              <td class="px-4 py-2 font-medium">{{ user.username }}</td>
+              <td class="px-4 py-2">{{ user.email }}</td>
+              <td class="px-4 py-2 capitalize">{{ user.role }}</td>
+              <td class="px-4 py-2">
+                <button
+                  class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700"
+                  @click="openModal(user)"
+                >
+                  View
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-          <input
-            v-model="userSearchQuery"
-            type="text"
-            placeholder="Search by name or email"
-            class="w-full mb-4 px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 focus:ring-2 focus:ring-green-400 focus:outline-none"
-          />
+      <!-- Invoice Modal -->
+      <div v-if="showModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div class="bg-white w-full max-w-5xl p-6 rounded-xl shadow relative">
+          <button class="absolute top-2 right-3 text-gray-600 hover:text-black text-lg" @click="closeModal">✕</button>
 
-          <div class="overflow-auto border rounded shadow bg-white">
+          <h2 class="text-xl font-bold text-gray-800 mb-2">
+            Invoices for {{ selectedUserName }}
+          </h2>
+
+          <!-- Delete All Button -->
+          <div class="mt-6 mb-4">
+            <button
+              @click="confirmDelete = true"
+              class="bg-red-600 text-white px-4 py-1 text-sm rounded hover:bg-red-700"
+            >
+              Delete All Invoices
+            </button>
+          </div>
+
+          <!-- Filters -->
+          <div class="flex flex-col md:flex-row gap-4 mb-4">
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search..."
+              class="w-full md:w-1/2 px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-800 focus:ring-green-400 focus:ring-2"
+            />
+            <select
+              v-model="filterStatus"
+              class="w-full md:w-1/4 px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-800 focus:ring-green-400 focus:ring-2"
+            >
+              <option value="">All</option>
+              <option value="Paid">Paid</option>
+              <option value="Pending">Pending</option>
+              <option value="Not Paid">Not Paid</option>
+            </select>
+          </div>
+
+          <!-- Invoice Table -->
+          <div class="overflow-x-auto border rounded max-h-[400px] overflow-y-auto">
             <table class="min-w-full text-sm text-left text-gray-700">
               <thead class="bg-gray-100 text-xs uppercase text-gray-600">
                 <tr>
-                  <th class="px-4 py-3">Name</th>
-                  <th class="px-4 py-3">Email</th>
-                  <th class="px-4 py-3">Role</th>
+                  <th class="px-4 py-2">Date</th>
+                  <th class="px-4 py-2">Services</th>
+                  <th class="px-4 py-2">Total</th>
+                  <th class="px-4 py-2">Method</th>
+                  <th class="px-4 py-2">Status</th>
+                  <th class="px-4 py-2 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 <tr
-                  v-for="user in filteredUsers"
-                  :key="user.id"
-                  @click="fetchInvoicesForUser(user.email, user.username)"
-                  class="hover:bg-green-50 cursor-pointer border-t"
+                  v-for="invoice in filteredInvoices"
+                  :key="invoice.id"
+                  class="border-t hover:bg-gray-50"
                 >
-                  <td class="px-4 py-2 font-medium text-green-700">{{ user.username }}</td>
-                  <td class="px-4 py-2">{{ user.email }}</td>
-                  <td class="px-4 py-2 capitalize">{{ user.role }}</td>
+                  <td class="px-4 py-2">{{ formatDate(invoice.createdAt) }}</td>
+                  <td class="px-4 py-2">
+                    {{ invoice.services.map(s => s.serviceName).join(', ') }}
+                  </td>
+                  <td class="px-4 py-2">₱{{ invoice.totalAmount }}</td>
+                  <td class="px-4 py-2">{{ invoice.paymentMethod || 'N/A' }}</td>
+                  <td class="px-4 py-2">
+                    <span
+                      class="text-xs font-bold px-2 py-1 rounded-full border"
+                      :class="{
+                        'bg-green-100 text-green-700 border-green-400': invoice.status === 'Paid',
+                        'bg-yellow-100 text-yellow-700 border-yellow-400': invoice.status === 'Pending',
+                        'bg-red-100 text-red-700 border-red-400': invoice.status === 'Not Paid',
+                      }"
+                    >
+                      {{ invoice.status }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-2 flex justify-center gap-2">
+                    <button
+                      v-if="invoice.status === 'Pending'"
+                      @click="approveInvoice(invoice.id)"
+                      class="bg-blue-600 text-white px-3 py-1 text-xs rounded hover:bg-blue-700"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      @click="deleteInvoice(invoice.id)"
+                      class="bg-red-600 text-white px-3 py-1 text-xs rounded hover:bg-red-700"
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+                <tr v-if="filteredInvoices.length === 0">
+                  <td colspan="6" class="px-4 py-4 text-center text-gray-400 italic">
+                    No invoices found.
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </section>
+        </div>
+      </div>
 
-        <!-- Invoices Table -->
-        <section class="col-span-1 lg:col-span-2 space-y-4">
-          <div v-if="selectedUserEmail">
-            <h3 class="text-2xl font-bold text-gray-800 mb-4">Invoices for {{ selectedUserName }}</h3>
-
-            <!-- Filters -->
-            <div class="flex flex-col md:flex-row gap-4 mb-4">
-              <div class="flex flex-col">
-                <label class="text-sm text-gray-600 mb-1">Filter by Status:</label>
-                <select
-                  v-model="filterStatus"
-                  class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-400 focus:outline-none"
-                >
-                  <option value="">All</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Paid">Paid</option>
-                </select>
-              </div>
-
-              <div class="flex flex-col w-full md:w-64">
-                <label class="text-sm text-gray-600 mb-1">Search Invoice:</label>
-                <input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Enter keyword"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-400 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <!-- Invoice Table -->
-            <div class="overflow-auto rounded shadow border border-gray-200 bg-white">
-              <table class="min-w-full text-sm text-left text-gray-700">
-                <thead class="bg-gray-100 text-xs uppercase text-gray-600">
-                  <tr>
-                    <th class="px-6 py-3">Date</th>
-                    <th class="px-6 py-3">Services</th>
-                    <th class="px-6 py-3">Total (₱)</th>
-                    <th class="px-6 py-3">Payment Method</th>
-                    <th class="px-6 py-3">Status</th>
-                    <th class="px-6 py-3">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="invoice in filteredInvoices"
-                    :key="invoice.id"
-                    class="bg-white border-b hover:bg-gray-50"
-                  >
-                    <td class="px-6 py-4">{{ formattedDate(invoice.createdAt) }}</td>
-                    <td class="px-6 py-4">
-                      {{ invoice.services.map(s => s.serviceName).join(', ') }}
-                    </td>
-                    <td class="px-6 py-4">₱{{ invoice.totalAmount }}</td>
-                    <td class="px-6 py-4">{{ invoice.paymentMethod || 'N/A' }}</td>
-                    <td class="px-6 py-4">
-                      <span
-                        class="text-xs font-semibold px-2 py-1 rounded-full"
-                        :class="{
-                          'bg-green-100 text-green-700': invoice.status === 'Paid',
-                          'bg-yellow-100 text-yellow-700': invoice.status === 'Pending',
-                        }"
-                      >
-                        {{ invoice.status }}
-                      </span>
-                    </td>
-                    <td class="px-6 py-4">
-                      <button
-                        v-if="invoice.status === 'Pending'"
-                        @click="approveInvoice(invoice)"
-                        :disabled="approvingInvoiceId === invoice.id"
-                        class="text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 text-xs font-semibold px-3 py-1 rounded"
-                      >
-                        {{ approvingInvoiceId === invoice.id ? 'Approving...' : 'Approve' }}
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+      <!-- Confirm Delete Modal -->
+      <div v-if="confirmDelete" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+        <div class="bg-white p-6 rounded-xl shadow max-w-md w-full text-center space-y-4">
+          <h3 class="text-lg font-semibold text-red-600">Confirm Deletion</h3>
+          <p class="text-gray-700">Are you sure you want to delete <strong>all invoices</strong> for {{ selectedUserEmail }}?</p>
+          <div class="flex justify-center gap-4 mt-4">
+            <button @click="performDeleteAll" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Yes, Delete</button>
+            <button @click="confirmDelete = false" class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400">Cancel</button>
           </div>
+        </div>
+      </div>
 
-          <div v-else class="text-gray-400 italic">
-            <p>Select a user to view their invoices.</p>
-          </div>
-        </section>
+      <!-- Success Modal -->
+      <div v-if="showSuccess" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+        <div class="bg-white p-6 rounded-xl shadow max-w-sm w-full text-center">
+          <h3 class="text-green-600 text-lg font-semibold mb-2">All invoices deleted</h3>
+          <p class="text-gray-700 mb-4">The user’s invoices were successfully deleted.</p>
+          <button @click="showSuccess = false" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">OK</button>
+        </div>
       </div>
     </div>
   </div>
@@ -142,85 +166,92 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  updateDoc,
+  deleteDoc,
+  doc,
+} from 'firebase/firestore';
 import { db } from '@/firebase';
-import { collection, getDocs, query, where, updateDoc, doc } from 'firebase/firestore';
 import admin_sidebar from '@/components/admin_sidebar.vue';
 
 const users = ref([]);
 const invoices = ref([]);
-const selectedUserEmail = ref(null);
 const selectedUserName = ref('');
-const filterStatus = ref('');
+const selectedUserEmail = ref('');
+const showModal = ref(false);
 const searchQuery = ref('');
-const userSearchQuery = ref('');
-const approvingInvoiceId = ref(null);
-
-const filteredUsers = computed(() => {
-  return users.value.filter(user =>
-    user.role !== 'admin' &&
-    (
-      user.username?.toLowerCase().includes(userSearchQuery.value.toLowerCase()) ||
-      user.email?.toLowerCase().includes(userSearchQuery.value.toLowerCase())
-    )
-  );
-});
-
-const filteredInvoices = computed(() => {
-  return invoices.value.filter(invoice =>
-    (!filterStatus.value || invoice.status === filterStatus.value) &&
-    (!searchQuery.value || JSON.stringify(invoice).toLowerCase().includes(searchQuery.value.toLowerCase()))
-  );
-});
+const filterStatus = ref('');
+const confirmDelete = ref(false);
+const showSuccess = ref(false);
 
 const fetchUsers = async () => {
-  try {
-    const querySnapshot = await getDocs(collection(db, 'users'));
-    users.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    console.error('Error fetching users:', error);
-  }
+  const snapshot = await getDocs(collection(db, 'users'));
+  users.value = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
 
-const fetchInvoicesForUser = async (email, username) => {
-  selectedUserEmail.value = email;
-  selectedUserName.value = username;
+const openModal = async (user) => {
+  selectedUserName.value = user.username;
+  selectedUserEmail.value = user.email;
+  showModal.value = true;
 
-  try {
-    const q = query(collection(db, 'invoices'), where('email', '==', email));
-    const querySnapshot = await getDocs(q);
-    invoices.value = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    if (invoices.value.length === 0) {
-      alert(`No invoices found for ${username}.`);
-    }
-  } catch (error) {
-    console.error('Error fetching invoices:', error);
-  }
+  const q = query(collection(db, 'invoices'), where('email', '==', user.email));
+  const snapshot = await getDocs(q);
+  invoices.value = snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
 };
 
-const formattedDate = (timestamp) => {
-  if (!timestamp || !timestamp.toDate) return 'N/A';
-  const date = timestamp.toDate();
-  return date.toISOString().split('T')[0];
+const closeModal = () => {
+  showModal.value = false;
+  invoices.value = [];
+  filterStatus.value = '';
+  searchQuery.value = '';
 };
 
-const approveInvoice = async (invoice) => {
-  approvingInvoiceId.value = invoice.id;
+const approveInvoice = async (invoiceId) => {
+  const invoiceRef = doc(db, 'invoices', invoiceId);
+  await updateDoc(invoiceRef, { status: 'Paid' });
+  invoices.value = invoices.value.map((inv) =>
+    inv.id === invoiceId ? { ...inv, status: 'Paid' } : inv
+  );
+};
 
-  try {
-    const invoiceRef = doc(db, 'invoices', invoice.id);
-    await updateDoc(invoiceRef, { status: 'Paid' });
+const deleteInvoice = async (invoiceId) => {
+  await deleteDoc(doc(db, 'invoices', invoiceId));
+  invoices.value = invoices.value.filter((inv) => inv.id !== invoiceId);
+};
 
-    const idx = invoices.value.findIndex(inv => inv.id === invoice.id);
-    if (idx !== -1) invoices.value[idx].status = 'Paid';
+const performDeleteAll = async () => {
+  confirmDelete.value = false;
+  const q = query(collection(db, 'invoices'), where('email', '==', selectedUserEmail.value));
+  const snapshot = await getDocs(q);
+  const deletePromises = snapshot.docs.map((doc) => deleteDoc(doc.ref));
+  await Promise.all(deletePromises);
+  invoices.value = [];
+  showSuccess.value = true;
+};
 
-    alert(`Invoice approved successfully.`);
-  } catch (error) {
-    console.error('Error approving invoice:', error);
-    alert('Failed to approve invoice.');
-  } finally {
-    approvingInvoiceId.value = null;
-  }
+const filteredUsers = computed(() =>
+  users.value.filter((u) => u.role !== 'admin')
+);
+
+const filteredInvoices = computed(() => {
+  return invoices.value.filter((inv) => {
+    const statusMatch = !filterStatus.value || inv.status?.toLowerCase() === filterStatus.value.toLowerCase();
+    const searchMatch = !searchQuery.value ||
+      JSON.stringify(inv).toLowerCase().includes(searchQuery.value.toLowerCase());
+    return statusMatch && searchMatch;
+  });
+});
+
+const formatDate = (timestamp) => {
+  if (!timestamp?.toDate) return 'N/A';
+  return timestamp.toDate().toISOString().split('T')[0];
 };
 
 onMounted(fetchUsers);

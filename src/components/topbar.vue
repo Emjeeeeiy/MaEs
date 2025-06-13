@@ -10,13 +10,21 @@
         <!-- Navigation with Icons -->
         <nav class="flex gap-6 text-gray-700 relative items-center">
           <!-- Feedback Trigger -->
-          <button @click="showModal = true" class="hover:text-green-600" title="Feedback">
+          <button
+            @click="showModal = true"
+            class="transition duration-300 hover:scale-110 hover:rotate-3 hover:text-green-600"
+            title="Feedback"
+          >
             <ChatBubbleBottomCenterTextIcon class="w-6 h-6 cursor-pointer" />
           </button>
 
           <!-- Notifications -->
           <div class="relative" ref="notifRef">
-            <button @click="toggleNotifDropdown" class="relative focus:outline-none hover:text-green-600" title="Notifications">
+            <button
+              @click="toggleNotifDropdown"
+              class="relative focus:outline-none transition duration-300 hover:scale-110 hover:rotate-3 hover:text-green-600"
+              title="Notifications"
+            >
               <BellIcon class="w-6 h-6" />
               <span
                 v-if="notifications.length > 0"
@@ -46,8 +54,12 @@
 
           <!-- Profile Dropdown -->
           <div class="relative" ref="profileDropdownRef">
-            <button @click="toggleDropdown" class="focus:outline-none">
-              <UserIcon class="w-6 h-6 cursor-pointer hover:text-green-600" />
+            <button
+              @click="toggleDropdown"
+              class="focus:outline-none transition duration-300 hover:scale-110 hover:rotate-3 hover:text-green-600"
+              title="Profile"
+            >
+              <UserIcon class="w-6 h-6 cursor-pointer" />
             </button>
 
             <transition name="fade">
@@ -73,7 +85,11 @@
           </div>
 
           <!-- Settings -->
-          <router-link to="/settings" class="hover:text-green-600">
+          <router-link
+            to="/settings"
+            class="transition duration-300 hover:scale-110 hover:rotate-3 hover:text-green-600"
+            title="Settings"
+          >
             <Cog6ToothIcon class="w-6 h-6 cursor-pointer" />
           </router-link>
         </nav>

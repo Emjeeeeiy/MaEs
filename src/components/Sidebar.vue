@@ -33,30 +33,34 @@
       <nav class="px-4 py-6 space-y-2">
         <router-link
           to="/dashboard"
-          class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition"
+          class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition group"
         >
-          <HomeIcon class="w-5 h-5 mr-3 text-green-500" /> Dashboard
+          <HomeIcon class="w-5 h-5 mr-3 text-white group-hover:animate-bounce transition" />
+          Dashboard
         </router-link>
 
         <router-link
           to="/billing"
-          class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition"
+          class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition group"
         >
-          <ClipboardDocumentCheckIcon class="w-5 h-5 mr-3 text-green-500" /> Billing
+          <ClipboardDocumentCheckIcon class="w-5 h-5 mr-3 text-white group-hover:animate-bounce transition" />
+          Billing
         </router-link>
 
         <router-link
           to="/payments"
-          class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition"
+          class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition group"
         >
-          <CreditCardIcon class="w-5 h-5 mr-3 text-green-500" /> Payments
+          <CreditCardIcon class="w-5 h-5 mr-3 text-white group-hover:animate-bounce transition" />
+          Payments
         </router-link>
 
         <router-link
           to="/invoices"
-          class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition"
+          class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition group"
         >
-          <DocumentTextIcon class="w-5 h-5 mr-3 text-green-500" /> Invoices
+          <DocumentTextIcon class="w-5 h-5 mr-3 text-white group-hover:animate-bounce transition" />
+          Invoices
         </router-link>
       </nav>
     </div>
@@ -118,7 +122,7 @@ onMounted(() => {
   color: #cbd5e0;
 }
 
-/* Make sure sidebar scrolls on smaller heights */
+/* Ensure the layout fills full height */
 html,
 body,
 #app {

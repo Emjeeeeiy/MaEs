@@ -1,114 +1,106 @@
 <template>
-  <div class="flex flex-col lg:flex-row min-h-screen bg-gray-50">
-    <!-- Sidebar -->
-    <Sidebar class="w-full lg:w-64 border-r border-gray-200" />
+  <div class="flex min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800 overflow-hidden">
+    <Sidebar />
 
-    <!-- Main content -->
-    <div class="flex-1 flex flex-col">
-      <!-- Sticky Topbar -->
-      <Topbar class="sticky top-0 z-10 bg-white shadow-sm" />
+    <div class="flex-1 flex flex-col max-h-screen">
+      <Topbar />
 
-      <!-- Loading State -->
-      <div v-if="loadingInvoices" class="flex-1 flex justify-center items-center">
-        <LoadingAnimation />
-      </div>
+      <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+        <div v-if="loadingInvoices" class="flex justify-center items-center h-60">
+          <LoadingAnimation />
+        </div>
 
-      <!-- Main Dashboard -->
-      <main v-else class="p-4 sm:p-6 xl:p-10 max-w-7xl mx-auto w-full">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- Left: Invoice Table -->
-          <section class="lg:col-span-2 bg-white rounded-lg shadow-lg p-6 sm:p-8 border border-black">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Invoices</h3>
-            <div class="overflow-x-auto">
-              <table class="min-w-full table-auto border-collapse text-sm">
-                <thead>
-                  <tr class="bg-gray-100 text-gray-600 text-left">
-                    <th class="px-4 py-2">Amount</th>
-                    <th class="px-4 py-2">Status</th>
+        <div v-else class="space-y-6">
+          <!-- Metrics Cards (moved to top) -->
+          <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="bg-white border-l-8 border-red-500 shadow rounded-lg p-4 flex items-center gap-4 animate-fade-in-up delay-100">
+              <ExclamationTriangleIcon class="w-8 h-8 text-red-500" />
+              <div class="text-center flex-1">
+                <h3 class="text-sm text-gray-500 mb-1">Overdue Count</h3>
+                <p class="text-2xl font-bold text-red-600">{{ overdueCount }}</p>
+              </div>
+            </div>
+
+            <div class="bg-white border-l-8 border-yellow-500 shadow rounded-lg p-4 flex items-center gap-4 animate-fade-in-up delay-150">
+              <ClockIcon class="w-8 h-8 text-yellow-500" />
+              <div class="text-center flex-1">
+                <h3 class="text-sm text-gray-500 mb-1">Unpaid Claims</h3>
+                <p class="text-2xl font-bold text-yellow-600">{{ unpaidClaims }}</p>
+              </div>
+            </div>
+
+            <div class="bg-white border-l-8 border-green-500 shadow rounded-lg p-4 flex items-center gap-4 animate-fade-in-up delay-200">
+              <BanknotesIcon class="w-8 h-8 text-green-500" />
+              <div class="text-center flex-1">
+                <h3 class="text-sm text-gray-500 mb-1">Unpaid Amount</h3>
+                <p class="text-2xl font-bold text-gray-700">₱{{ unpaidTotalAmount.toLocaleString() }}</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Invoice Table -->
+          <section class="bg-white shadow rounded-xl p-4 border border-gray-200 animate-fade-in-up">
+            <div class="flex items-center gap-2 mb-4">
+              <DocumentTextIcon class="w-6 h-6 text-blue-500" />
+              <h2 class="text-xl font-semibold text-gray-700">Recent Invoices</h2>
+            </div>
+            <div class="overflow-x-auto rounded-md">
+              <table class="min-w-full text-sm divide-y divide-gray-200">
+                <thead class="bg-gray-100 text-gray-600">
+                  <tr>
+                    <th class="px-4 py-2 text-left font-medium">Service(s)</th>
+                    <th class="px-4 py-2 text-left font-medium">Amount</th>
+                    <th class="px-4 py-2 text-left font-medium">Status</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr
-                    v-for="invoice in invoices"
-                    :key="invoice.id"
-                    class="border-t hover:bg-gray-50 transition text-gray-700"
-                  >
-                    <td class="px-4 py-3 font-medium">
-                      ₱{{ invoice.totalAmount?.toLocaleString() }}
+                <tbody class="bg-white divide-y divide-gray-100">
+                  <tr v-for="invoice in invoices" :key="invoice.id" class="hover:bg-gray-50">
+                    <td class="px-4 py-3">
+                      {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
                     </td>
-                    <td
-                      class="px-4 py-3 font-medium"
-                      :class="getStatusClass(invoice.status)"
-                    >
-                      {{ invoice.status }}
+                    <td class="px-4 py-3">₱{{ invoice.totalAmount?.toLocaleString() }}</td>
+                    <td class="px-4 py-3">
+                      <span
+                        :class="[
+                          'px-2 py-1 rounded-full text-xs font-semibold',
+                          invoice.status?.toLowerCase() === 'paid'
+                            ? 'bg-green-100 text-green-700'
+                            : invoice.status?.toLowerCase() === 'not paid'
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-yellow-100 text-yellow-700'
+                        ]"
+                      >
+                        {{ invoice.status }}
+                      </span>
                     </td>
                   </tr>
                   <tr v-if="invoices.length === 0">
-                    <td colspan="2" class="px-4 py-3 text-center text-gray-400">
-                      No invoices found.
-                    </td>
+                    <td colspan="3" class="text-center py-4 text-gray-500">No invoices found.</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </section>
 
-          <!-- Right: Metric Cards -->
-          <section class="space-y-6">
-            <div class="bg-white border border-black rounded-xl p-6 shadow-lg hover:shadow-2xl transition transform hover:scale-105 flex items-center space-x-4">
-              <div class="bg-green-100 text-green-600 p-3 rounded-full">
-                <BanknotesIcon class="w-8 h-8" />
-              </div>
-              <div>
-                <h3 class="text-gray-600 text-sm font-medium">Total Revenue</h3>
-                <p class="text-2xl font-semibold text-green-600">
-                  ₱{{ totalRevenue.toLocaleString() }}
-                </p>
-              </div>
+          <!-- Claim Summary -->
+          <section class="bg-white p-4 rounded-xl shadow border border-gray-200 animate-fade-in-up delay-300">
+            <div class="flex items-center gap-2 mb-2">
+              <ClipboardDocumentCheckIcon class="w-5 h-5 text-indigo-500" />
+              <h3 class="text-lg font-semibold text-gray-700">Claim Summary</h3>
             </div>
-
-            <div class="bg-white border border-black rounded-xl p-6 shadow-lg hover:shadow-2xl transition transform hover:scale-105 flex items-center space-x-4">
-              <div class="bg-yellow-100 text-yellow-600 p-3 rounded-full">
-                <DocumentTextIcon class="w-8 h-8" />
-              </div>
-              <div>
-                <h3 class="text-gray-600 text-sm font-medium">Unpaid Claims</h3>
-                <p class="text-2xl font-semibold text-yellow-600">
-                  {{ unpaidClaims }}
-                </p>
-              </div>
-            </div>
-
-            <div class="bg-white border border-black rounded-xl p-6 shadow-lg hover:shadow-2xl transition transform hover:scale-105 flex items-center space-x-4">
-              <div class="bg-red-100 text-red-600 p-3 rounded-full">
-                <ExclamationCircleIcon class="w-8 h-8" />
-              </div>
-              <div>
-                <h3 class="text-gray-600 text-sm font-medium">Unpaid Amount</h3>
-                <p class="text-2xl font-semibold text-red-600">
-                  ₱{{ unpaidTotalAmount.toLocaleString() }}
-                </p>
-              </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700">
+              <p>
+                <span class="font-medium text-green-600">Paid Claims:</span>
+                {{ paidClaims }}
+              </p>
+              <p>
+                <span class="font-medium text-yellow-600">Unpaid Claims:</span>
+                {{ unpaidClaims }}
+              </p>
             </div>
           </section>
         </div>
-
-        <!-- Bottom Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          <div class="bg-white border border-black rounded-xl p-4 shadow flex flex-col justify-center items-start space-y-1">
-            <h3 class="text-gray-600 text-sm font-medium mb-1">Claim Summary</h3>
-            <p class="text-base font-medium text-green-600">✔ Paid Claims: {{ paidClaims }}</p>
-            <p class="text-base font-medium text-yellow-600">⌛ Unpaid Claims: {{ unpaidClaims }}</p>
-          </div>
-
-          <div class="bg-white border border-black rounded-xl p-4 shadow flex flex-col justify-center items-start">
-            <h3 class="text-gray-600 text-sm font-medium mb-1">Overdue Count</h3>
-            <p class="text-xl font-semibold text-red-600">
-              {{ overdueCount }}
-            </p>
-          </div>
-        </div>
-      </main>
+      </div>
     </div>
   </div>
 </template>
@@ -123,25 +115,25 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "@/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
+// Heroicons
 import {
-  BanknotesIcon,
   DocumentTextIcon,
-  ExclamationCircleIcon,
+  ClipboardDocumentCheckIcon,
+  ExclamationTriangleIcon,
+  ClockIcon,
+  BanknotesIcon,
 } from "@heroicons/vue/24/solid";
 
-// Refs
 const invoices = ref([]);
 const totalRevenue = ref(0);
 const paidClaims = ref(0);
 const unpaidClaims = ref(0);
 const overdueCount = ref(0);
 const unpaidTotalAmount = ref(0);
-const isLoggedIn = ref(false);
 const loadingInvoices = ref(true);
 
 const auth = getAuth();
 
-// Load Tawk.to Chatbot
 const loadTawkChatbot = () => {
   if (!window.Tawk_API) {
     window.Tawk_API = window.Tawk_API || {};
@@ -165,13 +157,25 @@ const removeTawkChatbot = () => {
   if (script) script.remove();
 };
 
-// Fetch invoices
 const fetchInvoicesByEmail = async (email) => {
   loadingInvoices.value = true;
   try {
     const q = query(collection(db, "invoices"), where("email", "==", email));
     const snapshot = await getDocs(q);
     const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+
+    docs.sort((a, b) => {
+      const order = (status) => {
+        if (!status) return 3;
+        const s = status.toLowerCase();
+        if (s === "not paid") return 0;
+        if (s === "pending") return 1;
+        if (s === "paid") return 2;
+        return 3;
+      };
+      return order(a.status) - order(b.status);
+    });
+
     invoices.value = docs;
 
     totalRevenue.value = 0;
@@ -202,43 +206,24 @@ const fetchInvoicesByEmail = async (email) => {
         }
       }
     }
-  } catch (error) {
-    console.error("Error fetching invoices:", error);
+  } catch (err) {
+    console.error("Error fetching invoices:", err);
   } finally {
     loadingInvoices.value = false;
   }
 };
 
-// Status color class
-const getStatusClass = (status) => {
-  switch ((status || "").toLowerCase()) {
-    case "paid":
-      return "text-green-600";
-    case "pending":
-      return "text-yellow-600";
-    case "overdue":
-    case "not paid":
-      return "text-red-600";
-    default:
-      return "text-gray-500";
-  }
-};
-
-// Init on mount
 onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user?.email) {
       fetchInvoicesByEmail(user.email);
-      isLoggedIn.value = true;
       loadTawkChatbot();
-
       window.Tawk_API = window.Tawk_API || {};
       window.Tawk_API.visitor = {
         name: user.displayName || "User",
         email: user.email,
       };
     } else {
-      isLoggedIn.value = false;
       removeTawkChatbot();
     }
   });

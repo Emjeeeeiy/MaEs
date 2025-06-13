@@ -1,100 +1,108 @@
 <template>
-  <div class="flex min-h-screen bg-gray-50">
-    <!-- Sidebar -->
+  <div class="flex bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen text-gray-800">
     <Sidebar />
 
-    <!-- Main content -->
-    <div class="flex-1 flex flex-col">
-      <!-- Topbar -->
+    <div class="flex-1 flex flex-col max-h-screen">
       <Topbar />
 
-      <!-- Payment Content -->
-      <main class="p-6">
-        <div class="bg-white rounded-xl shadow-md px-8 py-2 max-w-4xl mx-auto border border-black">
-          <h2 class="text-xl font-semibold text-green-700 mb-3">Process Payment</h2>
-
-          <div v-if="loading" class="flex justify-center py-8">
+      <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+        <transition name="fade" mode="out-in">
+          <div v-if="loading" key="loading" class="flex justify-center items-center min-h-[300px]">
             <LoadingAnimation />
           </div>
 
-          <div v-else>
-            <label class="block text-gray-700 text-sm font-medium mb-1">Select an Unpaid Invoice:</label>
-            <select
-              v-model="selectedInvoice"
-              class="w-full bg-gray-50 text-gray-800 border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 mb-3"
-            >
-              <option v-for="invoice in invoices" :key="invoice.id" :value="invoice">
-                Invoice #{{ invoice.id }} - ₱{{ invoice.totalAmount }}
-              </option>
-            </select>
-
-            <label class="block text-gray-700 text-sm font-medium mb-1">Enter Cash Payment:</label>
-            <input
-              v-model.number="cashPaid"
-              type="number"
-              placeholder="Enter cash amount"
-              class="w-full bg-gray-50 text-gray-800 border border-gray-300 rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 mb-3"
-            />
-
-            <div v-if="selectedInvoice" class="mb-3 text-gray-700 text-sm">
-              <p><strong>Total Amount:</strong> ₱{{ selectedInvoice.totalAmount }}</p>
-              <p><strong>Change:</strong> ₱{{ changeDue }}</p>
+          <div v-else key="content" class="space-y-6 animate-fade-in">
+            <div class="flex items-center gap-2">
+              <BanknotesIcon class="w-6 h-6 text-green-600" />
+              <h2 class="text-2xl font-semibold">Process Payment</h2>
             </div>
 
-            <button
-              @click="showPaymentMethodModal = true"
-              :disabled="!selectedInvoice || cashPaid < selectedInvoice.totalAmount"
-              class="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 disabled:opacity-50 mb-3 text-sm"
-            >
-              Submit Payment
-            </button>
+            <div class="bg-white p-6 rounded-xl shadow border border-gray-200 space-y-4">
+              <!-- Invoice Select -->
+              <div>
+                <label class="block font-medium text-sm text-gray-700 mb-1">Select an Unpaid Invoice:</label>
+                <select
+                  v-model="selectedInvoice"
+                  class="w-full p-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option v-for="invoice in invoices" :key="invoice.id" :value="invoice">
+                    Invoice #{{ invoice.id }} - ₱{{ invoice.totalAmount.toLocaleString() }}
+                  </option>
+                </select>
+              </div>
 
-            <p v-if="successMessage" class="text-green-600 mt-2 font-medium text-sm">{{ successMessage }}</p>
+              <!-- Cash Input -->
+              <div>
+                <label class="block font-medium text-sm text-gray-700 mb-1">Enter Cash Payment:</label>
+                <input
+                  v-model.number="cashPaid"
+                  type="number"
+                  placeholder="Enter cash amount"
+                  class="w-full p-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <!-- Summary -->
+              <div v-if="selectedInvoice" class="space-y-1 text-sm text-gray-800">
+                <p><span class="font-semibold">Total Amount:</span> ₱{{ selectedInvoice.totalAmount.toLocaleString() }}</p>
+                <p><span class="font-semibold">Change:</span> ₱{{ changeDue.toLocaleString() }}</p>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="text-right">
+                <button
+                  @click="showPaymentMethodModal = true"
+                  :disabled="!selectedInvoice || cashPaid < selectedInvoice.totalAmount"
+                  class="bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-700 disabled:opacity-50"
+                >
+                  Submit Payment
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        </transition>
       </main>
     </div>
 
     <!-- Payment Method Modal -->
-    <div v-if="showPaymentMethodModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md text-center">
-        <h3 class="text-lg font-semibold mb-4 text-gray-800">Select Payment Method</h3>
-
-        <div class="flex flex-col gap-3">
-          <button
-            @click="submitPayment('Cash')"
-            class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
-          >
-            Cash
-          </button>
-          <button
-            @click="submitPayment('GCash')"
-            class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-          >
-            GCash
-          </button>
-          <button
-            @click="submitPayment('PayMaya')"
-            class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
-          >
-            PayMaya
-          </button>
-          <button
-            @click="submitPayment('PayPal')"
-            class="w-full bg-gray-700 text-white py-2 rounded hover:bg-gray-800"
-          >
-            PayPal
+    <transition name="fade">
+      <div
+        v-if="showPaymentMethodModal"
+        class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
+      >
+        <div class="bg-white/90 w-80 p-4 rounded-lg shadow-xl space-y-4 animate-fade-in">
+          <h3 class="text-base font-bold text-center">Select Payment Method</h3>
+          <div class="grid grid-cols-2 gap-2 text-sm font-medium">
+            <button @click="submitPayment('Cash')" class="bg-gray-100 hover:bg-gray-200 py-1.5 rounded-md">Cash</button>
+            <button @click="submitPayment('GCash')" class="bg-blue-100 hover:bg-blue-200 py-1.5 rounded-md">GCash</button>
+            <button @click="submitPayment('PayMaya')" class="bg-purple-100 hover:bg-purple-200 py-1.5 rounded-md">PayMaya</button>
+            <button @click="submitPayment('PayPal')" class="bg-yellow-100 hover:bg-yellow-200 py-1.5 rounded-md">PayPal</button>
+          </div>
+          <button @click="showPaymentMethodModal = false" class="w-full text-center text-red-500 hover:underline text-xs">
+            Cancel
           </button>
         </div>
-
-        <button
-          @click="showPaymentMethodModal = false"
-          class="mt-4 text-sm text-gray-500 hover:underline"
-        >
-          Cancel
-        </button>
       </div>
-    </div>
+    </transition>
+
+    <!-- Success Modal -->
+    <transition name="fade">
+      <div
+        v-if="showSuccessModal"
+        class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
+      >
+        <div class="bg-white/90 w-[300px] p-5 rounded-lg shadow-xl space-y-4 animate-fade-in text-center">
+          <h3 class="text-lg font-bold text-green-600">Payment Submitted!</h3>
+          <p class="text-sm text-gray-700">Your payment has been submitted and is awaiting admin approval.</p>
+          <button
+            @click="showSuccessModal = false"
+            class="mt-2 bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-md text-sm"
+          >
+            Okay
+          </button>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -116,12 +124,15 @@ import {
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
+import { BanknotesIcon } from "@heroicons/vue/24/solid";
+
 export default {
-  name: "BillingPage",
+  name: "ProcessPaymentPage",
   components: {
     Sidebar,
     Topbar,
     LoadingAnimation,
+    BanknotesIcon,
   },
   data() {
     return {
@@ -129,9 +140,9 @@ export default {
       selectedInvoice: null,
       cashPaid: 0,
       loading: true,
-      successMessage: "",
       userEmail: null,
       showPaymentMethodModal: false,
+      showSuccessModal: false,
     };
   },
   computed: {
@@ -171,37 +182,31 @@ export default {
     async submitPayment(method) {
       this.showPaymentMethodModal = false;
 
-      if (!this.selectedInvoice) {
-        alert("Please select an invoice.");
-        return;
-      }
+      if (!this.selectedInvoice) return;
 
       const paymentData = {
         invoiceID: this.selectedInvoice.id,
         amountPaid: this.selectedInvoice.totalAmount,
         method,
-        status: "Pending", // Payment is pending admin approval
+        status: "Pending",
         createdAt: serverTimestamp(),
         email: this.userEmail,
       };
 
       try {
-        // Add the payment record
         await addDoc(collection(db, "payments"), paymentData);
 
-        // Update the invoice with new status and method
         const invoiceRef = doc(db, "invoices", this.selectedInvoice.id);
         await updateDoc(invoiceRef, {
           status: "Pending",
           paymentMethod: method,
         });
 
-        this.successMessage =
-          "Payment submitted and awaiting admin approval.";
-
         this.selectedInvoice = null;
         this.cashPaid = 0;
         await this.fetchUnpaidInvoices();
+
+        this.showSuccessModal = true;
       } catch (error) {
         console.error("Error submitting payment:", error);
         alert("Error submitting payment.");
@@ -226,3 +231,27 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
