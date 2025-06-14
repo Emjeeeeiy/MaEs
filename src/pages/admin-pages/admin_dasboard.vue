@@ -74,14 +74,8 @@ const loading = ref(true);
 const revenueByDay = ref({});
 const serviceCounts = ref({});
 
-const logout = async () => {
-  try {
-    await signOut(auth);
-    window.location.href = "/login";
-  } catch (error) {
-    console.error("Error during logout:", error);
-  }
-};
+let lineChartInstance = null;
+let pieChartInstance = null;
 
 const fetchDashboardData = async () => {
   let totalRevenue = 0;
@@ -89,6 +83,7 @@ const fetchDashboardData = async () => {
   let outstandingPayments = 0;
   let totalPatients = 0;
   let dischargedPatients = 0;
+
   revenueByDay.value = {};
   serviceCounts.value = {};
 
@@ -98,40 +93,27 @@ const fetchDashboardData = async () => {
       const data = doc.data();
       const status = (data.status || "").toLowerCase();
       const amount = Number(data.totalAmount || 0);
-      const createdAt = data.createdAt?.seconds
-        ? new Date(data.createdAt.seconds * 1000)
-        : null;
+      const timestamp = data.createdAt?.seconds;
+
+      if (timestamp) {
+        const date = new Date(timestamp * 1000);
+        const day = date.toLocaleDateString("en-CA"); // yyyy-mm-dd format
+
+        if (!revenueByDay.value[day]) revenueByDay.value[day] = 0;
+        revenueByDay.value[day] += amount;
+      }
 
       if (status === "paid") {
         totalRevenue += amount;
-
-        // Group by day: "May 22, 2025"
-        if (createdAt) {
-          const day = createdAt.toLocaleDateString("en-US", {
-            month: "short",
-            day: "2-digit",
-            year: "numeric",
-          });
-          if (!revenueByDay.value[day]) {
-            revenueByDay.value[day] = 0;
-          }
-          revenueByDay.value[day] += amount;
-        }
-      } else if (status === "pending" || status === "not paid") {
+      } else if (["pending", "not paid", "unpaid", "overdue"].includes(status)) {
         unpaidClaims++;
-        outstandingPayments += amount;
-      } else if (status === "unpaid" || status === "overdue") {
         outstandingPayments += amount;
       }
 
-      // Service Count for Pie Chart
       if (Array.isArray(data.services)) {
         data.services.forEach((service) => {
           const name = service.serviceName || "Unknown";
-          if (!serviceCounts.value[name]) {
-            serviceCounts.value[name] = 0;
-          }
-          serviceCounts.value[name]++;
+          serviceCounts.value[name] = (serviceCounts.value[name] || 0) + 1;
         });
       }
     });
@@ -144,9 +126,7 @@ const fetchDashboardData = async () => {
 
       if (role === "user") {
         totalPatients++;
-        if (status === "discharged") {
-          dischargedPatients++;
-        }
+        if (status === "discharged") dischargedPatients++;
       }
     });
 
@@ -190,16 +170,23 @@ const fetchDashboardData = async () => {
 const drawCharts = () => {
   if (!lineChart.value || !pieChart.value) return;
 
-  // Line Chart - Revenue by Day
-  const days = Object.keys(revenueByDay.value).sort(
+  // Clean previous charts
+  if (lineChartInstance) {
+    lineChartInstance.destroy();
+  }
+  if (pieChartInstance) {
+    pieChartInstance.destroy();
+  }
+
+  const sortedDates = Object.keys(revenueByDay.value).sort(
     (a, b) => new Date(a) - new Date(b)
   );
-  const revenues = days.map((day) => revenueByDay.value[day]);
+  const revenues = sortedDates.map((day) => revenueByDay.value[day]);
 
-  new Chart(lineChart.value, {
+  lineChartInstance = new Chart(lineChart.value, {
     type: "line",
     data: {
-      labels: days,
+      labels: sortedDates,
       datasets: [
         {
           label: "Daily Revenue",
@@ -213,8 +200,8 @@ const drawCharts = () => {
       ],
     },
     options: {
-      maintainAspectRatio: false,
       responsive: true,
+      maintainAspectRatio: false,
       scales: {
         x: {
           ticks: {
@@ -226,27 +213,25 @@ const drawCharts = () => {
     },
   });
 
-  // Pie Chart - Services Used
   const serviceNames = Object.keys(serviceCounts.value);
-  const serviceValues = serviceNames.map((key) => serviceCounts.value[key]);
-  const colors = [
-    "#facc15", "#4ade80", "#3b82f6", "#fb923c", "#a78bfa", "#f472b6", "#f87171",
-  ];
+  const serviceValues = serviceNames.map((name) => serviceCounts.value[name]);
 
-  new Chart(pieChart.value, {
+  pieChartInstance = new Chart(pieChart.value, {
     type: "pie",
     data: {
       labels: serviceNames,
       datasets: [
         {
           data: serviceValues,
-          backgroundColor: colors.slice(0, serviceNames.length),
+          backgroundColor: [
+            "#facc15", "#4ade80", "#3b82f6", "#fb923c", "#a78bfa", "#f472b6", "#f87171",
+          ],
         },
       ],
     },
     options: {
-      maintainAspectRatio: false,
       responsive: true,
+      maintainAspectRatio: false,
     },
   });
 };

@@ -1,31 +1,21 @@
 <template>
-  <header class="bg-white shadow-md">
+  <header class="bg-white shadow-md relative z-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
-        <!-- Logo / Title -->
-        <div class="text-xl font-bold text-green-700">
-          Dashboard
-        </div>
+        <!-- Logo -->
+        <div class="text-xl font-bold text-green-700">Dashboard</div>
 
-        <!-- Navigation with Icons -->
+        <!-- Icons -->
         <nav class="flex gap-6 text-gray-700 relative items-center">
-          <!-- Feedback Trigger -->
-          <button
-            @click="showModal = true"
-            class="transition duration-300 hover:scale-110 hover:rotate-3 hover:text-green-600"
-            title="Feedback"
-          >
-            <ChatBubbleBottomCenterTextIcon class="w-6 h-6 cursor-pointer" />
+          <!-- Feedback -->
+          <button @click="showModal = true" title="Feedback">
+            <ChatBubbleBottomCenterTextIcon class="w-6 h-6 text-green-600 hover:scale-110 transition" />
           </button>
 
           <!-- Notifications -->
-          <div class="relative" ref="notifRef">
-            <button
-              @click="toggleNotifDropdown"
-              class="relative focus:outline-none transition duration-300 hover:scale-110 hover:rotate-3 hover:text-green-600"
-              title="Notifications"
-            >
-              <BellIcon class="w-6 h-6" />
+          <div class="relative z-50" ref="notifRef">
+            <button @click="toggleNotifDropdown" class="relative focus:outline-none" title="Notifications">
+              <BellIcon class="w-6 h-6 text-yellow-600 hover:rotate-12 transition" />
               <span
                 v-if="notifications.length > 0"
                 class="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center"
@@ -34,10 +24,18 @@
               </span>
             </button>
 
+            <!-- Blurred Background -->
+            <div
+              v-if="notifDropdownOpen"
+              class="fixed inset-0 backdrop-blur-sm bg-black/20 z-40"
+              @click="notifDropdownOpen = false"
+            ></div>
+
+            <!-- Dropdown -->
             <transition name="fade">
               <div
                 v-if="notifDropdownOpen"
-                class="absolute right-0 mt-2 w-64 max-h-80 overflow-y-auto bg-white border border-gray-200 rounded-md shadow-lg z-50"
+                class="absolute right-0 mt-2 w-64 max-h-80 overflow-y-auto border border-gray-200 rounded-md shadow-lg z-50 bg-white/90 backdrop-blur-sm"
               >
                 <div v-if="notifications.length === 0" class="text-gray-600 text-sm p-3">No new notifications.</div>
                 <div
@@ -52,14 +50,10 @@
             </transition>
           </div>
 
-          <!-- Profile Dropdown -->
+          <!-- Profile -->
           <div class="relative" ref="profileDropdownRef">
-            <button
-              @click="toggleDropdown"
-              class="focus:outline-none transition duration-300 hover:scale-110 hover:rotate-3 hover:text-green-600"
-              title="Profile"
-            >
-              <UserIcon class="w-6 h-6 cursor-pointer" />
+            <button @click="toggleDropdown" title="Profile">
+              <UserIcon class="w-6 h-6 text-blue-600 hover:scale-110 transition" />
             </button>
 
             <transition name="fade">
@@ -85,12 +79,8 @@
           </div>
 
           <!-- Settings -->
-          <router-link
-            to="/settings"
-            class="transition duration-300 hover:scale-110 hover:rotate-3 hover:text-green-600"
-            title="Settings"
-          >
-            <Cog6ToothIcon class="w-6 h-6 cursor-pointer" />
+          <router-link to="/settings" title="Settings">
+            <Cog6ToothIcon class="w-6 h-6 text-gray-700 hover:rotate-180 transition" />
           </router-link>
         </nav>
       </div>
@@ -100,7 +90,6 @@
     <div v-if="showModal" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
       <div class="bg-white text-gray-800 rounded-lg w-full max-w-lg shadow-lg p-6">
         <h2 class="text-xl font-bold mb-4">Send Feedback</h2>
-
         <form @submit.prevent="sendFeedback" class="space-y-4">
           <textarea
             v-model="newMessage"
@@ -178,7 +167,6 @@ const notifications = ref([])
 
 const toggleDropdown = () => dropdownOpen.value = !dropdownOpen.value
 const closeDropdown = () => dropdownOpen.value = false
-
 const toggleNotifDropdown = () => notifDropdownOpen.value = !notifDropdownOpen.value
 
 const handleLogout = async () => {
@@ -203,14 +191,12 @@ const handleClickOutside = (event) => {
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
 
-  // Real-time notification listener
   if (userEmail) {
     const notifQuery = query(
       collection(db, 'notifications'),
       where('email', '==', userEmail),
       orderBy('createdAt', 'desc')
     )
-
     onSnapshot(notifQuery, (snapshot) => {
       notifications.value = snapshot.docs.map(doc => doc.data())
     })

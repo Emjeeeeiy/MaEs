@@ -5,6 +5,16 @@
     <div class="flex-1 p-6">
       <h1 class="text-3xl font-bold text-gray-800 mb-6">User Invoices</h1>
 
+      <!-- User Search -->
+      <div class="mb-4 max-w-md">
+        <input
+          v-model="userSearchQuery"
+          type="text"
+          placeholder="Search users..."
+          class="w-full px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-800 focus:ring-green-400 focus:ring-2"
+        />
+      </div>
+
       <!-- User Table -->
       <div class="bg-white shadow rounded-lg overflow-x-auto border">
         <table class="min-w-full text-sm text-left text-gray-700">
@@ -32,6 +42,11 @@
                 >
                   View
                 </button>
+              </td>
+            </tr>
+            <tr v-if="filteredUsers.length === 0">
+              <td colspan="4" class="text-center text-gray-500 italic py-4">
+                No matching users found.
               </td>
             </tr>
           </tbody>
@@ -187,6 +202,7 @@ const searchQuery = ref('');
 const filterStatus = ref('');
 const confirmDelete = ref(false);
 const showSuccess = ref(false);
+const userSearchQuery = ref('');
 
 const fetchUsers = async () => {
   const snapshot = await getDocs(collection(db, 'users'));
@@ -237,17 +253,23 @@ const performDeleteAll = async () => {
 };
 
 const filteredUsers = computed(() =>
-  users.value.filter((u) => u.role !== 'admin')
+  users.value.filter((u) => {
+    const matchesRole = u.role !== 'admin';
+    const matchesSearch =
+      !userSearchQuery.value ||
+      u.username?.toLowerCase().includes(userSearchQuery.value.toLowerCase()) ||
+      u.email?.toLowerCase().includes(userSearchQuery.value.toLowerCase());
+    return matchesRole && matchesSearch;
+  })
 );
 
-const filteredInvoices = computed(() => {
-  return invoices.value.filter((inv) => {
+const filteredInvoices = computed(() =>
+  invoices.value.filter((inv) => {
     const statusMatch = !filterStatus.value || inv.status?.toLowerCase() === filterStatus.value.toLowerCase();
-    const searchMatch = !searchQuery.value ||
-      JSON.stringify(inv).toLowerCase().includes(searchQuery.value.toLowerCase());
+    const searchMatch = !searchQuery.value || JSON.stringify(inv).toLowerCase().includes(searchQuery.value.toLowerCase());
     return statusMatch && searchMatch;
-  });
-});
+  })
+);
 
 const formatDate = (timestamp) => {
   if (!timestamp?.toDate) return 'N/A';
