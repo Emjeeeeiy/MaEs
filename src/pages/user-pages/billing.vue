@@ -35,7 +35,7 @@
                       class="form-checkbox h-4 w-4 text-blue-600 mr-2"
                     />
                     <span class="text-sm text-gray-800">
-                      {{ service.serviceName }} - ₱{{ service.cost.toLocaleString() }}
+                      {{ service.serviceName }}
                     </span>
                   </div>
                 </div>

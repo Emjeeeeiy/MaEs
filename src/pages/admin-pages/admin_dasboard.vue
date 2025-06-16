@@ -1,61 +1,63 @@
 <template>
-  <div class="flex min-h-screen bg-gray-100">
+  <div class="flex min-h-screen bg-gray-100 text-gray-800 overflow-hidden">
+    <!-- Sidebar -->
     <admin_sidebar />
 
-    <main class="flex-1 p-8">
-      <h1 class="text-3xl font-bold mb-8 text-gray-800">Admin Dashboard</h1>
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-screen">
+      <!-- Header -->
+      <header class="bg-white shadow p-6 flex justify-between items-center">
+        <h1 class="text-3xl font-bold text-green-700">Admin</h1>
+      </header>
 
-      <loading_animation v-if="loading" />
-      <div v-else>
+      <!-- Page Content -->
+      <main class="flex-1 p-6 space-y-8 overflow-y-auto">
         <!-- Dashboard Cards -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-10">
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
           <div
             v-for="(card, index) in dashboardCards"
             :key="index"
-            class="bg-white border border-black rounded-2xl p-4 shadow hover:shadow-lg transition"
+            class="bg-white shadow-md rounded-2xl p-5 flex items-center space-x-4 hover:shadow-lg transition"
           >
-            <div class="flex items-center space-x-4">
-              <div class="p-3 rounded-full text-white" :class="card.color">
-                <component :is="card.icon" class="w-6 h-6" />
-              </div>
-              <div>
-                <p class="text-sm text-gray-500">{{ card.title }}</p>
-                <p class="text-xl font-semibold text-gray-800">{{ card.value }}</p>
-              </div>
+            <component :is="card.icon" class="w-8 h-8 text-green-600" />
+            <div>
+              <p class="text-sm text-gray-500 font-medium">{{ card.title }}</p>
+              <p class="text-lg font-bold">{{ card.value }}</p>
             </div>
           </div>
         </section>
 
-        <!-- Charts -->
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div class="bg-white rounded-2xl p-6 shadow border border-gray-200">
-            <h3 class="text-lg font-semibold mb-4 text-gray-700">Revenue Trend (Daily)</h3>
-            <div class="h-64">
+        <!-- Combined Charts Section -->
+        <section class="space-y-6">
+          <!-- Line Chart -->
+          <div class="bg-white p-6 rounded-2xl shadow-md">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">Revenue Trend (Daily)</h2>
+            <div class="h-72">
               <canvas ref="lineChart" class="w-full h-full"></canvas>
             </div>
           </div>
-          <div class="bg-white rounded-2xl p-6 shadow border border-gray-200">
-            <h3 class="text-lg font-semibold mb-4 text-gray-700">Department Revenue</h3>
-            <div class="h-64">
-              <canvas ref="pieChart" class="w-full h-full"></canvas>
+
+          <!-- Pie Chart -->
+          <div class="bg-white p-6 rounded-2xl shadow-md">
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">Department Revenue</h2>
+            <div class="relative h-72">
+              <canvas ref="pieChart" class="w-full h-full" />
+              <div class="absolute inset-0 flex items-center justify-center pointer-events-none"></div>
             </div>
           </div>
         </section>
-      </div>
-    </main>
+      </main>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, nextTick } from "vue";
-import { getAuth, signOut } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import Chart from "chart.js/auto";
 
 import admin_sidebar from "@/components/admin_sidebar.vue";
-import loading_animation from "@/components/loading_animation.vue";
-
-// Heroicons
 import {
   ChartBarIcon,
   UsersIcon,
@@ -97,8 +99,7 @@ const fetchDashboardData = async () => {
 
       if (timestamp) {
         const date = new Date(timestamp * 1000);
-        const day = date.toLocaleDateString("en-CA"); // yyyy-mm-dd format
-
+        const day = date.toLocaleDateString("en-CA");
         if (!revenueByDay.value[day]) revenueByDay.value[day] = 0;
         revenueByDay.value[day] += amount;
       }
@@ -135,31 +136,26 @@ const fetchDashboardData = async () => {
         title: "Total Revenue",
         value: `₱${totalRevenue.toLocaleString()}`,
         icon: ChartBarIcon,
-        color: "bg-yellow-400",
       },
       {
         title: "Unpaid Claims",
         value: unpaidClaims,
         icon: CreditCardIcon,
-        color: "bg-red-400",
       },
       {
         title: "Outstanding Payments",
         value: `₱${outstandingPayments.toLocaleString()}`,
         icon: CreditCardIcon,
-        color: "bg-purple-500",
       },
       {
         title: "Total Patients",
         value: totalPatients,
         icon: UsersIcon,
-        color: "bg-blue-500",
       },
       {
         title: "Discharged Patients",
         value: dischargedPatients,
         icon: UserGroupIcon,
-        color: "bg-green-500",
       },
     ];
   } catch (error) {
@@ -170,20 +166,20 @@ const fetchDashboardData = async () => {
 const drawCharts = () => {
   if (!lineChart.value || !pieChart.value) return;
 
-  // Clean previous charts
-  if (lineChartInstance) {
-    lineChartInstance.destroy();
-  }
-  if (pieChartInstance) {
-    pieChartInstance.destroy();
-  }
+  if (lineChartInstance) lineChartInstance.destroy();
+  if (pieChartInstance) pieChartInstance.destroy();
 
   const sortedDates = Object.keys(revenueByDay.value).sort(
     (a, b) => new Date(a) - new Date(b)
   );
   const revenues = sortedDates.map((day) => revenueByDay.value[day]);
 
-  lineChartInstance = new Chart(lineChart.value, {
+  const ctx = lineChart.value.getContext("2d");
+  const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+  gradient.addColorStop(0, "rgba(34, 197, 94, 0.4)");
+  gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+  lineChartInstance = new Chart(ctx, {
     type: "line",
     data: {
       labels: sortedDates,
@@ -191,23 +187,50 @@ const drawCharts = () => {
         {
           label: "Daily Revenue",
           data: revenues,
-          borderColor: "#facc15",
-          backgroundColor: "rgba(250, 204, 21, 0.2)",
-          borderWidth: 3,
           fill: true,
+          backgroundColor: gradient,
+          borderColor: "#22c55e",
           tension: 0.4,
+          borderWidth: 3,
+          pointBackgroundColor: "#22c55e",
+          pointBorderColor: "#fff",
+          pointRadius: 4,
+          pointHoverRadius: 6,
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: {
+        duration: 1000,
+        easing: "easeOutQuart",
+      },
       scales: {
         x: {
+          ticks: { color: "#6b7280", font: { weight: "500" } },
+          grid: { color: "#e5e7eb" },
+        },
+        y: {
           ticks: {
-            autoSkip: true,
-            maxTicksLimit: 10,
+            color: "#6b7280",
+            callback: (val) => `₱${val.toLocaleString()}`,
           },
+          grid: { color: "#e5e7eb" },
+        },
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ` ₱${ctx.raw.toLocaleString()}`,
+          },
+          backgroundColor: "#1f2937",
+          titleColor: "#facc15",
+          bodyColor: "#f9fafb",
+          padding: 10,
+        },
+        legend: {
+          display: false,
         },
       },
     },
@@ -223,15 +246,51 @@ const drawCharts = () => {
       datasets: [
         {
           data: serviceValues,
+          borderColor: "#ffffff",
+          borderWidth: 3,
           backgroundColor: [
-            "#facc15", "#4ade80", "#3b82f6", "#fb923c", "#a78bfa", "#f472b6", "#f87171",
+            "#4ade80", "#3b82f6", "#fb923c", "#a78bfa", "#f472b6",
+            "#facc15", "#f87171", "#14b8a6", "#8b5cf6", "#f59e0b", "#10b981"
           ],
+          hoverOffset: 16,
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      animation: {
+        animateScale: true,
+        animateRotate: true,
+        easing: "easeOutBounce",
+        duration: 1000,
+      },
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: {
+            color: "#374151",
+            font: { size: 14, weight: "500" },
+            padding: 20,
+            boxWidth: 18,
+          },
+        },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const label = ctx.label || "";
+              const value = ctx.raw || 0;
+              return ` ${label}: ₱${value.toLocaleString()}`;
+            },
+          },
+          backgroundColor: "#111827",
+          titleColor: "#facc15",
+          bodyColor: "#f9fafb",
+          borderColor: "#facc15",
+          borderWidth: 1,
+          padding: 10,
+        },
+      },
     },
   });
 };

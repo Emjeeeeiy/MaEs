@@ -26,7 +26,7 @@
                   class="w-full p-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option v-for="invoice in invoices" :key="invoice.id" :value="invoice">
-                    Invoice #{{ invoice.id }} - ₱{{ invoice.totalAmount.toLocaleString() }}
+                    {{ invoice.services.map(s => s.serviceName).join(', ') }} - ₱{{ invoice.totalAmount.toLocaleString() }}
                   </option>
                 </select>
               </div>

@@ -79,9 +79,9 @@
           </div>
 
           <!-- Settings -->
-          <router-link to="/settings" title="Settings">
+          <!-- <router-link to="/settings" title="Settings">
             <Cog6ToothIcon class="w-6 h-6 text-gray-700 hover:rotate-180 transition" />
-          </router-link>
+          </router-link> -->
         </nav>
       </div>
     </div>

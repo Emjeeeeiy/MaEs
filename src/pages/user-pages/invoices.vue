@@ -11,7 +11,6 @@
         <!-- Header -->
         <div class="space-y-0.5">
           <h2 class="text-lg font-semibold text-gray-900">Your Invoices</h2>
-          <p class="text-xs text-gray-600">Browse and search your invoices below.</p>
         </div>
 
         <!-- Filters -->
