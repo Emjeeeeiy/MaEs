@@ -48,15 +48,15 @@
         </div>
 
         <!-- Invoices Table -->
-        <div v-else class="overflow-x-auto">
-          <table class="min-w-full bg-white border border-gray-200 rounded-md shadow-sm text-xs text-gray-800">
+        <div v-else class="overflow-x-auto rounded-md border border-gray-200 shadow-sm">
+          <table class="min-w-full bg-white text-xs text-gray-800">
             <thead class="bg-gray-100 text-left text-[10px] uppercase text-gray-600">
               <tr>
-                <th class="px-3 py-2">Invoice ID</th>
-                <th class="px-3 py-2">Date</th>
-                <th class="px-3 py-2">Services</th>
-                <th class="px-3 py-2">Total</th>
-                <th class="px-3 py-2">Status</th>
+                <th class="px-3 py-2 whitespace-nowrap">Invoice ID</th>
+                <th class="px-3 py-2 whitespace-nowrap">Date</th>
+                <th class="px-3 py-2 whitespace-nowrap">Services</th>
+                <th class="px-3 py-2 whitespace-nowrap">Total</th>
+                <th class="px-3 py-2 whitespace-nowrap">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -65,8 +65,8 @@
                 :key="invoice.id"
                 class="hover:bg-blue-50 transition"
               >
-                <td class="px-3 py-2 font-mono">{{ invoice.id }}</td>
-                <td class="px-3 py-2">{{ formattedDate(invoice.createdAt) }}</td>
+                <td class="px-3 py-2 font-mono whitespace-nowrap">{{ invoice.id }}</td>
+                <td class="px-3 py-2 whitespace-nowrap">{{ formattedDate(invoice.createdAt) }}</td>
                 <td class="px-3 py-2">
                   <ul class="list-disc list-inside text-[11px] text-gray-700">
                     <li v-for="service in invoice.services" :key="service.serviceName">
@@ -74,8 +74,10 @@
                     </li>
                   </ul>
                 </td>
-                <td class="px-3 py-2 font-semibold">₱{{ invoice.totalAmount.toLocaleString() }}</td>
-                <td class="px-3 py-2">
+                <td class="px-3 py-2 font-semibold whitespace-nowrap">
+                  ₱{{ invoice.totalAmount.toLocaleString() }}
+                </td>
+                <td class="px-3 py-2 whitespace-nowrap">
                   <span
                     :class="[
                       'px-2 py-0.5 rounded-full text-[10px] font-medium',
@@ -103,7 +105,7 @@ import Sidebar from "@/components/Sidebar.vue";
 import Topbar from "@/components/Topbar.vue";
 import LoadingAnimation from "@/components/loading_animation.vue";
 import { db } from "@/firebase";
-import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default {
@@ -131,7 +133,7 @@ export default {
         .sort((a, b) => {
           const dateA = a.createdAt?.toDate?.() || new Date(0);
           const dateB = b.createdAt?.toDate?.() || new Date(0);
-          return dateB - dateA; // newest first
+          return dateB - dateA;
         })
         .filter((invoice) => {
           const invoiceStatus = (invoice.status || "").toLowerCase();
