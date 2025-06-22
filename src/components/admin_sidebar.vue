@@ -51,6 +51,14 @@
         </router-link>
 
         <router-link
+          to="/admin-appointment"
+          class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
+        >
+          <CalendarDaysIcon class="w-5 h-5 transform group-hover:scale-105 group-hover:-rotate-3 transition duration-300 ease-in-out" />
+          Appointment Management
+        </router-link>
+
+        <router-link
           to="/admin-feedback"
           class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
         >
@@ -84,6 +92,7 @@ import { DocumentTextIcon } from "@heroicons/vue/24/outline";
 import { Cog6ToothIcon } from "@heroicons/vue/24/outline";
 import { ArrowLeftOnRectangleIcon } from "@heroicons/vue/24/outline";
 import { ChatBubbleLeftRightIcon } from "@heroicons/vue/24/outline";
+import { CalendarDaysIcon } from "@heroicons/vue/24/outline"; // new icon
 
 const router = useRouter();
 

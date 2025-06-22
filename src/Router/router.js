@@ -19,6 +19,8 @@ import report from '../pages/user-pages/report.vue';
 import admin_services from '../pages/admin-pages/admin_services.vue';
 import edit_profile from '../pages/user-pages/edit_profile.vue';
 import admin_feedback from '../pages/admin-pages/admin_feedback.vue';
+import appointment from '../pages/user-pages/appointment.vue';
+import admin_appointment from '../pages/admin-pages/admin_appointment.vue';
 
 
 const routes = [
@@ -35,7 +37,8 @@ const routes = [
   { path: '/settings', name: 'Settings', component: settings },
   { path: '/profile', name: 'Profile', component: profile },
   { path : '/report', name: 'Report', component: report },
-  { path: '/edit_profile', name: 'EditProfile', component: edit_profile },  
+  { path: '/edit_profile', name: 'EditProfile', component: edit_profile }, 
+  { path: '/appointment', name: 'Appointment', component: appointment }, 
 
   // Admin Routes
   { path: '/admin-dashboard', name: 'AdminDashboard', component: AdminDashboard, meta: { requiresAdmin: true, role: 'admin' },},
@@ -43,6 +46,7 @@ const routes = [
   { path: '/admin-management', name: 'AdminManagement', component: admin_management, meta: { requiresAdmin: true, role: 'admin' },},  
   { path: '/admin-services', name: 'AdminServices', component: admin_services, meta: { requiresAdmin: true, role: 'admin' },},
   { path: '/admin-feedback', name: 'AdminFeedback', component: admin_feedback, meta: { requiresAdmin: true, role: 'admin' },},
+  { path: '/admin-appointment', name: 'AdminAppointment', component: admin_appointment, meta: { requiresAdmin: true, role: 'admin' },},
 
 ];
 

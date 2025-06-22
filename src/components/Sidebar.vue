@@ -71,6 +71,15 @@
             <DocumentTextIcon class="w-5 h-5 mr-3 text-white group-hover:animate-bounce" />
             Invoices
           </router-link>
+
+          <!-- NEW: Appointment Link -->
+          <router-link
+            to="/appointment"
+            class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition group"
+          >
+            <CalendarIcon class="w-5 h-5 mr-3 text-white group-hover:animate-bounce" />
+            Appointments
+          </router-link>
         </nav>
       </div>
     </aside>
@@ -101,6 +110,7 @@ import {
   CreditCardIcon,
   DocumentTextIcon,
   ClipboardDocumentCheckIcon,
+  CalendarIcon, // new icon
 } from "@heroicons/vue/24/solid";
 
 // State
