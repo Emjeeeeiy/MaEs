@@ -10,7 +10,7 @@
       <div
         class="w-full lg:w-1/2 max-w-xl bg-white/30 backdrop-blur-md border border-white/30 p-8 rounded-lg shadow-md mb-8 lg:mb-0 lg:mr-8 text-white"
       >
-        <h2 class="text-3xl font-bold mb-4">Welcome to Our System</h2>
+        <h2 class="text-3xl font-bold mb-4">Welcome</h2>
         <p class="mb-4">
           This platform provides a secure and efficient environment for managing hospital billing, feedback, user roles, and more.
         </p>

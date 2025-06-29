@@ -3,83 +3,92 @@
     <!-- Admin Sidebar -->
     <AdminSidebar class="w-64 border-r bg-white" />
 
-    <!-- Main content -->
-    <div class="flex-1 p-6 space-y-6">
-      <h2 class="text-2xl font-bold text-gray-800">Admin Management</h2>
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+      <!-- Admin Topbar -->
+      <AdminTopbar />
 
-      <p v-if="errorMessage" class="text-red-600 font-medium">{{ errorMessage }}</p>
+      <!-- Page Content -->
+      <div class="flex-1 p-6 space-y-6 overflow-y-auto">
+        <h2 class="text-2xl font-bold text-gray-800">User Management</h2>
 
-      <div v-if="users.length" class="overflow-x-auto bg-white shadow rounded-xl border border-gray-200">
-        <table class="min-w-full text-sm text-gray-800">
-          <thead class="bg-green-100 text-gray-700 uppercase text-xs font-semibold tracking-wide">
-            <tr>
-              <th class="px-6 py-3 text-left">Username</th>
-              <th class="px-6 py-3 text-left">Email</th>
-              <th class="px-6 py-3 text-left">Role</th>
-              <th class="px-6 py-3 text-left">Status</th>
-              <th class="px-6 py-3 text-left">Last Active</th>
-              <th class="px-6 py-3 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="user in users"
-              :key="user.id"
-              class="border-t border-gray-200 hover:bg-gray-50 even:bg-gray-50"
-            >
-              <td class="px-6 py-4 font-medium">{{ user.username || "Unknown" }}</td>
-              <td class="px-6 py-4">{{ user.email }}</td>
-              <td class="px-6 py-4">
-                <select
-                  v-model="user.role"
-                  @change="updateUserRole(user)"
-                  class="bg-white border border-gray-300 text-sm rounded-md px-2 py-1 focus:ring-2 focus:ring-green-400"
-                >
-                  <option value="user">User</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </td>
-              <td class="px-6 py-4">
-                <span
-                  :class="[
-                    'px-2 py-1 rounded-full text-xs font-semibold',
-                    user.status === 'deactivated'
-                      ? 'bg-red-100 text-red-700'
-                      : 'bg-green-100 text-green-700'
-                  ]"
-                >
-                  {{ user.status === 'deactivated' ? 'Deactivated' : 'Active' }}
-                </span>
-              </td>
-              <td class="px-6 py-4">{{ user.lastActive || "Never Logged In" }}</td>
-              <td class="px-6 py-4 space-x-2 whitespace-nowrap">
-                <button
-                  v-if="user.status === 'active'"
-                  @click="confirmDeactivation(user)"
-                  class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 text-xs font-medium"
-                >
-                  Deactivate
-                </button>
-                <button
-                  v-if="user.status === 'deactivated'"
-                  @click="confirmReactivation(user)"
-                  class="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-xs font-medium"
-                >
-                  Reactivate
-                </button>
-                <button
-                  @click="confirmDeletion(user.id)"
-                  class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-xs font-medium"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <p v-if="errorMessage" class="text-red-600 font-medium">{{ errorMessage }}</p>
+
+        <div
+          v-if="users.length"
+          class="bg-white shadow rounded-xl border border-gray-200"
+        >
+          <table class="w-full text-sm text-gray-800">
+            <thead class="bg-green-100 text-gray-700 uppercase text-xs font-semibold tracking-wide">
+              <tr>
+                <th class="px-6 py-3 text-left">Username</th>
+                <th class="px-6 py-3 text-left">Email</th>
+                <th class="px-6 py-3 text-left">Role</th>
+                <th class="px-6 py-3 text-left">Status</th>
+                <th class="px-6 py-3 text-left">Last Active</th>
+                <th class="px-6 py-3 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="user in users"
+                :key="user.id"
+                class="border-t border-gray-200 hover:bg-gray-50 even:bg-gray-50"
+              >
+                <td class="px-6 py-4 font-medium">{{ user.username || "Unknown" }}</td>
+                <td class="px-6 py-4">{{ user.email }}</td>
+                <td class="px-6 py-4">
+                  <select
+                    v-model="user.role"
+                    @change="updateUserRole(user)"
+                    class="bg-white border border-gray-300 text-sm rounded-md px-2 py-1 focus:ring-2 focus:ring-green-400"
+                  >
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </td>
+                <td class="px-6 py-4">
+                  <span
+                    :class="[
+                      'px-2 py-1 rounded-full text-xs font-semibold',
+                      user.status === 'deactivated'
+                        ? 'bg-red-100 text-red-700'
+                        : 'bg-green-100 text-green-700'
+                    ]"
+                  >
+                    {{ user.status === 'deactivated' ? 'Deactivated' : 'Active' }}
+                  </span>
+                </td>
+                <td class="px-6 py-4">{{ user.lastActive || "Never Logged In" }}</td>
+                <td class="px-6 py-4 space-x-2 whitespace-nowrap">
+                  <button
+                    v-if="user.status === 'active'"
+                    @click="confirmDeactivation(user)"
+                    class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 text-xs font-medium"
+                  >
+                    Deactivate
+                  </button>
+                  <button
+                    v-if="user.status === 'deactivated'"
+                    @click="confirmReactivation(user)"
+                    class="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-xs font-medium"
+                  >
+                    Reactivate
+                  </button>
+                  <button
+                    @click="confirmDeletion(user.id)"
+                    class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-xs font-medium"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p v-else class="text-gray-500 text-sm">No users found.</p>
       </div>
-
-      <p v-else class="text-gray-500 text-sm">No users found.</p>
     </div>
   </div>
 </template>
@@ -96,6 +105,7 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import AdminSidebar from "@/components/admin_sidebar.vue";
+import AdminTopbar from "@/components/AdminTopbar.vue";
 
 const users = ref([]);
 const errorMessage = ref("");

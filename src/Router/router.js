@@ -18,9 +18,11 @@ import profile from '../pages/user-pages/profile.vue';
 import report from '../pages/user-pages/report.vue';
 import admin_services from '../pages/admin-pages/admin_services.vue';
 import edit_profile from '../pages/user-pages/edit_profile.vue';
-import admin_feedback from '../pages/admin-pages/admin_feedback.vue';
+import admin_rfa from '../pages/admin-pages/admin_rfa.vue';
 import appointment from '../pages/user-pages/appointment.vue';
 import admin_appointment from '../pages/admin-pages/admin_appointment.vue';
+import result from '../pages/user-pages/result.vue';
+import admin_result from '../pages/admin-pages/admin_result.vue';
 
 
 const routes = [
@@ -28,6 +30,15 @@ const routes = [
   { path: '/login', name: 'Login', component: Login },
   { path: '/register', name: 'Register', component: Register },
   { path: '/reset_password', name: 'ResetPassword', component: reset_password },
+
+  // Admin Routes
+  { path: '/admin-dashboard', name: 'AdminDashboard', component: AdminDashboard, meta: { requiresAdmin: true, role: 'admin' },},
+  { path: '/admin-invoices', name: 'AdminInvoices', component: AdminInvoices, meta: { requiresAdmin: true, role: 'admin' },},
+  { path: '/admin-management', name: 'AdminManagement', component: admin_management, meta: { requiresAdmin: true, role: 'admin' },},  
+  { path: '/admin-services', name: 'AdminServices', component: admin_services, meta: { requiresAdmin: true, role: 'admin' },},
+  { path: '/admin-rfa', name: 'AdminRFA', component: admin_rfa, meta: { requiresAdmin: true, role: 'admin' },},
+  { path: '/admin-appointment', name: 'AdminAppointment', component: admin_appointment, meta: { requiresAdmin: true, role: 'admin' },},
+  { path: '/admin-result', name: 'AdminResult', component: admin_result, meta: { requiresAdmin: true, role: 'admin' },},
 
   // User Routes
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
@@ -38,16 +49,8 @@ const routes = [
   { path: '/profile', name: 'Profile', component: profile },
   { path : '/report', name: 'Report', component: report },
   { path: '/edit_profile', name: 'EditProfile', component: edit_profile }, 
-  { path: '/appointment', name: 'Appointment', component: appointment }, 
-
-  // Admin Routes
-  { path: '/admin-dashboard', name: 'AdminDashboard', component: AdminDashboard, meta: { requiresAdmin: true, role: 'admin' },},
-  { path: '/admin-invoices', name: 'AdminInvoices', component: AdminInvoices, meta: { requiresAdmin: true, role: 'admin' },},
-  { path: '/admin-management', name: 'AdminManagement', component: admin_management, meta: { requiresAdmin: true, role: 'admin' },},  
-  { path: '/admin-services', name: 'AdminServices', component: admin_services, meta: { requiresAdmin: true, role: 'admin' },},
-  { path: '/admin-feedback', name: 'AdminFeedback', component: admin_feedback, meta: { requiresAdmin: true, role: 'admin' },},
-  { path: '/admin-appointment', name: 'AdminAppointment', component: admin_appointment, meta: { requiresAdmin: true, role: 'admin' },},
-
+  { path: '/appointment', name: 'Appointment', component: appointment },
+  { path: '/result', name: 'Result', component: result },
 ];
 
 const router = createRouter({

@@ -3,13 +3,20 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <!-- Logo -->
-        <div class="text-xl font-bold text-green-700">Dashboard</div>
+        <div class="font-bold text-green-700 text-lg sm:text-xl md:text-2xl">
+          Maria Estrella General Hospital Inc.
+        </div>
 
         <!-- Icons -->
         <nav class="flex gap-6 text-gray-700 relative items-center">
           <!-- Feedback -->
           <button @click="showModal = true" title="Feedback">
             <ChatBubbleBottomCenterTextIcon class="w-6 h-6 text-green-600 hover:scale-110 transition" />
+          </button>
+
+          <!-- Upload Icon -->
+          <button @click="showDocumentModal = true" title="Upload File">
+            <DocumentArrowUpIcon class="w-6 h-6 text-purple-600 hover:scale-110 transition" />
           </button>
 
           <!-- Notifications -->
@@ -24,14 +31,12 @@
               </span>
             </button>
 
-            <!-- Blurred Background -->
             <div
               v-if="notifDropdownOpen"
               class="fixed inset-0 backdrop-blur-sm bg-black/20 z-40"
               @click="notifDropdownOpen = false"
             ></div>
 
-            <!-- Dropdown -->
             <transition name="fade">
               <div
                 v-if="notifDropdownOpen"
@@ -119,6 +124,27 @@
         </form>
       </div>
     </div>
+
+    <!-- Document Upload Modal -->
+    <div v-if="showDocumentModal" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
+      <div class="bg-white text-gray-800 rounded-lg w-full max-w-lg shadow-lg p-6">
+        <h2 class="text-xl font-bold mb-4">Upload Financial Document</h2>
+        <form class="space-y-4">
+          <input type="file" class="w-full border rounded px-3 py-2 text-sm" />
+          <textarea
+            placeholder="Optional description..."
+            class="w-full border rounded px-3 py-2 text-sm"
+          ></textarea>
+
+          <div class="flex justify-end gap-3">
+            <button type="button" @click="showDocumentModal = false" class="text-gray-600 hover:underline">Cancel</button>
+            <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+              Upload
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </header>
 </template>
 
@@ -129,7 +155,8 @@ import {
   UserIcon,
   ChatBubbleBottomCenterTextIcon,
   Cog6ToothIcon,
-  BellIcon
+  BellIcon,
+  DocumentArrowUpIcon
 } from '@heroicons/vue/24/outline'
 import { db, storage } from '@/firebase'
 import {
@@ -159,6 +186,8 @@ const profileDropdownRef = ref(null)
 const notifRef = ref(null)
 
 const showModal = ref(false)
+const showDocumentModal = ref(false)
+
 const newMessage = ref('')
 const imageFile = ref(null)
 const imageInput = ref(null)

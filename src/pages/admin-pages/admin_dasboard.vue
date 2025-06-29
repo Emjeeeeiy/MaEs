@@ -5,15 +5,15 @@
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col h-screen">
-      <!-- Header -->
-      <header class="bg-white shadow p-6 flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-green-700">Admin</h1>
-      </header>
+      <!-- Admin Top-bar (feedback + notification icons) -->
+      <AdminTopbar />
 
       <!-- Page Content -->
       <main class="flex-1 p-6 space-y-8 overflow-y-auto">
         <!-- Dashboard Cards -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        <section
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        >
           <div
             v-for="(card, index) in dashboardCards"
             :key="index"
@@ -27,22 +27,25 @@
           </div>
         </section>
 
-        <!-- Combined Charts Section -->
+        <!-- Charts Section -->
         <section class="space-y-6">
           <!-- Line Chart -->
           <div class="bg-white p-6 rounded-2xl shadow-md">
-            <h2 class="text-lg font-semibold mb-4 text-gray-700">Revenue Trend (Daily)</h2>
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">
+              Revenue Trend (Daily)
+            </h2>
             <div class="h-72">
               <canvas ref="lineChart" class="w-full h-full"></canvas>
             </div>
           </div>
 
-          <!-- Pie Chart -->
+          <!-- Bar Chart -->
           <div class="bg-white p-6 rounded-2xl shadow-md">
-            <h2 class="text-lg font-semibold mb-4 text-gray-700">Department Revenue</h2>
-            <div class="relative h-72">
-              <canvas ref="pieChart" class="w-full h-full" />
-              <div class="absolute inset-0 flex items-center justify-center pointer-events-none"></div>
+            <h2 class="text-lg font-semibold mb-4 text-gray-700">
+              Department Revenue
+            </h2>
+            <div class="h-72">
+              <canvas ref="barChart" class="w-full h-full"></canvas>
             </div>
           </div>
         </section>
@@ -53,11 +56,11 @@
 
 <script setup>
 import { ref, onMounted, nextTick } from "vue";
-import { getAuth } from "firebase/auth";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import Chart from "chart.js/auto";
-
 import admin_sidebar from "@/components/admin_sidebar.vue";
+import AdminTopbar from "@/components/AdminTopbar.vue"; // ⬅️ import the top-bar
+
 import {
   ChartBarIcon,
   UsersIcon,
@@ -65,11 +68,10 @@ import {
   UserGroupIcon,
 } from "@heroicons/vue/24/solid";
 
-const auth = getAuth();
 const db = getFirestore();
 
 const lineChart = ref(null);
-const pieChart = ref(null);
+const barChart = ref(null);
 const dashboardCards = ref([]);
 const loading = ref(true);
 
@@ -77,12 +79,12 @@ const revenueByDay = ref({});
 const serviceCounts = ref({});
 
 let lineChartInstance = null;
-let pieChartInstance = null;
+let barChartInstance = null;
 
+/* ───────────── Dashboard Data ───────────── */
 const fetchDashboardData = async () => {
   let totalRevenue = 0;
   let unpaidClaims = 0;
-  let outstandingPayments = 0;
   let totalPatients = 0;
   let dischargedPatients = 0;
 
@@ -98,199 +100,85 @@ const fetchDashboardData = async () => {
       const timestamp = data.createdAt?.seconds;
 
       if (timestamp) {
-        const date = new Date(timestamp * 1000);
-        const day = date.toLocaleDateString("en-CA");
-        if (!revenueByDay.value[day]) revenueByDay.value[day] = 0;
-        revenueByDay.value[day] += amount;
+        const day = new Date(timestamp * 1000).toLocaleDateString("en-CA");
+        revenueByDay.value[day] = (revenueByDay.value[day] || 0) + amount;
       }
 
-      if (status === "paid") {
-        totalRevenue += amount;
-      } else if (["pending", "not paid", "unpaid", "overdue"].includes(status)) {
+      if (status === "paid") totalRevenue += amount;
+      else if (["pending", "not paid", "unpaid", "overdue"].includes(status))
         unpaidClaims++;
-        outstandingPayments += amount;
-      }
 
-      if (Array.isArray(data.services)) {
-        data.services.forEach((service) => {
-          const name = service.serviceName || "Unknown";
-          serviceCounts.value[name] = (serviceCounts.value[name] || 0) + 1;
-        });
-      }
+      (data.services || []).forEach((s) => {
+        const name = s.serviceName || "Unknown";
+        serviceCounts.value[name] = (serviceCounts.value[name] || 0) + 1;
+      });
     });
 
     const usersSnap = await getDocs(collection(db, "users"));
     usersSnap.forEach((doc) => {
       const data = doc.data();
-      const role = (data.role || "").toLowerCase();
-      const status = (data.status || "").toLowerCase();
-
-      if (role === "user") {
+      if ((data.role || "").toLowerCase() === "user") {
         totalPatients++;
-        if (status === "discharged") dischargedPatients++;
+        if ((data.status || "").toLowerCase() === "discharged")
+          dischargedPatients++;
       }
     });
 
     dashboardCards.value = [
-      {
-        title: "Total Revenue",
-        value: `₱${totalRevenue.toLocaleString()}`,
-        icon: ChartBarIcon,
-      },
-      {
-        title: "Unpaid Claims",
-        value: unpaidClaims,
-        icon: CreditCardIcon,
-      },
-      {
-        title: "Outstanding Payments",
-        value: `₱${outstandingPayments.toLocaleString()}`,
-        icon: CreditCardIcon,
-      },
-      {
-        title: "Total Patients",
-        value: totalPatients,
-        icon: UsersIcon,
-      },
-      {
-        title: "Discharged Patients",
-        value: dischargedPatients,
-        icon: UserGroupIcon,
-      },
+      { title: "Total Revenue", value: `₱${totalRevenue.toLocaleString()}`, icon: ChartBarIcon },
+      { title: "Unpaid Claims", value: unpaidClaims, icon: CreditCardIcon },
+      { title: "Total Patients", value: totalPatients, icon: UsersIcon },
+      { title: "Discharged Patients", value: dischargedPatients, icon: UserGroupIcon },
     ];
-  } catch (error) {
-    console.error("Error fetching dashboard data:", error);
+  } catch (err) {
+    console.error("Dashboard data error:", err);
   }
 };
 
+/* ───────────── Draw Charts ───────────── */
 const drawCharts = () => {
-  if (!lineChart.value || !pieChart.value) return;
+  if (!lineChart.value || !barChart.value) return;
 
   if (lineChartInstance) lineChartInstance.destroy();
-  if (pieChartInstance) pieChartInstance.destroy();
+  if (barChartInstance) barChartInstance.destroy();
 
-  const sortedDates = Object.keys(revenueByDay.value).sort(
+  const dates = Object.keys(revenueByDay.value).sort(
     (a, b) => new Date(a) - new Date(b)
   );
-  const revenues = sortedDates.map((day) => revenueByDay.value[day]);
+  const revenues = dates.map((d) => revenueByDay.value[d]);
 
-  const ctx = lineChart.value.getContext("2d");
-  const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-  gradient.addColorStop(0, "rgba(34, 197, 94, 0.4)");
-  gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+  // Line
+  const ctxLine = lineChart.value.getContext("2d");
+  const grad = ctxLine.createLinearGradient(0, 0, 0, 300);
+  grad.addColorStop(0, "rgba(34,197,94,0.4)");
+  grad.addColorStop(1, "rgba(255,255,255,0)");
 
-  lineChartInstance = new Chart(ctx, {
+  lineChartInstance = new Chart(ctxLine, {
     type: "line",
-    data: {
-      labels: sortedDates,
-      datasets: [
-        {
-          label: "Daily Revenue",
-          data: revenues,
-          fill: true,
-          backgroundColor: gradient,
-          borderColor: "#22c55e",
-          tension: 0.4,
-          borderWidth: 3,
-          pointBackgroundColor: "#22c55e",
-          pointBorderColor: "#fff",
-          pointRadius: 4,
-          pointHoverRadius: 6,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: {
-        duration: 1000,
-        easing: "easeOutQuart",
-      },
-      scales: {
-        x: {
-          ticks: { color: "#6b7280", font: { weight: "500" } },
-          grid: { color: "#e5e7eb" },
-        },
-        y: {
-          ticks: {
-            color: "#6b7280",
-            callback: (val) => `₱${val.toLocaleString()}`,
-          },
-          grid: { color: "#e5e7eb" },
-        },
-      },
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: (ctx) => ` ₱${ctx.raw.toLocaleString()}`,
-          },
-          backgroundColor: "#1f2937",
-          titleColor: "#facc15",
-          bodyColor: "#f9fafb",
-          padding: 10,
-        },
-        legend: {
-          display: false,
-        },
-      },
-    },
+    data: { labels: dates, datasets: [{ data: revenues, fill: true, backgroundColor: grad, borderColor: "#22c55e", tension: 0.4, borderWidth: 3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: "#6b7280" }, grid: { color: "#e5e7eb" } }, y: { ticks: { color: "#6b7280", callback: v=>`₱${v.toLocaleString()}` }, grid: { color: "#e5e7eb" } } } }
   });
 
-  const serviceNames = Object.keys(serviceCounts.value);
-  const serviceValues = serviceNames.map((name) => serviceCounts.value[name]);
-
-  pieChartInstance = new Chart(pieChart.value, {
-    type: "pie",
+  // Bar
+  const ctxBar = barChart.value.getContext("2d");
+  barChartInstance = new Chart(ctxBar, {
+    type: "bar",
     data: {
-      labels: serviceNames,
+      labels: Object.keys(serviceCounts.value),
       datasets: [
         {
-          data: serviceValues,
-          borderColor: "#ffffff",
-          borderWidth: 3,
-          backgroundColor: [
-            "#4ade80", "#3b82f6", "#fb923c", "#a78bfa", "#f472b6",
-            "#facc15", "#f87171", "#14b8a6", "#8b5cf6", "#f59e0b", "#10b981"
-          ],
-          hoverOffset: 16,
+          data: Object.values(serviceCounts.value),
+          backgroundColor: "#22c55e",
+          borderRadius: 6,
+          barThickness: 24,
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: {
-        animateScale: true,
-        animateRotate: true,
-        easing: "easeOutBounce",
-        duration: 1000,
-      },
-      plugins: {
-        legend: {
-          position: "bottom",
-          labels: {
-            color: "#374151",
-            font: { size: 14, weight: "500" },
-            padding: 20,
-            boxWidth: 18,
-          },
-        },
-        tooltip: {
-          callbacks: {
-            label: (ctx) => {
-              const label = ctx.label || "";
-              const value = ctx.raw || 0;
-              return ` ${label}: ₱${value.toLocaleString()}`;
-            },
-          },
-          backgroundColor: "#111827",
-          titleColor: "#facc15",
-          bodyColor: "#f9fafb",
-          borderColor: "#facc15",
-          borderWidth: 1,
-          padding: 10,
-        },
-      },
+      plugins: { legend: { display: false } },
+      scales: { x: { display: false }, y: { beginAtZero: true, ticks: { color: "#6b7280" }, grid: { color: "#e5e7eb" } } },
     },
   });
 };
@@ -299,7 +187,6 @@ onMounted(async () => {
   await fetchDashboardData();
   await nextTick();
   loading.value = false;
-  await nextTick();
   drawCharts();
 });
 </script>

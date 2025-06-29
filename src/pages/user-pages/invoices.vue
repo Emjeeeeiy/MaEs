@@ -1,7 +1,6 @@
 <template>
   <div class="flex h-screen overflow-hidden bg-gray-100">
     <Sidebar />
-
     <div class="flex flex-col flex-1 w-full text-sm">
       <div class="sticky top-0 z-50 bg-white shadow">
         <Topbar />
@@ -10,7 +9,7 @@
       <main class="flex-1 overflow-y-auto px-3 py-3 space-y-4 animate-fade-in">
         <!-- Header -->
         <div class="space-y-0.5">
-          <h2 class="text-lg font-semibold text-gray-900">Your Invoices</h2>
+          <h2 class="text-xl font-bold text-green-700">Your Invoices</h2>
         </div>
 
         <!-- Filters -->
@@ -52,10 +51,10 @@
           <table class="min-w-full bg-white text-xs text-gray-800">
             <thead class="bg-gray-100 text-left text-[10px] uppercase text-gray-600">
               <tr>
-                <th class="px-3 py-2 whitespace-nowrap">Invoice ID</th>
+                <th class="px-3 py-2 whitespace-nowrap">Invoice&nbsp;ID</th>
+                <th class="px-3 py-2 whitespace-nowrap">Service(s)</th>
+                <th class="px-3 py-2 whitespace-nowrap">Total Amount</th>
                 <th class="px-3 py-2 whitespace-nowrap">Date</th>
-                <th class="px-3 py-2 whitespace-nowrap">Services</th>
-                <th class="px-3 py-2 whitespace-nowrap">Total</th>
                 <th class="px-3 py-2 whitespace-nowrap">Status</th>
               </tr>
             </thead>
@@ -65,18 +64,31 @@
                 :key="invoice.id"
                 class="hover:bg-blue-50 transition"
               >
-                <td class="px-3 py-2 font-mono whitespace-nowrap">{{ invoice.id }}</td>
-                <td class="px-3 py-2 whitespace-nowrap">{{ formattedDate(invoice.createdAt) }}</td>
+                <!-- shortId -->
+                <td class="px-3 py-2 font-mono whitespace-nowrap">
+                  {{ invoice.shortId || 'N/A' }}
+                </td>
+
+                <!-- Services with Amount -->
                 <td class="px-3 py-2">
-                  <ul class="list-disc list-inside text-[11px] text-gray-700">
+                  <ul class="list-disc list-inside text-[11px] text-gray-700 space-y-0.5">
                     <li v-for="service in invoice.services" :key="service.serviceName">
-                      {{ service.serviceName }}
+                      {{ service.serviceName }} - ₱{{ service.amount?.toFixed(2) || '0.00' }}
                     </li>
                   </ul>
                 </td>
-                <td class="px-3 py-2 font-semibold whitespace-nowrap">
-                  ₱{{ invoice.totalAmount.toLocaleString() }}
+
+                <!-- Total -->
+                <td class="px-3 py-2 whitespace-nowrap font-semibold text-green-600">
+                  ₱{{ calculateInvoiceTotal(invoice).toFixed(2) }}
                 </td>
+
+                <!-- Date -->
+                <td class="px-3 py-2 whitespace-nowrap">
+                  {{ formattedDate(invoice.createdAt) }}
+                </td>
+
+                <!-- Status -->
                 <td class="px-3 py-2 whitespace-nowrap">
                   <span
                     :class="[
@@ -110,11 +122,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default {
   name: "UserInvoices",
-  components: {
-    Sidebar,
-    Topbar,
-    LoadingAnimation,
-  },
+  components: { Sidebar, Topbar, LoadingAnimation },
   data() {
     return {
       invoices: [],
@@ -127,32 +135,32 @@ export default {
   computed: {
     filteredInvoices() {
       const statusFilter = this.filterStatus.trim().toLowerCase();
-      const query = this.searchQuery.toLowerCase();
+      const q = this.searchQuery.toLowerCase();
 
       return this.invoices
+        .slice()
         .sort((a, b) => {
-          const dateA = a.createdAt?.toDate?.() || new Date(0);
-          const dateB = b.createdAt?.toDate?.() || new Date(0);
-          return dateB - dateA;
+          const dA = a.createdAt?.toDate?.() || new Date(0);
+          const dB = b.createdAt?.toDate?.() || new Date(0);
+          return dB - dA;
         })
-        .filter((invoice) => {
-          const invoiceStatus = (invoice.status || "").toLowerCase();
-          const statusMatches = !this.filterStatus || invoiceStatus === statusFilter;
+        .filter((inv) => {
+          const status = (inv.status || "").toLowerCase();
+          const statusMatches = !statusFilter || status === statusFilter;
 
-          const servicesText = invoice.services.map(s => s.serviceName).join(" ").toLowerCase();
-          const total = invoice.totalAmount?.toString() || "";
-          const date = this.formattedDate(invoice.createdAt).toLowerCase();
+          const servicesText = inv.services
+            .map((s) => s.serviceName)
+            .join(" ")
+            .toLowerCase();
 
           const combined = [
-            invoice.id?.toLowerCase(),
+            (inv.shortId || "").toLowerCase(),
             servicesText,
-            date,
-            total,
-            invoiceStatus,
+            this.formattedDate(inv.createdAt).toLowerCase(),
+            status,
           ].join(" ");
 
-          const searchMatches = !this.searchQuery || combined.includes(query);
-
+          const searchMatches = !q || combined.includes(q);
           return statusMatches && searchMatches;
         });
     },
@@ -178,21 +186,20 @@ export default {
 
       try {
         const q = query(collection(db, "invoices"), where("email", "==", this.userEmail));
-        const querySnapshot = await getDocs(q);
-        this.invoices = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-      } catch (error) {
-        console.error("Error fetching invoices:", error);
+        const snap = await getDocs(q);
+        this.invoices = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      } catch (err) {
+        console.error("Error fetching invoices:", err);
       } finally {
         this.loading = false;
       }
     },
-    formattedDate(timestamp) {
-      if (!timestamp || !timestamp.toDate) return "N/A";
-      const date = timestamp.toDate();
-      return date.toISOString().split("T")[0];
+    formattedDate(ts) {
+      if (!ts || !ts.toDate) return "N/A";
+      return ts.toDate().toISOString().split("T")[0];
+    },
+    calculateInvoiceTotal(invoice) {
+      return invoice.services?.reduce((sum, s) => sum + (s.amount || 0), 0) || 0;
     },
   },
 };

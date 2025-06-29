@@ -9,9 +9,11 @@
         <div v-if="loadingInvoices" class="flex justify-center items-center h-60">
           <LoadingAnimation />
         </div>
+        
 
         <div v-else class="space-y-6">
-          <!-- Metrics Cards (moved to top) -->
+          <div class="text-xl font-bold text-green-700">Dashboard</div>
+          <!-- ── METRICS CARDS ── -->
           <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div class="bg-white border-l-8 border-red-500 shadow rounded-lg p-4 flex items-center gap-4 animate-fade-in-up delay-100">
               <ExclamationTriangleIcon class="w-8 h-8 text-red-500" />
@@ -32,13 +34,13 @@
             <div class="bg-white border-l-8 border-green-500 shadow rounded-lg p-4 flex items-center gap-4 animate-fade-in-up delay-200">
               <BanknotesIcon class="w-8 h-8 text-green-500" />
               <div class="text-center flex-1">
-                <h3 class="text-sm text-gray-500 mb-1">Unpaid Amount</h3>
-                <p class="text-2xl font-bold text-gray-700">₱{{ unpaidTotalAmount.toLocaleString() }}</p>
+                <h3 class="text-sm text-gray-500 mb-1">Paid Claims</h3>
+                <p class="text-2xl font-bold text-green-700">{{ paidClaims }}</p>
               </div>
             </div>
           </section>
 
-          <!-- Invoice Table -->
+          <!-- ── RECENT INVOICES ── -->
           <section class="bg-white shadow rounded-xl p-4 border border-gray-200 animate-fade-in-up">
             <div class="flex items-center gap-2 mb-4">
               <DocumentTextIcon class="w-6 h-6 text-blue-500" />
@@ -49,7 +51,6 @@
                 <thead class="bg-gray-100 text-gray-600">
                   <tr>
                     <th class="px-4 py-2 text-left font-medium">Service(s)</th>
-                    <th class="px-4 py-2 text-left font-medium">Amount</th>
                     <th class="px-4 py-2 text-left font-medium">Status</th>
                   </tr>
                 </thead>
@@ -58,7 +59,6 @@
                     <td class="px-4 py-3">
                       {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
                     </td>
-                    <td class="px-4 py-3">₱{{ invoice.totalAmount?.toLocaleString() }}</td>
                     <td class="px-4 py-3">
                       <span
                         :class="[
@@ -75,28 +75,10 @@
                     </td>
                   </tr>
                   <tr v-if="invoices.length === 0">
-                    <td colspan="3" class="text-center py-4 text-gray-500">No invoices found.</td>
+                    <td colspan="2" class="text-center py-4 text-gray-500">No invoices found.</td>
                   </tr>
                 </tbody>
               </table>
-            </div>
-          </section>
-
-          <!-- Claim Summary -->
-          <section class="bg-white p-4 rounded-xl shadow border border-gray-200 animate-fade-in-up delay-300">
-            <div class="flex items-center gap-2 mb-2">
-              <ClipboardDocumentCheckIcon class="w-5 h-5 text-indigo-500" />
-              <h3 class="text-lg font-semibold text-gray-700">Claim Summary</h3>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700">
-              <p>
-                <span class="font-medium text-green-600">Paid Claims:</span>
-                {{ paidClaims }}
-              </p>
-              <p>
-                <span class="font-medium text-yellow-600">Unpaid Claims:</span>
-                {{ unpaidClaims }}
-              </p>
             </div>
           </section>
         </div>
@@ -115,7 +97,6 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "@/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
-// Heroicons
 import {
   DocumentTextIcon,
   ClipboardDocumentCheckIcon,
@@ -125,37 +106,13 @@ import {
 } from "@heroicons/vue/24/solid";
 
 const invoices = ref([]);
-const totalRevenue = ref(0);
 const paidClaims = ref(0);
 const unpaidClaims = ref(0);
 const overdueCount = ref(0);
-const unpaidTotalAmount = ref(0);
+const unpaidTotalAmount = ref(0); // optional if still used elsewhere
 const loadingInvoices = ref(true);
 
 const auth = getAuth();
-
-const loadTawkChatbot = () => {
-  if (!window.Tawk_API) {
-    window.Tawk_API = window.Tawk_API || {};
-    window.Tawk_LoadStart = new Date();
-    (function () {
-      const s1 = document.createElement("script"),
-        s0 = document.getElementsByTagName("script")[0];
-      s1.async = true;
-      s1.src = "https://embed.tawk.to/682390baa582f719105b0cc6/1ir5eqmhl";
-      s1.charset = "UTF-8";
-      s1.setAttribute("crossorigin", "*");
-      s0.parentNode.insertBefore(s1, s0);
-    })();
-  }
-};
-
-const removeTawkChatbot = () => {
-  const script = document.querySelector(
-    'script[src="https://embed.tawk.to/682390baa582f719105b0cc6/1ir5eqmhl"]'
-  );
-  if (script) script.remove();
-};
 
 const fetchInvoicesByEmail = async (email) => {
   loadingInvoices.value = true;
@@ -178,7 +135,6 @@ const fetchInvoicesByEmail = async (email) => {
 
     invoices.value = docs;
 
-    totalRevenue.value = 0;
     paidClaims.value = 0;
     unpaidClaims.value = 0;
     overdueCount.value = 0;
@@ -195,12 +151,10 @@ const fetchInvoicesByEmail = async (email) => {
         rawDate?.toDate?.() || (typeof rawDate === "string" ? new Date(rawDate) : null);
 
       if (status === "paid") {
-        totalRevenue.value += amount;
         paidClaims.value += 1;
       } else {
         unpaidClaims.value += 1;
         unpaidTotalAmount.value += amount;
-
         if (dueDate && dueDate < today) {
           overdueCount.value += 1;
         }
@@ -211,6 +165,29 @@ const fetchInvoicesByEmail = async (email) => {
   } finally {
     loadingInvoices.value = false;
   }
+};
+
+const loadTawkChatbot = () => {
+  if (!window.Tawk_API) {
+    window.Tawk_API = window.Tawk_API || {};
+    window.Tawk_LoadStart = new Date();
+    (function () {
+      const s1 = document.createElement("script"),
+        s0 = document.getElementsByTagName("script")[0];
+      s1.async = true;
+      s1.src = "https://embed.tawk.to/682390baa582f719105b0cc6/1ir5eqmhl";
+      s1.charset = "UTF-8";
+      s1.setAttribute("crossorigin", "*");
+      s0.parentNode.insertBefore(s1, s0);
+    })();
+  }
+};
+
+const removeTawkChatbot = () => {
+  const script = document.querySelector(
+    'script[src="https://embed.tawk.to/682390baa582f719105b0cc6/1ir5eqmhl"]'
+  );
+  if (script) script.remove();
 };
 
 onMounted(() => {

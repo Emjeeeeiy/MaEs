@@ -9,7 +9,7 @@
 
     <!-- Sidebar -->
     <aside
-      :class="[
+      :class="[ 
         'fixed sm:static top-0 left-0 h-screen w-64 bg-gray-800 text-white z-50 flex flex-col transition-transform duration-300',
         isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'
       ]"
@@ -72,13 +72,21 @@
             Invoices
           </router-link>
 
-          <!-- NEW: Appointment Link -->
           <router-link
             to="/appointment"
             class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition group"
           >
             <CalendarIcon class="w-5 h-5 mr-3 text-white group-hover:animate-bounce" />
             Appointments
+          </router-link>
+
+          <!-- ✅ New Results Link -->
+          <router-link
+            to="/result"
+            class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition group"
+          >
+            <ChartBarIcon class="w-5 h-5 mr-3 text-white group-hover:animate-bounce" />
+            Results
           </router-link>
         </nav>
       </div>
@@ -110,16 +118,15 @@ import {
   CreditCardIcon,
   DocumentTextIcon,
   ClipboardDocumentCheckIcon,
-  CalendarIcon, // new icon
+  CalendarIcon,
+  ChartBarIcon, // ✅ newly added
 } from "@heroicons/vue/24/solid";
 
-// State
 const username = ref("User");
 const role = ref("Viewer");
 const profileImageUrl = ref("");
 const isMobileSidebarOpen = ref(false);
 
-// Firebase Auth
 onMounted(() => {
   const auth = getAuth();
   onAuthStateChanged(auth, async (user) => {
@@ -137,7 +144,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Optional: scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
 }
