@@ -42,7 +42,7 @@
           <!-- Bar Chart -->
           <div class="bg-[#222] p-6 rounded-xl shadow-md">
             <h2 class="text-lg font-semibold mb-4 text-gray-200">
-              Department Revenue
+              Service trend
             </h2>
             <div class="h-72">
               <canvas ref="barChart" class="w-full h-full"></canvas>
