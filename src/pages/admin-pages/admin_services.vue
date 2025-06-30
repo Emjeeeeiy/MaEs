@@ -10,9 +10,13 @@
 
       <!-- Page Body -->
       <div class="flex-1 overflow-y-auto p-6 space-y-6">
-        <!-- Header Actions -->
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-[#222] border border-gray-700 px-4 py-3 rounded-xl shadow">
-          <h1 class="text-xl font-semibold text-green-400">Manage Services</h1>
+        <!-- Search & Filter -->
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+          <input v-model="searchTerm" type="text" placeholder="Search services..." class="w-full sm:w-1/2 px-3 py-1.5 rounded-md bg-[#222] border border-gray-700 placeholder-gray-400 text-sm focus:ring-green-400 focus:outline-none" />
+          <select v-model="selectedCategory" class="w-full sm:w-64 px-3 py-1.5 rounded-md bg-[#222] border border-gray-700 text-sm text-white focus:ring-green-400 focus:outline-none">
+            <option value="">All Categories</option>
+            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+          </select>
           <div class="flex flex-wrap gap-2">
             <button @click="showModal = true" class="inline-flex items-center gap-1 bg-green-600 text-white px-3 py-1.5 rounded-md hover:bg-green-700 text-sm">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -27,15 +31,6 @@
               Delete All
             </button>
           </div>
-        </div>
-
-        <!-- Search & Filter -->
-        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-          <input v-model="searchTerm" type="text" placeholder="Search services..." class="w-full sm:w-1/2 px-3 py-1.5 rounded-md bg-[#222] border border-gray-700 placeholder-gray-400 text-sm focus:ring-green-400 focus:outline-none" />
-          <select v-model="selectedCategory" class="w-full sm:w-64 px-3 py-1.5 rounded-md bg-[#222] border border-gray-700 text-sm text-white focus:ring-green-400 focus:outline-none">
-            <option value="">All Categories</option>
-            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-          </select>
         </div>
 
         <!-- Services Table -->
@@ -66,6 +61,31 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add/Edit Service Modal -->
+    <div v-if="showModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+      <div class="bg-[#222] border border-gray-700 rounded-lg p-6 w-full max-w-lg">
+        <h2 class="text-lg font-bold text-white mb-4">
+          {{ isEditing ? 'Edit Service' : 'Add New Service' }}
+        </h2>
+        <div class="space-y-4">
+          <input v-model="form.serviceName" placeholder="Service Name" class="w-full px-3 py-2 rounded bg-[#111] border border-gray-600 text-white" />
+          <select v-model="form.category" class="w-full px-3 py-2 rounded bg-[#111] border border-gray-600 text-white">
+            <option value="" disabled>Select Category</option>
+            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+          </select>
+          <input v-model.number="form.amount" type="number" placeholder="Amount" class="w-full px-3 py-2 rounded bg-[#111] border border-gray-600 text-white" />
+          <textarea v-model="form.specialInstructions" placeholder="Special Instructions (optional)" rows="2" class="w-full px-3 py-2 rounded bg-[#111] border border-gray-600 text-white"></textarea>
+
+          <div class="flex justify-end gap-3 pt-2">
+            <button @click="closeModal" class="text-gray-400 hover:underline">Cancel</button>
+            <button @click="isEditing ? updateService() : addService()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+              {{ isEditing ? 'Update' : 'Add' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
