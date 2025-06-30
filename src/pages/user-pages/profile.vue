@@ -1,12 +1,16 @@
 <template>
-  <div class="flex min-h-screen bg-gray-50">
-    <Sidebar class="w-full lg:w-64 border-r border-gray-200" />
+  <div class="flex flex-col lg:flex-row min-h-screen bg-gray-50">
+    <!-- Sidebar -->
+    <Sidebar class="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-gray-200" />
 
+    <!-- Main Content -->
     <div class="flex-1 flex flex-col">
+      <!-- Topbar -->
       <Topbar class="sticky top-0 z-10 bg-white shadow-sm" />
 
-      <main class="flex-1 p-6 max-w-4xl mx-auto w-full">
-        <div class="bg-white rounded-lg shadow p-6 border border-black">
+      <!-- Page Body -->
+      <main class="flex-1 p-4 sm:p-6 max-w-4xl mx-auto w-full">
+        <div class="bg-white rounded-lg shadow p-4 sm:p-6 border border-black">
           <!-- Loading Animation -->
           <div v-if="loading" class="flex justify-center py-16">
             <LoadingAnimation />
@@ -15,7 +19,7 @@
           <!-- Profile Content -->
           <template v-else>
             <!-- Header -->
-            <div class="flex flex-col items-center mb-6">
+            <div class="flex flex-col items-center mb-6 text-center">
               <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center border border-gray-300">
                 <img
                   v-if="profileImageUrl"
@@ -52,10 +56,10 @@
             </div>
 
             <!-- Actions -->
-            <div class="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+            <div class="mt-6 flex flex-col sm:flex-row justify-center items-center gap-3">
               <router-link
                 to="/edit_profile"
-                class="px-5 py-2.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition"
+                class="w-full sm:w-auto text-center px-5 py-2.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition"
               >
                 Edit Profile
               </router-link>
@@ -130,7 +134,6 @@ onMounted(() => {
         profileImageUrl.value = data.profileImageUrl || "";
         status.value = "active";
 
-        // Set to active on login
         await updateStatusInDB(user.uid, "active");
       } else {
         errorMessage.value = "User profile not found.";

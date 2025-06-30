@@ -1,18 +1,18 @@
 <template>
-  <div class="flex min-h-screen bg-gray-100 text-gray-800">
+  <div class="flex min-h-screen bg-[#1a1a1a] text-gray-100">
     <!-- Sidebar -->
-    <AdminSidebar class="w-64 border-r bg-white" />
+    <AdminSidebar class="w-64 border-r border-gray-800 bg-[#111]" />
 
     <!-- Main -->
-    <div class="flex-1 flex flex-col">
+    <div class="flex-1 flex flex-col h-screen">
       <AdminTopbar />
 
       <main class="flex-1 p-6 space-y-6 overflow-y-auto">
         <!-- Filters -->
-        <div class="flex flex-wrap gap-2 items-center bg-white p-4 rounded-md shadow border">
+        <div class="flex flex-wrap gap-2 items-center bg-[#222] p-4 rounded-md shadow border border-gray-800">
           <select
             v-model="filterStatus"
-            class="px-2 py-1 border border-gray-300 rounded-md text-sm bg-white text-gray-800"
+            class="px-2 py-1 border border-gray-700 rounded-md text-sm bg-[#1a1a1a] text-gray-200"
           >
             <option value="">All Status</option>
             <option value="Pending">Pending</option>
@@ -24,14 +24,14 @@
             v-model="searchQuery"
             type="text"
             placeholder="Search by email or service"
-            class="px-2 py-1 border border-gray-300 rounded-md text-sm bg-white text-gray-800"
+            class="px-2 py-1 border border-gray-700 rounded-md text-sm bg-[#1a1a1a] text-gray-200"
           />
         </div>
 
         <!-- Table -->
-        <div class="overflow-x-auto bg-white rounded shadow border">
-          <table class="min-w-full text-sm text-left text-gray-700">
-            <thead class="bg-gray-100 uppercase text-xs text-gray-600">
+        <div class="overflow-x-auto bg-[#222] rounded shadow border border-gray-800">
+          <table class="min-w-full text-sm text-left text-gray-300">
+            <thead class="bg-[#1e1e1e] uppercase text-xs text-gray-400">
               <tr>
                 <th class="px-4 py-2">Email</th>
                 <th class="px-4 py-2">Services</th>
@@ -48,7 +48,7 @@
               <tr
                 v-for="appt in filteredAppointments"
                 :key="appt.id"
-                class="border-t hover:bg-gray-50"
+                class="border-t border-gray-700 hover:bg-[#2a2a2a]"
               >
                 <td class="px-4 py-2">{{ appt.email }}</td>
                 <td class="px-4 py-2">
@@ -61,10 +61,10 @@
                     :class="[
                       'px-2 py-0.5 rounded-full text-xs font-semibold',
                       appt.status === 'Approved'
-                        ? 'bg-green-100 text-green-700'
+                        ? 'bg-green-600/20 text-green-400'
                         : appt.status === 'Pending'
-                        ? 'bg-yellow-100 text-yellow-700'
-                        : 'bg-red-100 text-red-700'
+                        ? 'bg-yellow-500/20 text-yellow-400'
+                        : 'bg-red-600/20 text-red-400'
                     ]"
                   >
                     {{ appt.status }}
@@ -74,32 +74,32 @@
                   <span v-if="appt.approvedAt">
                     {{ formatTimestamp(appt.approvedAt) }}
                   </span>
-                  <span v-else class="text-gray-400 text-xs italic">—</span>
+                  <span v-else class="text-gray-500 text-xs italic">—</span>
                 </td>
                 <td class="px-4 py-2">
                   <span v-if="appt.declinedAt">
                     {{ formatTimestamp(appt.declinedAt) }}
                   </span>
-                  <span v-else class="text-gray-400 text-xs italic">—</span>
+                  <span v-else class="text-gray-500 text-xs italic">—</span>
                 </td>
                 <td class="px-4 py-2 text-center space-x-2">
                   <button
                     v-if="appt.status === 'Pending'"
                     @click="updateStatus(appt.id, 'Approved')"
-                    class="text-green-600 hover:underline"
+                    class="text-green-400 hover:underline"
                   >
                     Approve
                   </button>
                   <button
                     v-if="appt.status === 'Pending'"
                     @click="updateStatus(appt.id, 'Declined')"
-                    class="text-red-600 hover:underline"
+                    class="text-red-400 hover:underline"
                   >
                     Decline
                   </button>
                   <button
                     @click="deleteAppointment(appt.id)"
-                    class="text-gray-500 hover:text-red-600 underline"
+                    class="text-gray-400 hover:text-red-500 underline"
                   >
                     Delete
                   </button>

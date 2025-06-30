@@ -1,80 +1,80 @@
 <template>
-  <div class="flex h-screen bg-gray-100 text-gray-800 overflow-hidden">
+  <div class="flex h-screen bg-[#1a1a1a] text-gray-100 overflow-hidden">
     <!-- Sidebar -->
-    <div class="w-64 h-screen sticky top-0 border-r bg-white z-20">
+    <div class="w-64 h-screen sticky top-0 border-r border-gray-800 bg-[#1f1f1f] z-20">
       <AdminSidebar />
     </div>
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col max-h-screen overflow-hidden">
-      <div class="sticky top-0 z-10 bg-white border-b border-gray-300 shadow-sm">
+      <div class="sticky top-0 z-10 bg-[#1f1f1f] border-b border-gray-800 shadow">
         <AdminTopbar />
       </div>
 
       <main class="flex-1 p-6 space-y-6 overflow-y-auto">
-        <h1 class="text-xl font-bold text-green-700">Input Patient Results</h1>
+        <h1 class="text-xl font-bold text-green-400">Input Patient Results</h1>
 
         <!-- Search Field -->
         <input
           v-model="searchQuery"
           type="text"
           placeholder="Search by patient email"
-          class="px-4 py-2 border rounded-md w-full max-w-md text-sm"
+          class="px-4 py-2 border border-gray-700 rounded-md w-full max-w-md text-sm bg-[#2a2a2a] text-white placeholder-gray-400"
         />
 
         <!-- Unique Patient Table -->
-        <table class="w-full mt-4 text-sm border border-gray-300 bg-white rounded shadow">
-          <thead class="bg-gray-200">
+        <table class="w-full mt-4 text-sm border border-gray-700 bg-[#222] rounded shadow">
+          <thead class="bg-[#333] text-gray-300">
             <tr>
-              <th class="px-4 py-2 border text-left">Email</th>
-              <th class="px-4 py-2 border text-center">Actions</th>
+              <th class="px-4 py-2 border border-gray-700 text-left">Email</th>
+              <th class="px-4 py-2 border border-gray-700 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr
               v-for="(group, email) in groupedInvoices"
               :key="email"
-              class="text-left"
+              class="border-t border-gray-700 hover:bg-[#2a2a2a]"
             >
-              <td class="px-4 py-2 border">{{ email }}</td>
-              <td class="px-4 py-2 border text-center">
+              <td class="px-4 py-2 border border-gray-700">{{ email }}</td>
+              <td class="px-4 py-2 border border-gray-700 text-center">
                 <button
                   @click="openModal(email)"
-                  class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                  class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
                 >
                   View
                 </button>
               </td>
             </tr>
             <tr v-if="Object.keys(groupedInvoices).length === 0">
-              <td colspan="2" class="text-center text-gray-500 py-4 italic">No matching accounts found.</td>
+              <td colspan="2" class="text-center text-gray-400 py-4 italic">
+                No matching accounts found.
+              </td>
             </tr>
           </tbody>
         </table>
 
-        <!-- Modal for Services per User -->
+        <!-- Modal -->
         <div v-if="selectedEmail" class="fixed inset-0 z-50 flex items-center justify-center">
-          <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
-          <div class="relative bg-white w-full max-w-3xl rounded-lg shadow p-6 z-10 max-h-[80vh] overflow-y-auto">
-            <h2 class="text-lg font-semibold mb-4 text-gray-800">
-              Results – {{ selectedEmail }}
-            </h2>
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+          <div class="relative bg-[#1f1f1f] w-full max-w-3xl rounded-lg shadow p-6 z-10 max-h-[80vh] overflow-y-auto border border-gray-700">
+            <h2 class="text-lg font-semibold mb-4 text-white">Results – {{ selectedEmail }}</h2>
 
             <div
               v-for="invoice in groupedInvoices[selectedEmail]"
               :key="invoice.id"
-              class="mb-6 border-t pt-4"
+              class="mb-6 border-t border-gray-700 pt-4"
             >
-              <p class="text-sm text-gray-500 mb-2">Invoice Date: {{ formatDate(invoice.createdAt) }}</p>
-
-              <!-- Status Display -->
-              <p class="text-sm text-gray-600 mb-2">
-                <span class="font-medium">Status:</span>
+              <p class="text-sm text-gray-400 mb-2">
+                Invoice Date: {{ formatDate(invoice.createdAt) }}
+              </p>
+              <p class="text-sm text-gray-400 mb-2">
+                <span class="font-medium text-gray-300">Status:</span>
                 <span
                   :class="{
-                    'text-green-600': invoice.status === 'Paid',
-                    'text-yellow-600': invoice.status === 'Pending',
-                    'text-red-600': invoice.status === 'Not Paid',
+                    'text-green-400': invoice.status === 'Paid',
+                    'text-yellow-400': invoice.status === 'Pending',
+                    'text-red-400': invoice.status === 'Not Paid',
                   }"
                 >
                   {{ invoice.status || 'N/A' }}
@@ -86,12 +86,12 @@
                 :key="svc.serviceName"
                 class="mb-4"
               >
-                <label class="block text-sm font-medium mb-1 text-gray-700">
+                <label class="block text-sm font-medium mb-1 text-gray-300">
                   {{ svc.serviceName }}
                 </label>
                 <textarea
                   v-model="results[invoice.id + '_' + svc.serviceName]"
-                  class="w-full border rounded-md px-3 py-2 text-sm"
+                  class="w-full border border-gray-700 rounded-md px-3 py-2 text-sm bg-[#2a2a2a] text-white"
                   placeholder="Enter result for this service…"
                 />
               </div>
@@ -106,7 +106,7 @@
             <div class="text-right mt-6">
               <button
                 @click="selectedEmail = null"
-                class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded text-sm"
+                class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded text-sm text-white"
               >
                 Close
               </button>

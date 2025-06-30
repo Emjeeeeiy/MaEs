@@ -11,8 +11,6 @@
       <!-- Edit Profile Content -->
       <main class="flex-1 p-6 max-w-4xl mx-auto w-full">
         <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-2xl font-bold text-gray-800 mb-4">Edit Profile</h2>
-
           <form @submit.prevent="updateProfile">
             <!-- Profile Picture -->
             <div class="flex items-center space-x-4 mb-6">

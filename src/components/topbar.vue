@@ -2,29 +2,29 @@
   <header class="bg-white shadow-md relative z-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
-        <!-- Logo -->
-        <div class="font-bold text-green-700 text-lg sm:text-xl md:text-2xl">
-          Maria Estrella General Hospital Inc.
+        <!-- Dynamic Page Title -->
+        <div class="font-bold text-green-700 text-lg sm:text-xl md:text-2xl capitalize">
+          {{ pageTitle }}
         </div>
 
-        <!-- Icons -->
+        <!-- Topbar Icons -->
         <nav class="flex gap-6 text-gray-700 relative items-center">
           <!-- Feedback -->
           <button @click="showModal = true" title="Feedback">
             <ChatBubbleBottomCenterTextIcon class="w-6 h-6 text-green-600 hover:scale-110 transition" />
           </button>
 
-          <!-- Upload Icon -->
+          <!-- Upload File -->
           <button @click="showDocumentModal = true" title="Upload File">
             <DocumentArrowUpIcon class="w-6 h-6 text-purple-600 hover:scale-110 transition" />
           </button>
 
           <!-- Notifications -->
           <div class="relative z-50" ref="notifRef">
-            <button @click="toggleNotifDropdown" class="relative focus:outline-none" title="Notifications">
+            <button @click="toggleNotifDropdown" title="Notifications">
               <BellIcon class="w-6 h-6 text-yellow-600 hover:rotate-12 transition" />
               <span
-                v-if="notifications.length > 0"
+                v-if="notifications.length"
                 class="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center"
               >
                 {{ notifications.length }}
@@ -42,7 +42,7 @@
                 v-if="notifDropdownOpen"
                 class="absolute right-0 mt-2 w-64 max-h-80 overflow-y-auto border border-gray-200 rounded-md shadow-lg z-50 bg-white/90 backdrop-blur-sm"
               >
-                <div v-if="notifications.length === 0" class="text-gray-600 text-sm p-3">No new notifications.</div>
+                <div v-if="!notifications.length" class="text-gray-600 text-sm p-3">No new notifications.</div>
                 <div
                   v-for="(notif, index) in notifications"
                   :key="index"
@@ -55,7 +55,7 @@
             </transition>
           </div>
 
-          <!-- Profile -->
+          <!-- Profile Dropdown -->
           <div class="relative" ref="profileDropdownRef">
             <button @click="toggleDropdown" title="Profile">
               <UserIcon class="w-6 h-6 text-blue-600 hover:scale-110 transition" />
@@ -66,27 +66,15 @@
                 v-if="dropdownOpen"
                 class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50"
               >
-                <router-link
-                  to="/profile"
-                  class="block px-4 py-2 text-gray-700 hover:bg-green-100"
-                  @click="closeDropdown"
-                >
+                <router-link to="/profile" class="block px-4 py-2 text-gray-700 hover:bg-green-100" @click="closeDropdown">
                   Profile
                 </router-link>
-                <button
-                  @click="handleLogout"
-                  class="w-full text-left px-4 py-2 text-gray-700 hover:bg-green-100"
-                >
+                <button @click="handleLogout" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-green-100">
                   Logout
                 </button>
               </div>
             </transition>
           </div>
-
-          <!-- Settings -->
-          <!-- <router-link to="/settings" title="Settings">
-            <Cog6ToothIcon class="w-6 h-6 text-gray-700 hover:rotate-180 transition" />
-          </router-link> -->
         </nav>
       </div>
     </div>
@@ -102,15 +90,11 @@
             placeholder="Your message..."
             class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-800 bg-white"
           ></textarea>
-
           <div class="flex items-center gap-3">
             <input ref="imageInput" type="file" accept="image/*" class="hidden" @change="handleImageUpload" />
-            <button type="button" @click="imageInput.click()" class="text-green-600 hover:underline">
-              Upload Image
-            </button>
+            <button type="button" @click="imageInput.click()" class="text-green-600 hover:underline">Upload Image</button>
             <span v-if="imageFile?.name" class="text-sm text-gray-500">{{ imageFile.name }}</span>
           </div>
-
           <div class="flex justify-end gap-3">
             <button type="button" @click="showModal = false" class="text-gray-600 hover:underline">Cancel</button>
             <button
@@ -131,16 +115,10 @@
         <h2 class="text-xl font-bold mb-4">Upload Financial Document</h2>
         <form class="space-y-4">
           <input type="file" class="w-full border rounded px-3 py-2 text-sm" />
-          <textarea
-            placeholder="Optional description..."
-            class="w-full border rounded px-3 py-2 text-sm"
-          ></textarea>
-
+          <textarea placeholder="Optional description..." class="w-full border rounded px-3 py-2 text-sm"></textarea>
           <div class="flex justify-end gap-3">
             <button type="button" @click="showDocumentModal = false" class="text-gray-600 hover:underline">Cancel</button>
-            <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
-              Upload
-            </button>
+            <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Upload</button>
           </div>
         </form>
       </div>
@@ -149,19 +127,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import {
   UserIcon,
   ChatBubbleBottomCenterTextIcon,
-  Cog6ToothIcon,
   BellIcon,
   DocumentArrowUpIcon
 } from '@heroicons/vue/24/outline'
+import { getAuth, signOut } from 'firebase/auth'
 import { db, storage } from '@/firebase'
 import {
-  collection,
   addDoc,
+  collection,
   serverTimestamp,
   onSnapshot,
   query,
@@ -173,10 +151,10 @@ import {
   uploadBytes,
   getDownloadURL
 } from 'firebase/storage'
-import { getAuth, signOut } from 'firebase/auth'
 
-const router = useRouter()
 const auth = getAuth()
+const router = useRouter()
+const route = useRoute()
 const user = auth.currentUser
 const userEmail = user?.email || ''
 
@@ -198,21 +176,37 @@ const toggleDropdown = () => dropdownOpen.value = !dropdownOpen.value
 const closeDropdown = () => dropdownOpen.value = false
 const toggleNotifDropdown = () => notifDropdownOpen.value = !notifDropdownOpen.value
 
+const pageTitle = computed(() => {
+  const routeMap = {
+    '/dashboard': 'Dashboard',
+    '/payments': 'Payments',
+    '/billing': 'Billing',
+    '/invoices': 'Invoices',
+    '/settings': 'Settings',
+    '/profile': 'Profile',
+    '/report': 'Report',
+    '/edit_profile': 'Edit Profile',
+    '/appointment': 'Appointment',
+    '/result': 'Result'
+  }
+  return routeMap[route.path] || 'Page'
+})
+
 const handleLogout = async () => {
   try {
     await signOut(auth)
     closeDropdown()
     router.push('/login')
-  } catch (error) {
-    console.error('Logout error:', error)
+  } catch (err) {
+    console.error('Logout error:', err)
   }
 }
 
-const handleClickOutside = (event) => {
-  if (profileDropdownRef.value && !profileDropdownRef.value.contains(event.target)) {
+const handleClickOutside = (e) => {
+  if (profileDropdownRef.value && !profileDropdownRef.value.contains(e.target)) {
     dropdownOpen.value = false
   }
-  if (notifRef.value && !notifRef.value.contains(event.target)) {
+  if (notifRef.value && !notifRef.value.contains(e.target)) {
     notifDropdownOpen.value = false
   }
 }
@@ -275,6 +269,7 @@ const sendFeedback = async () => {
     loading.value = false
   }
 }
+
 
 const formatDate = (timestamp) => {
   if (!timestamp) return ''

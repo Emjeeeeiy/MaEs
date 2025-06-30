@@ -1,25 +1,24 @@
 <template>
-  <div class="flex min-h-screen bg-gray-100">
-    <!-- Admin Sidebar -->
-    <AdminSidebar class="w-64 border-r bg-white" />
+  <div class="flex min-h-screen bg-[#1a1a1a] text-gray-200">
+    <!-- Sidebar -->
+    <AdminSidebar class="w-64 border-r border-gray-700" />
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col">
-      <!-- Admin Topbar -->
+      <!-- Topbar -->
       <AdminTopbar />
 
       <!-- Page Content -->
       <div class="flex-1 p-6 space-y-6 overflow-y-auto">
-        <h2 class="text-2xl font-bold text-gray-800">User Management</h2>
+        <!-- Error Message -->
+        <div v-if="errorMessage" class="p-4 bg-red-800 text-red-300 rounded-lg border border-red-600">
+          {{ errorMessage }}
+        </div>
 
-        <p v-if="errorMessage" class="text-red-600 font-medium">{{ errorMessage }}</p>
-
-        <div
-          v-if="users.length"
-          class="bg-white shadow rounded-xl border border-gray-200"
-        >
-          <table class="w-full text-sm text-gray-800">
-            <thead class="bg-green-100 text-gray-700 uppercase text-xs font-semibold tracking-wide">
+        <!-- User Table -->
+        <div v-if="users.length" class="bg-[#222] border border-gray-700 rounded-xl shadow-md overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-green-900 text-green-300 uppercase text-xs font-semibold">
               <tr>
                 <th class="px-6 py-3 text-left">Username</th>
                 <th class="px-6 py-3 text-left">Email</th>
@@ -33,7 +32,7 @@
               <tr
                 v-for="user in users"
                 :key="user.id"
-                class="border-t border-gray-200 hover:bg-gray-50 even:bg-gray-50"
+                class="border-t border-gray-700 hover:bg-[#2b2b2b] even:bg-[#1f1f1f] transition"
               >
                 <td class="px-6 py-4 font-medium">{{ user.username || "Unknown" }}</td>
                 <td class="px-6 py-4">{{ user.email }}</td>
@@ -41,7 +40,7 @@
                   <select
                     v-model="user.role"
                     @change="updateUserRole(user)"
-                    class="bg-white border border-gray-300 text-sm rounded-md px-2 py-1 focus:ring-2 focus:ring-green-400"
+                    class="bg-[#1a1a1a] border border-gray-600 text-sm rounded px-2 py-1 focus:ring-2 focus:ring-green-500"
                   >
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
@@ -52,32 +51,37 @@
                     :class="[
                       'px-2 py-1 rounded-full text-xs font-semibold',
                       user.status === 'deactivated'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-green-100 text-green-700'
+                        ? 'bg-red-900 text-red-300'
+                        : 'bg-green-900 text-green-300'
                     ]"
                   >
                     {{ user.status === 'deactivated' ? 'Deactivated' : 'Active' }}
                   </span>
                 </td>
-                <td class="px-6 py-4">{{ user.lastActive || "Never Logged In" }}</td>
+                <td class="px-6 py-4 text-gray-400">
+                  {{ formatLastActive(user.lastActive) }}
+                </td>
                 <td class="px-6 py-4 space-x-2 whitespace-nowrap">
                   <button
                     v-if="user.status === 'active'"
                     @click="confirmDeactivation(user)"
-                    class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded hover:bg-yellow-200 text-xs font-medium"
+                    class="px-3 py-1 bg-yellow-800 text-yellow-300 rounded hover:bg-yellow-700 text-xs font-medium"
+                    title="Deactivate"
                   >
                     Deactivate
                   </button>
                   <button
                     v-if="user.status === 'deactivated'"
                     @click="confirmReactivation(user)"
-                    class="px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 text-xs font-medium"
+                    class="px-3 py-1 bg-green-800 text-green-300 rounded hover:bg-green-700 text-xs font-medium"
+                    title="Reactivate"
                   >
                     Reactivate
                   </button>
                   <button
                     @click="confirmDeletion(user.id)"
-                    class="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 text-xs font-medium"
+                    class="px-3 py-1 bg-red-800 text-red-300 rounded hover:bg-red-700 text-xs font-medium"
+                    title="Delete"
                   >
                     Delete
                   </button>
@@ -87,7 +91,15 @@
           </table>
         </div>
 
-        <p v-else class="text-gray-500 text-sm">No users found.</p>
+        <!-- No Users -->
+        <div v-else class="text-center mt-12 text-gray-400">
+          <svg class="mx-auto w-16 h-16 mb-4 text-gray-600" fill="none" stroke="currentColor" stroke-width="1.5"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0M2.25 12a9.75 9.75 0 1119.5 0 9.75 9.75 0 01-19.5 0z" />
+          </svg>
+          <p class="text-sm">No users found in the system.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -110,6 +122,17 @@ import AdminTopbar from "@/components/AdminTopbar.vue";
 const users = ref([]);
 const errorMessage = ref("");
 
+// Format timestamp for lastActive
+const formatLastActive = (lastActive) => {
+  if (!lastActive) return "Never";
+  return new Date(lastActive).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+// Fetch users
 const fetchUsers = async () => {
   try {
     const currentUser = auth.currentUser;
@@ -134,6 +157,7 @@ const fetchUsers = async () => {
   }
 };
 
+// Role update
 const updateUserRole = async (user) => {
   if (user.status === "deactivated") {
     alert("Cannot change role of a deactivated user.");
@@ -148,6 +172,7 @@ const updateUserRole = async (user) => {
   }
 };
 
+// Status actions
 const deactivateUser = async (user) => {
   try {
     await updateDoc(doc(db, "users", user.id), { status: "deactivated" });
@@ -175,6 +200,7 @@ const deleteUser = async (userId) => {
   }
 };
 
+// Confirmation wrappers
 const confirmDeactivation = (user) => {
   if (confirm(`Deactivate ${user.username}?`)) {
     deactivateUser(user);

@@ -1,48 +1,57 @@
 <template>
-  <div class="flex h-screen bg-gray-100 text-gray-800 overflow-hidden">
-    <!-- ░░ Sidebar ░░ -->
-    <div class="w-64 h-screen sticky top-0 border-r bg-white z-20">
+  <div class="flex flex-col sm:flex-row h-screen bg-gray-100 text-gray-800 overflow-hidden">
+    <!-- Sidebar -->
+    <div class="w-full sm:w-64 sm:h-screen sticky top-0 border-b sm:border-b-0 sm:border-r border-gray-200 bg-white z-20">
       <Sidebar />
     </div>
 
-    <!-- ░░ Main ░░ -->
-    <div class="flex-1 flex flex-col max-h-screen overflow-hidden">
-      <!-- Top‑bar -->
-      <div class="sticky top-0 z-10 bg-white border-b border-gray-300 shadow-sm">
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col max-h-screen overflow-hidden text-sm">
+      <!-- Topbar -->
+      <div class="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm">
         <Topbar />
       </div>
 
-      <!-- ░░ Results ░░ -->
-      <main class="flex-1 overflow-y-auto p-6 space-y-6">
-        <h1 class="text-xl font-bold text-green-700">Your Results</h1>
-
+      <!-- Page Body -->
+      <main class="flex-1 overflow-y-auto px-4 py-4 sm:py-6 space-y-6 animate-fade-in">
+        <!-- Each Invoice -->
         <div
           v-for="inv in invoices"
           :key="inv.id"
-          class="bg-white p-6 rounded-lg shadow border space-y-4"
+          class="bg-white p-4 sm:p-5 rounded-lg shadow-sm border border-gray-200 space-y-4"
         >
-          <!-- Header row -->
-          <div class="flex flex-wrap justify-between items-center gap-3">
-            <div>
+          <!-- Header Row -->
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4">
+            <div class="space-y-0.5">
               <p class="font-medium text-gray-700">
-                Date: {{ formatDate(inv.createdAt) }}
+                <span class="text-gray-500">Date:</span> {{ formatDate(inv.createdAt) }}
               </p>
-              <p class="text-sm text-gray-500">
-                Status: {{ inv.status }}
+              <p class="text-xs">
+                <span class="text-gray-500 font-medium">Status:</span>
+                <span
+                  :class="[
+                    'inline-block px-2 py-0.5 rounded-full text-[10px] font-medium',
+                    inv.status === 'Paid' ? 'bg-green-100 text-green-800' :
+                    inv.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                  ]"
+                >
+                  {{ inv.status }}
+                </span>
               </p>
             </div>
 
             <button
               @click="exportPDF(inv)"
-              class="px-4 py-1.5 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+              class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs transition"
             >
               Export PDF
             </button>
           </div>
 
-          <!-- Service results -->
+          <!-- Results Section -->
           <div>
-            <h2 class="font-semibold text-gray-800 mb-2">Results</h2>
+            <h3 class="text-sm font-semibold text-gray-800 mb-2">Results</h3>
             <ul class="space-y-2">
               <li
                 v-for="svc in inv.services"
@@ -50,18 +59,16 @@
                 class="text-sm text-gray-800"
               >
                 <strong>{{ svc.serviceName }}:</strong>
-                <span class="whitespace-pre-line">
+                <div class="text-xs text-gray-700 whitespace-pre-line mt-0.5 ml-2">
                   {{ svc.result || 'No result yet' }}
-                </span>
+                </div>
               </li>
             </ul>
           </div>
         </div>
 
-        <p
-          v-if="invoices.length === 0"
-          class="text-center text-sm text-gray-500"
-        >
+        <!-- No Results Message -->
+        <p v-if="invoices.length === 0" class="text-center text-sm text-gray-500">
           No results available.
         </p>
       </main>
@@ -70,32 +77,21 @@
 </template>
 
 <script setup>
-/* ── Imports ─────────────────────────────────── */
 import { ref, onMounted } from 'vue'
-import {
-  collection,
-  query,
-  where,
-  onSnapshot
-} from 'firebase/firestore'
+import { collection, query, where, onSnapshot } from 'firebase/firestore'
 import { db } from '@/firebase'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import html2pdf from 'html2pdf.js'
 
 import Sidebar from '@/components/Sidebar.vue'
-import Topbar  from '@/components/Topbar.vue'
+import Topbar from '@/components/Topbar.vue'
 
-/* ── Reactive state ──────────────────────────── */
-const invoices  = ref([])
+const invoices = ref([])
 const userEmail = ref('')
 
-/* ── Listen to invoices for this user ────────── */
 const listenForInvoices = () => {
   if (!userEmail.value) return
-  const q = query(
-    collection(db, 'invoices'),
-    where('email', '==', userEmail.value)
-  )
+  const q = query(collection(db, 'invoices'), where('email', '==', userEmail.value))
   onSnapshot(q, snap => {
     invoices.value = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
@@ -103,7 +99,6 @@ const listenForInvoices = () => {
   })
 }
 
-/* ── Helpers ─────────────────────────────────── */
 const formatDate = (ts) => {
   if (!ts?.toDate) return 'N/A'
   return ts.toDate().toISOString().split('T')[0]
@@ -111,7 +106,7 @@ const formatDate = (ts) => {
 
 const exportPDF = (inv) => {
   const exportDate = new Date().toLocaleString()
-  const logoURL    = `${window.location.origin}/MaEs_logo2.png`
+  const logoURL = `${window.location.origin}/MaEs_logo2.png`
 
   const serviceItems = inv.services?.map(s => `
     <li style="margin-bottom:6px;">
@@ -153,7 +148,6 @@ const exportPDF = (inv) => {
     .save()
 }
 
-/* ── Auth → start listener ───────────────────── */
 onMounted(() => {
   onAuthStateChanged(getAuth(), user => {
     if (user) {
@@ -165,5 +159,17 @@ onMounted(() => {
 </script>
 
 <style scoped>
-button { white-space: nowrap; }
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 </style>

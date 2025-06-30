@@ -1,63 +1,85 @@
 <template>
-  <div class="flex bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen text-gray-800">
+  <div class="flex flex-col sm:flex-row min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800">
     <Sidebar />
+
     <div class="flex-1 flex flex-col max-h-screen">
       <Topbar />
       <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
         <transition name="fade" mode="out-in">
-          <div
-            v-if="loading"
-            key="loading"
-            class="flex justify-center items-center min-h-[300px]"
-          >
+          <div v-if="loading" key="loading" class="flex justify-center items-center min-h-[300px]">
             <LoadingAnimation />
           </div>
 
           <div v-else key="content" class="space-y-6 animate-fade-in">
-            <div class="flex items-center gap-2">
-              <BanknotesIcon class="w-6 h-6 text-green-600" />
-              <h2 class="text-xl font-bold text-green-700">Process Payment</h2>
-            </div>
-
             <div class="bg-white p-6 rounded-xl shadow border border-gray-200 space-y-4">
-              <!-- Invoice Table -->
-              <div>
-                <h3 class="font-medium text-sm text-gray-700 mb-2">Select Unpaid Invoices:</h3>
-                <div class="overflow-x-auto">
-                  <table class="min-w-full divide-y divide-gray-200 text-sm">
-                    <thead class="bg-gray-100 text-gray-600">
-                      <tr>
-                        <th class="px-4 py-2 text-left">Select</th>
-                        <th class="px-4 py-2 text-left">Service(s)</th>
-                        <th class="px-4 py-2 text-left">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-100">
-                      <tr
-                        v-for="invoice in sortedInvoices"
-                        :key="invoice.id"
-                        class="hover:bg-gray-50 transition"
-                      >
-                        <td class="px-4 py-2">
-                          <input
-                            type="checkbox"
-                            :value="invoice"
-                            v-model="selectedInvoices"
-                            class="form-checkbox text-blue-600"
-                          />
-                        </td>
-                        <td class="px-4 py-2">
-                          {{ (invoice.services || []).map(s => s.serviceName).join(', ') || 'N/A' }}
-                        </td>
-                        <td class="px-4 py-2 text-green-600 font-medium">
-                          ₱{{ calculateInvoiceAmount(invoice).toFixed(2) }}
-                        </td>
-                      </tr>
-                      <tr v-if="sortedInvoices.length === 0">
-                        <td colspan="3" class="text-center text-gray-500 py-4">No unpaid invoices found.</td>
-                      </tr>
-                    </tbody>
-                  </table>
+              <h3 class="font-medium text-sm text-gray-700 mb-2">Select Unpaid Invoices:</h3>
+
+              <!-- Table for Desktop -->
+              <div class="hidden sm:block overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead class="bg-gray-100 text-gray-600">
+                    <tr>
+                      <th class="px-4 py-2 text-left">Select</th>
+                      <th class="px-4 py-2 text-left">Service(s)</th>
+                      <th class="px-4 py-2 text-left">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-100">
+                    <tr
+                      v-for="invoice in sortedInvoices"
+                      :key="invoice.id"
+                      class="hover:bg-gray-50 transition"
+                    >
+                      <td class="px-4 py-2">
+                        <input
+                          type="checkbox"
+                          :value="invoice"
+                          v-model="selectedInvoices"
+                          class="form-checkbox text-blue-600"
+                        />
+                      </td>
+                      <td class="px-4 py-2">
+                        {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
+                      </td>
+                      <td class="px-4 py-2 text-green-600 font-medium">
+                        ₱{{ calculateInvoiceAmount(invoice).toFixed(2) }}
+                      </td>
+                    </tr>
+                    <tr v-if="sortedInvoices.length === 0">
+                      <td colspan="3" class="text-center text-gray-500 py-4">No unpaid invoices found.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Mobile Card View -->
+              <div class="space-y-4 sm:hidden">
+                <div
+                  v-for="invoice in sortedInvoices"
+                  :key="invoice.id"
+                  class="border border-gray-200 rounded-lg p-4 shadow-sm bg-white"
+                >
+                  <label class="flex items-center mb-2">
+                    <input
+                      type="checkbox"
+                      :value="invoice"
+                      v-model="selectedInvoices"
+                      class="form-checkbox text-blue-600 mr-2"
+                    />
+                    <span class="font-medium text-sm text-gray-700">Select</span>
+                  </label>
+                  <div class="text-sm text-gray-600">
+                    <p class="mb-1">
+                      <span class="font-semibold">Services:</span>
+                      {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
+                    </p>
+                    <p>
+                      <span class="font-semibold">Amount:</span>
+                      <span class="text-green-600 font-medium">
+                        ₱{{ calculateInvoiceAmount(invoice).toFixed(2) }}
+                      </span>
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -79,7 +101,10 @@
 
     <!-- Payment Method Modal -->
     <transition name="fade">
-      <div v-if="showPaymentMethodModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+      <div
+        v-if="showPaymentMethodModal"
+        class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
+      >
         <div class="bg-white w-80 p-4 rounded-lg shadow-xl space-y-4 animate-fade-in">
           <h3 class="text-base font-bold text-center">Select Payment Method</h3>
           <div class="grid grid-cols-2 gap-2 text-sm font-medium">
@@ -126,11 +151,9 @@ import {
   doc,
   query,
   where,
-  orderBy,
   serverTimestamp,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { BanknotesIcon } from "@heroicons/vue/24/solid";
 
 export default {
   name: "ProcessPaymentPage",
@@ -138,7 +161,6 @@ export default {
     Sidebar,
     Topbar,
     LoadingAnimation,
-    BanknotesIcon,
   },
   data() {
     return {
@@ -164,7 +186,6 @@ export default {
       const services = invoice.services || [];
       return services.reduce((sum, s) => sum + (s.amount || 0), 0);
     },
-
     async fetchUnpaidInvoices() {
       if (!this.userEmail) return;
       try {
@@ -174,14 +195,11 @@ export default {
           where("status", "==", "not paid")
         );
         const snapshot = await getDocs(q);
-        this.invoices = snapshot.docs.map((doc) => {
-          const data = doc.data();
-          return {
-            id: doc.id,
-            services: Array.isArray(data.services) ? data.services : [],
-            ...data,
-          };
-        });
+        this.invoices = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          services: Array.isArray(doc.data().services) ? doc.data().services : [],
+        }));
       } catch (err) {
         console.error("Error fetching invoices:", err);
         alert("Error fetching invoices.");
@@ -189,14 +207,11 @@ export default {
         this.loading = false;
       }
     },
-
     async submitPayments(method) {
       this.showPaymentMethodModal = false;
       if (this.selectedInvoices.length === 0) return;
-
       try {
         const submittedAt = serverTimestamp();
-
         for (const invoice of this.selectedInvoices) {
           await addDoc(collection(db, "payments"), {
             invoiceID: invoice.id,
@@ -205,14 +220,12 @@ export default {
             submittedAt,
             email: this.userEmail,
           });
-
           await updateDoc(doc(db, "invoices", invoice.id), {
             status: "Pending",
             paymentMethod: method,
             submittedAt,
           });
         }
-
         this.selectedInvoices = [];
         await this.fetchUnpaidInvoices();
         this.showSuccessModal = true;
@@ -221,7 +234,6 @@ export default {
         alert("Error processing payments.");
       }
     },
-
     getCurrentUser() {
       const auth = getAuth();
       onAuthStateChanged(auth, async (user) => {

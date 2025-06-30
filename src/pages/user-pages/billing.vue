@@ -1,44 +1,66 @@
 <template>
-  <div class="flex bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen text-gray-800 overflow-hidden relative">
+  <!-- Stack on mobile, keep sidebar‑plus‑content layout from lg↑ -->
+  <div
+    class="flex flex-col lg:flex-row bg-gray-100 min-h-screen text-gray-800 overflow-hidden relative"
+  >
+    <!-- ⬅️ Sidebar handles its own mobile toggle -->
     <Sidebar />
 
+    <!-- Content area -->
     <div class="flex-1 flex flex-col max-h-screen">
       <Topbar />
 
-      <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+      <!-- ▽ Main -->
+      <main
+        class="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 space-y-6"
+      >
         <transition name="fade" mode="out-in">
-          <div v-if="loading" key="loading" class="flex justify-center items-center min-h-[300px]">
+          <!-- Loading state -->
+          <div
+            v-if="loading"
+            key="loading"
+            class="flex justify-center items-center min-h-[300px]"
+          >
             <LoadingAnimation />
           </div>
 
+          <!-- Loaded state -->
           <div v-else key="content" class="space-y-6 animate-fade-in">
-            <!-- Header -->
-            <div class="flex items-center gap-2">
-              <CreditCardIcon class="w-6 h-6 text-blue-500" />
-              <h2 class="text-xl font-bold text-green-700">Billing System</h2>
-            </div>
-
-            <!-- Billing Card -->
-            <div class="bg-white rounded-xl shadow border border-gray-200 p-6 space-y-6">
-              <!-- Search Input -->
+            <!-- Billing card -->
+            <div
+              class="bg-white border border-gray-300 rounded-xl shadow-sm p-4 sm:p-6 space-y-6"
+            >
+              <!-- 🔍 Search -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Search Service:</label>
+                <label
+                  class="block text-sm font-medium text-gray-700 mb-1"
+                  >Search Service:</label
+                >
                 <input
                   v-model="searchQuery"
                   type="text"
                   placeholder="Type to filter services..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm"
                 />
               </div>
 
-              <!-- Grouped Services by Category -->
-              <div v-for="(services, category) in groupedFilteredServices" :key="category">
-                <h3 class="text-md font-semibold text-gray-700 mt-4 mb-2">{{ category }}</h3>
-                <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+              <!-- 🗂 Grouped services -->
+              <div
+                v-for="(services, category) in groupedFilteredServices"
+                :key="category"
+              >
+                <h3
+                  class="text-sm font-semibold text-gray-600 mt-4 mb-2 first:mt-0"
+                >
+                  {{ category }}
+                </h3>
+                <div
+                  class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+                >
                   <label
                     v-for="service in services"
                     :key="service.id"
-                    class="flex items-center justify-between gap-2 p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+                    class="flex items-center justify-between p-3 border border-gray-200 rounded-md bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
                   >
                     <div class="flex items-center gap-2">
                       <input
@@ -47,22 +69,30 @@
                         v-model="selectedServices"
                         class="form-checkbox text-blue-600 h-4 w-4"
                       />
-                      <span class="text-sm text-gray-800">{{ service.serviceName }}</span>
+                      <span class="text-sm text-gray-800">
+                        {{ service.serviceName }}
+                      </span>
                     </div>
-                    <span class="text-sm font-medium text-gray-700">₱{{ service.amount }}</span>
+                    <span class="text-sm font-medium text-gray-700 whitespace-nowrap">
+                      ₱{{ service.amount }}
+                    </span>
                   </label>
                 </div>
               </div>
 
-              <p v-if="Object.keys(groupedFilteredServices).length === 0" class="text-sm text-gray-500 mt-2">
+              <!-- Empty‑state -->
+              <p
+                v-if="Object.keys(groupedFilteredServices).length === 0"
+                class="text-sm text-gray-500"
+              >
                 No services found.
               </p>
 
-              <!-- Submit Button -->
-              <div class="text-right pt-4">
+              <!-- 📄 Generate button -->
+              <div class="pt-2 sm:pt-4 text-right">
                 <button
                   @click="generateInvoice"
-                  class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2 rounded-lg shadow transition"
+                  class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2 rounded-md shadow-sm transition"
                 >
                   Generate Invoice
                 </button>
@@ -73,24 +103,28 @@
       </main>
     </div>
 
-    <!-- ✅ Success Modal -->
+    <!-- ✅ Success modal -->
     <div
       v-if="showSuccessModal"
-      class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/30"
+      class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/30 px-4"
     >
-      <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full text-center space-y-4 animate-fade-in">
-        <h2 class="text-xl font-semibold text-green-600">Invoice Generated</h2>
+      <div
+        class="bg-white p-6 rounded-lg shadow-md max-w-sm w-full text-center space-y-4 animate-fade-in"
+      >
+        <h2 class="text-xl font-semibold text-green-600">
+          Invoice Generated
+        </h2>
         <p class="text-gray-700 text-sm">
-          Invoice <strong>{{ generatedShortId }}</strong> successfully generated for <strong>{{ userEmail }}</strong>.
+          Invoice
+          <strong>{{ generatedShortId }}</strong> successfully generated for
+          <strong>{{ userEmail }}</strong>.
         </p>
-        <div class="text-center">
-          <button
-            @click="showSuccessModal = false"
-            class="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition"
-          >
-            Close
-          </button>
-        </div>
+        <button
+          @click="showSuccessModal = false"
+          class="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition w-full sm:w-auto"
+        >
+          Close
+        </button>
       </div>
     </div>
   </div>
@@ -102,9 +136,13 @@ import Topbar from "@/components/Topbar.vue";
 import LoadingAnimation from "@/components/loading_animation.vue";
 
 import { db } from "@/firebase";
-import { collection, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  addDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { CreditCardIcon } from "@heroicons/vue/24/solid";
 
 export default {
   name: "BillingPage",
@@ -112,7 +150,6 @@ export default {
     Sidebar,
     Topbar,
     LoadingAnimation,
-    CreditCardIcon,
   },
   data() {
     return {
@@ -156,32 +193,29 @@ export default {
         this.loading = false;
       }
     },
-
     generateShortId() {
       const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
       return `INV-${randomPart}`;
     },
-
     async generateInvoice() {
       if (this.selectedServices.length === 0) {
         alert("Please select at least one service.");
         return;
       }
-
       const auth = getAuth();
       const user = auth.currentUser;
-
       if (!user) {
         alert("You must be logged in.");
         return;
       }
-
       const shortId = this.generateShortId();
-      const totalAmount = this.selectedServices.reduce((sum, s) => sum + Number(s.amount || 0), 0);
-
+      const totalAmount = this.selectedServices.reduce(
+        (sum, s) => sum + Number(s.amount || 0),
+        0
+      );
       const invoiceData = {
         email: user.email,
-        services: this.selectedServices.map(s => ({
+        services: this.selectedServices.map((s) => ({
           serviceName: s.serviceName,
           amount: s.amount,
         })),
@@ -190,7 +224,6 @@ export default {
         createdAt: serverTimestamp(),
         shortId,
       };
-
       try {
         await addDoc(collection(db, "invoices"), invoiceData);
         this.generatedShortId = shortId;
@@ -215,6 +248,7 @@ export default {
 </script>
 
 <style scoped>
+/* Fade transition for route changes & modals */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -223,6 +257,8 @@ export default {
 .fade-leave-to {
   opacity: 0;
 }
+
+/* Reusable fade‑in keyframe */
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
 }
