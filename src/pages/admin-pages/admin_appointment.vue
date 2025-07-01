@@ -98,7 +98,7 @@
                     Decline
                   </button>
                   <button
-                    @click="deleteAppointment(appt.id)"
+                    @click="confirmDelete(appt.id)"
                     class="text-gray-400 hover:text-red-500 underline"
                   >
                     Delete
@@ -115,6 +115,29 @@
           </table>
         </div>
       </main>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center">
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+      <div class="relative z-10 bg-[#1a1a1a] text-gray-100 p-6 rounded-lg shadow-xl border border-gray-700 max-w-sm w-full space-y-4">
+        <h2 class="text-lg font-semibold text-red-400">Confirm Deletion</h2>
+        <p class="text-sm">Are you sure you want to delete this appointment? This action cannot be undone.</p>
+        <div class="flex justify-end gap-2">
+          <button
+            @click="showDeleteModal = false"
+            class="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 text-sm"
+          >
+            Cancel
+          </button>
+          <button
+            @click="deleteAppointment"
+            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-500 text-sm"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -136,6 +159,8 @@ import AdminTopbar from '@/components/AdminTopbar.vue';
 const appointments = ref([]);
 const filterStatus = ref('');
 const searchQuery = ref('');
+const showDeleteModal = ref(false);
+const pendingDeleteId = ref(null);
 
 onMounted(() => {
   const apptCol = collection(db, 'appointments');
@@ -164,17 +189,21 @@ const updateStatus = async (id, newStatus) => {
     }
     await updateDoc(doc(db, 'appointments', id), updateData);
   } catch (err) {
-    alert('Failed to update status: ' + err.message);
+    console.error('Failed to update status:', err.message);
   }
 };
 
-const deleteAppointment = async (id) => {
-  if (confirm('Are you sure you want to delete this appointment?')) {
-    try {
-      await deleteDoc(doc(db, 'appointments', id));
-    } catch (err) {
-      alert('Failed to delete: ' + err.message);
-    }
+const confirmDelete = (id) => {
+  pendingDeleteId.value = id;
+  showDeleteModal.value = true;
+};
+
+const deleteAppointment = async () => {
+  try {
+    await deleteDoc(doc(db, 'appointments', pendingDeleteId.value));
+    showDeleteModal.value = false;
+  } catch (err) {
+    console.error('Failed to delete:', err.message);
   }
 };
 
