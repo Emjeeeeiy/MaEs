@@ -31,16 +31,17 @@
               </span>
             </button>
 
+            <!-- ❌ Removed blur here -->
             <div
               v-if="notifDropdownOpen"
-              class="fixed inset-0 backdrop-blur-sm bg-black/20 z-40"
+              class="fixed inset-0 bg-black/30 z-40"
               @click="notifDropdownOpen = false"
             ></div>
 
             <transition name="fade">
               <div
                 v-if="notifDropdownOpen"
-                class="absolute right-0 mt-2 w-64 max-h-80 overflow-y-auto border border-gray-200 rounded-md shadow-lg z-50 bg-white/90 backdrop-blur-sm"
+                class="absolute right-0 mt-2 w-64 max-h-80 overflow-y-auto border border-gray-200 rounded-md shadow-lg z-50 bg-white"
               >
                 <div v-if="!notifications.length" class="text-gray-600 text-sm p-3">No new notifications.</div>
                 <div
@@ -269,7 +270,6 @@ const sendFeedback = async () => {
     loading.value = false
   }
 }
-
 
 const formatDate = (timestamp) => {
   if (!timestamp) return ''

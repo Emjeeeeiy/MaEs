@@ -113,6 +113,23 @@
             </div>
           </div>
         </div>
+
+        <!-- Success Modal -->
+        <transition name="fade">
+          <div v-if="successMessage" class="fixed inset-0 z-50 flex items-center justify-center">
+            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="successMessage = ''"></div>
+            <div class="relative bg-black max-w-sm w-[90%] p-6 rounded-xl shadow-lg text-center space-y-3 z-10">
+              <svg class="w-10 h-10 text-green-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <h3 class="text-lg font-semibold text-green-400">Saved Successfully</h3>
+              <p class="text-sm text-gray-300">{{ successMessage }}</p>
+              <button @click="successMessage = ''" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm">
+                Okay
+              </button>
+            </div>
+          </div>
+        </transition>
       </main>
     </div>
   </div>
@@ -136,6 +153,7 @@ const invoices = ref([]);
 const searchQuery = ref('');
 const selectedEmail = ref(null);
 const results = ref({});
+const successMessage = ref('');
 
 const fetchInvoices = async () => {
   const snap = await getDocs(query(collection(db, 'invoices'), orderBy('createdAt', 'desc')));
@@ -188,9 +206,9 @@ const submitResults = async (invoice) => {
       services: updatedServices
     });
     invoice.services = updatedServices;
-    alert('Results saved for this invoice.');
+    successMessage.value = 'Results saved successfully.';
   } catch (err) {
-    alert('Error saving results: ' + err.message);
+    successMessage.value = 'Error saving results: ' + err.message;
   }
 };
 </script>
@@ -199,5 +217,14 @@ const submitResults = async (invoice) => {
 textarea {
   resize: vertical;
   min-height: 80px;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

@@ -1,9 +1,9 @@
 <template>
   <div class="h-screen w-64 bg-[#1a1a1a] text-white border-r border-gray-700 shadow-lg flex flex-col">
-    <!-- Logo Header -->
-    <div class="px-6 py-5 text-2xl font-bold text-green-500 border-b border-gray-700">
+    <!-- Logo Header (Slightly Reduced Height) -->
+    <!-- <div class="px-6 py-4 text-2xl font-bold text-green-500 border-b border-gray-700">
       MaEs
-    </div>
+    </div> -->
 
     <!-- Scrollable Content -->
     <div class="flex-1 overflow-y-auto">
@@ -111,7 +111,7 @@ const logout = async () => {
   router.push("/login");
 };
 
-// Static (replace with actual user data from Firebase or Vuex)
+// Static placeholders (replace with actual data if using Firebase auth/user info)
 const username = "Admin";
 const role = "Administrator";
 </script>

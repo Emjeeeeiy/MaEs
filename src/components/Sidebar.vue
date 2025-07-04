@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- Blurred overlay on mobile -->
+    <!-- Mobile overlay -->
     <div
       v-if="isMobileSidebarOpen"
       class="fixed inset-0 z-40 backdrop-blur-sm bg-black/10 sm:hidden"
@@ -14,14 +14,13 @@
         isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'
       ]"
     >
-      <!-- Logo/Header -->
+      <!-- Logo -->
       <div class="px-6 py-4 text-2xl font-bold text-green-500 border-b border-gray-700">
         MaEs
       </div>
 
-      <!-- Scrollable Content -->
+      <!-- Profile -->
       <div class="flex-1 overflow-y-auto">
-        <!-- Profile Info -->
         <div class="px-6 py-5 border-b border-gray-700 text-center">
           <div class="mx-auto w-16 h-16 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
             <img
@@ -38,60 +37,47 @@
           <p class="text-xs text-gray-400">{{ role }}</p>
         </div>
 
-        <!-- Navigation -->
+        <!-- Navigation Links -->
         <nav class="px-4 py-6 space-y-2">
-          <router-link
-            to="/dashboard"
-            class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition group"
-          >
-            <HomeIcon class="w-5 h-5 mr-3 text-white group-hover:animate-bounce" />
+          <router-link to="/dashboard" class="nav-link group">
+            <HomeIcon class="nav-icon group-hover:animate-bounce" />
             Dashboard
           </router-link>
 
-          <router-link
-            to="/billing"
-            class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition group"
-          >
-            <ClipboardDocumentCheckIcon class="w-5 h-5 mr-3 text-white group-hover:animate-bounce" />
+          <router-link to="/billing" class="nav-link group">
+            <ClipboardDocumentCheckIcon class="nav-icon group-hover:animate-bounce" />
             Billing
           </router-link>
 
-          <router-link
-            to="/payments"
-            class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition group"
-          >
-            <CreditCardIcon class="w-5 h-5 mr-3 text-white group-hover:animate-bounce" />
+          <router-link to="/payments" class="nav-link group">
+            <CreditCardIcon class="nav-icon group-hover:animate-bounce" />
             Payments
           </router-link>
 
-          <router-link
-            to="/invoices"
-            class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition group"
-          >
-            <DocumentTextIcon class="w-5 h-5 mr-3 text-white group-hover:animate-bounce" />
+          <router-link to="/invoices" class="nav-link group">
+            <DocumentTextIcon class="nav-icon group-hover:animate-bounce" />
             Invoices
           </router-link>
 
-          <router-link
-            to="/appointment"
-            class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition group"
-          >
-            <CalendarIcon class="w-5 h-5 mr-3 text-white group-hover:animate-bounce" />
+          <router-link to="/appointment" class="nav-link group">
+            <CalendarIcon class="nav-icon group-hover:animate-bounce" />
             Appointments
           </router-link>
 
-          <router-link
-            to="/result"
-            class="flex items-center px-4 py-2 rounded-lg text-gray-200 hover:bg-green-600 hover:text-white transition group"
-          >
-            <ChartBarIcon class="w-5 h-5 mr-3 text-white group-hover:animate-bounce" />
-            Results
+          <router-link to="/report" class="nav-link group">
+            <ClipboardDocumentListIcon class="nav-icon group-hover:animate-bounce" />
+            Report
+          </router-link>
+
+          <router-link to="/result" class="nav-link group">
+            <ChartBarIcon class="nav-icon group-hover:animate-bounce" />
+            Result
           </router-link>
         </nav>
       </div>
     </aside>
 
-    <!-- ✅ Toggle Button (mobile only) -->
+    <!-- Toggle Button -->
     <button
       @click="isMobileSidebarOpen = !isMobileSidebarOpen"
       class="fixed top-16 left-4 z-[9999] sm:hidden bg-gray-800 text-white p-1.5 rounded-md shadow-md"
@@ -106,10 +92,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { doc, onSnapshot } from 'firebase/firestore'
+import { db } from '@/firebase'
 
 import {
   HomeIcon,
@@ -118,30 +104,63 @@ import {
   ClipboardDocumentCheckIcon,
   CalendarIcon,
   ChartBarIcon,
-} from "@heroicons/vue/24/solid";
+  ClipboardDocumentListIcon
+} from '@heroicons/vue/24/solid'
 
-const username = ref("User");
-const role = ref("Viewer");
-const profileImageUrl = ref("");
-const isMobileSidebarOpen = ref(false);
+const username = ref('User')
+const role = ref('Viewer')
+const profileImageUrl = ref('')
+const isMobileSidebarOpen = ref(false)
+
+let unsubscribeUserDoc = null
 
 onMounted(() => {
-  const auth = getAuth();
-  onAuthStateChanged(auth, async (user) => {
+  const auth = getAuth()
+  onAuthStateChanged(auth, (user) => {
+    if (unsubscribeUserDoc) unsubscribeUserDoc()
     if (user) {
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        username.value = data.displayName || user.displayName || "User";
-        role.value = data.role || "Viewer";
-        profileImageUrl.value = data.photoURL || user.photoURL || "";
-      }
+      const userRef = doc(db, 'users', user.uid)
+      unsubscribeUserDoc = onSnapshot(userRef, (snap) => {
+        if (snap.exists()) {
+          const data = snap.data()
+          username.value = data.username || data.displayName || user.displayName || 'User'
+          role.value = data.role || 'Viewer'
+          profileImageUrl.value = data.photoURL || user.photoURL || ''
+        }
+      })
     }
-  });
-});
+  })
+})
+
+onBeforeUnmount(() => {
+  if (unsubscribeUserDoc) unsubscribeUserDoc()
+})
 </script>
 
 <style scoped>
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  color: #e5e7eb; /* text-gray-200 */
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  background-color: #16a34a; /* green-600 */
+  color: white;
+}
+
+.nav-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: white;
+}
+
+/* Scrollbar fix */
 ::-webkit-scrollbar {
   width: 6px;
 }
