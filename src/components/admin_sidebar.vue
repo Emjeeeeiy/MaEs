@@ -1,10 +1,5 @@
 <template>
   <div class="h-screen w-64 bg-[#1a1a1a] text-white border-r border-gray-700 shadow-lg flex flex-col">
-    <!-- Logo Header (Slightly Reduced Height) -->
-    <!-- <div class="px-6 py-4 text-2xl font-bold text-green-500 border-b border-gray-700">
-      MaEs
-    </div> -->
-
     <!-- Scrollable Content -->
     <div class="flex-1 overflow-y-auto">
       <!-- Profile Section -->
@@ -22,7 +17,7 @@
           to="/admin-dashboard"
           class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
         >
-          <HomeIcon class="w-5 h-5 transform group-hover:scale-110 group-hover:rotate-6 transition duration-300" />
+          <HomeIcon class="w-5 h-5 transform transition duration-300 group-hover:scale-110 group-hover:rotate-6" />
           Admin Dashboard
         </router-link>
 
@@ -30,7 +25,7 @@
           to="/admin-management"
           class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
         >
-          <UsersIcon class="w-5 h-5 transform group-hover:scale-110 group-hover:-rotate-6 transition duration-300" />
+          <UsersIcon class="w-5 h-5 transform transition duration-300 group-hover:scale-110 group-hover:-rotate-6" />
           Manage Users
         </router-link>
 
@@ -38,23 +33,23 @@
           to="/admin-invoices"
           class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
         >
-          <DocumentTextIcon class="w-5 h-5 transform group-hover:scale-105 group-hover:rotate-3 transition duration-300" />
-          Invoice 
+          <DocumentTextIcon class="w-5 h-5 transform transition duration-300 group-hover:scale-105 group-hover:rotate-3" />
+          Invoice
         </router-link>
 
         <router-link
           to="/admin-services"
           class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
         >
-          <Cog6ToothIcon class="w-5 h-5 transform group-hover:rotate-90 transition duration-300" />
-          Service 
+          <Cog6ToothIcon class="w-5 h-5 transform transition duration-300 group-hover:rotate-90" />
+          Service
         </router-link>
 
         <router-link
           to="/admin-appointment"
           class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
         >
-          <CalendarDaysIcon class="w-5 h-5 transform group-hover:scale-105 group-hover:-rotate-3 transition duration-300" />
+          <CalendarDaysIcon class="w-5 h-5 transform transition duration-300 group-hover:scale-105 group-hover:-rotate-3" />
           Appointment
         </router-link>
 
@@ -62,16 +57,25 @@
           to="/admin-result"
           class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
         >
-          <ChartBarIcon class="w-5 h-5 transform group-hover:scale-110 group-hover:rotate-2 transition duration-300" />
-          Result 
+          <ChartBarIcon class="w-5 h-5 transform transition duration-300 group-hover:scale-110 group-hover:rotate-2" />
+          Result
         </router-link>
 
         <router-link
           to="/admin-rfa"
           class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
         >
-          <ChatBubbleLeftRightIcon class="w-5 h-5 transform group-hover:scale-110 group-hover:-rotate-3 transition duration-300" />
+          <ChatBubbleLeftRightIcon class="w-5 h-5 transform transition duration-300 group-hover:scale-110 group-hover:-rotate-3" />
           Request for Assistance
+        </router-link>
+
+        <!-- ✅ Report Link -->
+        <router-link
+          to="/admin-report"
+          class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
+        >
+          <ChartPieIcon class="w-5 h-5 transform transition duration-300 group-hover:scale-110 group-hover:rotate-6" />
+          Report
         </router-link>
       </nav>
     </div>
@@ -82,7 +86,7 @@
         @click="logout"
         class="w-full flex items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-600 hover:text-white rounded transition font-medium group"
       >
-        <ArrowLeftOnRectangleIcon class="w-5 h-5 transform group-hover:-translate-x-1 transition duration-300" />
+        <ArrowLeftOnRectangleIcon class="w-5 h-5 transform transition duration-300 group-hover:-translate-x-1" />
         Logout
       </button>
     </div>
@@ -93,7 +97,7 @@
 import { useRouter } from "vue-router";
 import { getAuth, signOut } from "firebase/auth";
 
-// Icons from Heroicons
+// Icons
 import { HomeIcon } from "@heroicons/vue/24/outline";
 import { UsersIcon } from "@heroicons/vue/24/outline";
 import { DocumentTextIcon } from "@heroicons/vue/24/outline";
@@ -102,6 +106,7 @@ import { CalendarDaysIcon } from "@heroicons/vue/24/outline";
 import { ChartBarIcon } from "@heroicons/vue/24/outline";
 import { ChatBubbleLeftRightIcon } from "@heroicons/vue/24/outline";
 import { ArrowLeftOnRectangleIcon } from "@heroicons/vue/24/outline";
+import { ChartPieIcon } from "@heroicons/vue/24/outline"; // ✅ Added for Report
 
 const router = useRouter();
 
@@ -111,7 +116,7 @@ const logout = async () => {
   router.push("/login");
 };
 
-// Static placeholders (replace with actual data if using Firebase auth/user info)
+// Placeholder (replace with actual auth info)
 const username = "Admin";
 const role = "Administrator";
 </script>

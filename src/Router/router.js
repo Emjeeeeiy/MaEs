@@ -23,6 +23,7 @@ import appointment from '../pages/user-pages/appointment.vue';
 import admin_appointment from '../pages/admin-pages/admin_appointment.vue';
 import result from '../pages/user-pages/result.vue';
 import admin_result from '../pages/admin-pages/admin_result.vue';
+import admin_report from '../pages/admin-pages/admin_report.vue';
 
 
 const routes = [
@@ -39,6 +40,7 @@ const routes = [
   { path: '/admin-rfa', name: 'AdminRFA', component: admin_rfa, meta: { requiresAdmin: true, role: 'admin' },},
   { path: '/admin-appointment', name: 'AdminAppointment', component: admin_appointment, meta: { requiresAdmin: true, role: 'admin' },},
   { path: '/admin-result', name: 'AdminResult', component: admin_result, meta: { requiresAdmin: true, role: 'admin' },},
+  { path: '/admin-report', name: 'AdminReport', component: admin_report, meta: { requiresAdmin: true, role: 'admin' },},
 
   // User Routes
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
