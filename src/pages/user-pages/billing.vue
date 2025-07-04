@@ -1,62 +1,49 @@
+<!-- BillingPage.vue -->
 <template>
-  <!-- Stack on mobile, keep sidebar‑plus‑content layout from lg↑ -->
-  <div
-    class="flex flex-col lg:flex-row bg-gray-100 min-h-screen text-gray-800 overflow-hidden relative"
-  >
-    <!-- ⬅️ Sidebar handles its own mobile toggle -->
+  <div class="flex flex-col lg:flex-row bg-gray-100 min-h-screen text-gray-800 overflow-hidden relative">
     <Sidebar />
 
-    <!-- Content area -->
     <div class="flex-1 flex flex-col max-h-screen">
       <Topbar />
 
-      <!-- ▽ Main -->
-      <main
-        class="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 space-y-6"
-      >
+      <main class="flex-1 overflow-y-auto px-4 py-4 sm:px-6 sm:py-6 space-y-6">
         <transition name="fade" mode="out-in">
-          <!-- Loading state -->
-          <div
-            v-if="loading"
-            key="loading"
-            class="flex justify-center items-center min-h-[300px]"
-          >
+          <div v-if="loading" key="loading" class="flex justify-center items-center min-h-[300px]">
             <LoadingAnimation />
           </div>
 
-          <!-- Loaded state -->
           <div v-else key="content" class="space-y-6 animate-fade-in">
-            <!-- Billing card -->
-            <div
-              class="bg-white border border-gray-300 rounded-xl shadow-sm p-4 sm:p-6 space-y-6"
-            >
-              <!-- 🔍 Search -->
-              <div>
-                <label
-                  class="block text-sm font-medium text-gray-700 mb-1"
-                  >Search Service:</label
-                >
-                <input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Type to filter services..."
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm"
-                />
+            <div class="bg-white border border-gray-300 rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
+              <!-- Search + Category Filter -->
+              <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+                <div class="flex-1">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Search Service or Category:</label>
+                  <input
+                    v-model="searchQuery"
+                    type="text"
+                    placeholder="Type to search services or category..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm"
+                  />
+                </div>
+                <div class="sm:w-60">
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Category:</label>
+                  <select
+                    v-model="selectedCategory"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">All Categories</option>
+                    <option v-for="cat in availableCategories" :key="cat" :value="cat">{{ cat }}</option>
+                  </select>
+                </div>
               </div>
 
-              <!-- 🗂 Grouped services -->
-              <div
-                v-for="(services, category) in groupedFilteredServices"
-                :key="category"
-              >
-                <h3
-                  class="text-sm font-semibold text-gray-600 mt-4 mb-2 first:mt-0"
-                >
+              <!-- Grouped Service List -->
+              <div v-for="(services, category) in groupedFilteredServices" :key="category">
+                <h3 class="flex items-center gap-2 text-sm font-semibold text-green-600 mt-4 mb-2 first:mt-0">
+                  <span class="w-3 h-3 bg-green-500 rounded-full"></span>
                   {{ category }}
                 </h3>
-                <div
-                  class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
-                >
+                <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                   <label
                     v-for="service in services"
                     :key="service.id"
@@ -69,26 +56,19 @@
                         v-model="selectedServices"
                         class="form-checkbox text-blue-600 h-4 w-4"
                       />
-                      <span class="text-sm text-gray-800">
-                        {{ service.serviceName }}
-                      </span>
+                      <span class="text-sm text-gray-800">{{ service.serviceName }}</span>
                     </div>
-                    <span class="text-sm font-medium text-gray-700 whitespace-nowrap">
-                      ₱{{ service.amount }}
-                    </span>
+                    <span class="text-sm font-medium text-gray-700 whitespace-nowrap">₱{{ service.amount }}</span>
                   </label>
                 </div>
               </div>
 
-              <!-- Empty‑state -->
-              <p
-                v-if="Object.keys(groupedFilteredServices).length === 0"
-                class="text-sm text-gray-500"
-              >
+              <!-- Empty state -->
+              <p v-if="Object.keys(groupedFilteredServices).length === 0" class="text-sm text-gray-500">
                 No services found.
               </p>
 
-              <!-- 📄 Generate button -->
+              <!-- Generate Button -->
               <div class="pt-2 sm:pt-4 text-right">
                 <button
                   @click="generateInvoice"
@@ -103,21 +83,12 @@
       </main>
     </div>
 
-    <!-- ✅ Success modal -->
-    <div
-      v-if="showSuccessModal"
-      class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/30 px-4"
-    >
-      <div
-        class="bg-white p-6 rounded-lg shadow-md max-w-sm w-full text-center space-y-4 animate-fade-in"
-      >
-        <h2 class="text-xl font-semibold text-green-600">
-          Invoice Generated
-        </h2>
+    <!-- Success Modal -->
+    <div v-if="showSuccessModal" class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/30 px-4">
+      <div class="bg-white p-6 rounded-lg shadow-md max-w-sm w-full text-center space-y-4 animate-fade-in">
+        <h2 class="text-xl font-semibold text-green-600">Invoice Generated</h2>
         <p class="text-gray-700 text-sm">
-          Invoice
-          <strong>{{ generatedShortId }}</strong> successfully generated for
-          <strong>{{ userEmail }}</strong>.
+          Invoice <strong>{{ generatedShortId }}</strong> successfully generated for <strong>{{ userEmail }}</strong>.
         </p>
         <button
           @click="showSuccessModal = false"
@@ -134,7 +105,6 @@
 import Sidebar from "@/components/Sidebar.vue";
 import Topbar from "@/components/Topbar.vue";
 import LoadingAnimation from "@/components/loading_animation.vue";
-
 import { db } from "@/firebase";
 import {
   collection,
@@ -156,6 +126,7 @@ export default {
       services: [],
       selectedServices: [],
       searchQuery: "",
+      selectedCategory: "",
       loading: true,
       userEmail: null,
       showSuccessModal: false,
@@ -163,12 +134,21 @@ export default {
     };
   },
   computed: {
+    availableCategories() {
+      const categories = this.services.map((s) => s.category || "Uncategorized");
+      return [...new Set(categories)].sort();
+    },
     filteredServices() {
-      if (!this.searchQuery.trim()) return this.services;
-      const q = this.searchQuery.toLowerCase();
-      return this.services.filter((service) =>
-        service.serviceName.toLowerCase().includes(q)
-      );
+      return this.services.filter((service) => {
+        const query = this.searchQuery.toLowerCase();
+        const matchesQuery =
+          service.serviceName.toLowerCase().includes(query) ||
+          (service.category || "").toLowerCase().includes(query);
+        const matchesCategory = this.selectedCategory
+          ? service.category === this.selectedCategory
+          : true;
+        return matchesQuery && matchesCategory;
+      });
     },
     groupedFilteredServices() {
       return this.filteredServices.reduce((groups, service) => {
@@ -248,7 +228,6 @@ export default {
 </script>
 
 <style scoped>
-/* Fade transition for route changes & modals */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -257,8 +236,6 @@ export default {
 .fade-leave-to {
   opacity: 0;
 }
-
-/* Reusable fade‑in keyframe */
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
 }

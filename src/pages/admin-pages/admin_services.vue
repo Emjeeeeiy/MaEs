@@ -38,6 +38,7 @@
           <table class="min-w-full text-sm text-left text-gray-200">
             <thead class="bg-gray-700 text-xs uppercase text-green-300 border-b border-gray-600">
               <tr>
+                <th class="px-3 py-2 w-12 text-center">No.</th>
                 <th class="px-4 py-2">Service Name</th>
                 <th class="px-4 py-2">Category</th>
                 <th class="px-4 py-2">Amount</th>
@@ -46,7 +47,12 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="service in filteredServices" :key="service.id" class="border-t border-gray-700 hover:bg-gray-700/50">
+              <tr
+                v-for="(service, idx) in filteredServices"
+                :key="service.id"
+                class="border-t border-gray-700 hover:bg-gray-700/50"
+              >
+                <td class="px-3 py-2 text-center">{{ idx + 1 }}</td>
                 <td class="px-4 py-2 font-medium">{{ service.serviceName }}</td>
                 <td class="px-4 py-2">{{ service.category }}</td>
                 <td class="px-4 py-2">₱{{ service.amount || 0 }}</td>
@@ -57,7 +63,7 @@
                 </td>
               </tr>
               <tr v-if="filteredServices.length === 0">
-                <td colspan="5" class="px-4 py-3 text-center text-gray-400 italic">No services found.</td>
+                <td colspan="6" class="px-4 py-3 text-center text-gray-400 italic">No services found.</td>
               </tr>
             </tbody>
           </table>
@@ -109,6 +115,7 @@ const editId = ref(null)
 const showDeleteModal = ref(false)
 const serviceToDelete = ref(null)
 
+// Categories
 const categories = [
   'CHEMISTRY', 'SPECIAL CHEMISTRY', 'ELECTROLYTES', 'CLINICAL MICROSCOPY',
   'SPECIAL MICROSCOPY', 'URINE CHEMISTRY', 'HEMATOLOGY', 'SEROLOGY', 'IMMUNOLOGY',
@@ -116,6 +123,7 @@ const categories = [
   'HISTOPATHOLOGY', 'BLOOD STATION', 'TB-DOTS', 'OTHERS', 'PACKAGES', 'SEND OUT', 'MICROBIOLOGY'
 ]
 
+// Form data
 const form = ref({
   serviceName: '',
   category: '',
@@ -123,19 +131,22 @@ const form = ref({
   specialInstructions: ''
 })
 
+// Fetch services from Firestore
 const fetchServices = async () => {
   const snapshot = await getDocs(collection(db, 'services'))
-  services.value = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+  services.value = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
 }
 
+// Computed: filtered list
 const filteredServices = computed(() => {
   const term = searchTerm.value.toLowerCase()
   const cat = selectedCategory.value
-  return services.value.filter((s) =>
-    s.serviceName?.toLowerCase().includes(term) && (cat ? s.category === cat : true)
+  return services.value.filter(
+    (s) => s.serviceName?.toLowerCase().includes(term) && (cat ? s.category === cat : true)
   )
 })
 
+// Add Service
 const addService = async () => {
   if (!form.value.serviceName || !form.value.category || form.value.amount == null) {
     showWarningModal.value = true
@@ -146,6 +157,7 @@ const addService = async () => {
   fetchServices()
 }
 
+// Open edit modal
 const openEditModal = (svc) => {
   form.value = { ...svc }
   editId.value = svc.id
@@ -153,6 +165,7 @@ const openEditModal = (svc) => {
   showModal.value = true
 }
 
+// Update Service
 const updateService = async () => {
   if (!form.value.serviceName || !form.value.category || form.value.amount == null) {
     showWarningModal.value = true
@@ -163,6 +176,7 @@ const updateService = async () => {
   fetchServices()
 }
 
+// Delete Service
 const confirmDelete = (svc) => {
   serviceToDelete.value = svc
   showDeleteModal.value = true
@@ -177,6 +191,7 @@ const cancelDelete = () => {
   serviceToDelete.value = null
 }
 
+// Delete All
 const confirmDeleteAll = async () => {
   if (confirm('Are you sure you want to delete ALL services?')) {
     const batch = writeBatch(db)
@@ -186,6 +201,7 @@ const confirmDeleteAll = async () => {
   }
 }
 
+// Close modal
 const closeModal = () => {
   showModal.value = false
   isEditing.value = false
@@ -193,5 +209,6 @@ const closeModal = () => {
   form.value = { serviceName: '', category: '', amount: null, specialInstructions: '' }
 }
 
+// Init
 onMounted(fetchServices)
 </script>
