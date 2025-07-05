@@ -12,8 +12,6 @@
       </div>
 
       <main class="flex-1 p-6 space-y-6 overflow-y-auto">
-        <h1 class="text-xl font-bold text-green-400">Input Patient Results</h1>
-
         <!-- Search Field -->
         <input
           v-model="searchQuery"

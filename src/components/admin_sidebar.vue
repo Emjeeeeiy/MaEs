@@ -68,15 +68,6 @@
           <ChatBubbleLeftRightIcon class="w-5 h-5 transform transition duration-300 group-hover:scale-110 group-hover:-rotate-3" />
           Request for Assistance
         </router-link>
-
-        <!-- ✅ Report Link -->
-        <router-link
-          to="/admin-report"
-          class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
-        >
-          <ChartPieIcon class="w-5 h-5 transform transition duration-300 group-hover:scale-110 group-hover:rotate-6" />
-          Report
-        </router-link>
       </nav>
     </div>
 

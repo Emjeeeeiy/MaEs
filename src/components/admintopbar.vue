@@ -182,7 +182,7 @@ const pageTitle = computed(() => {
     case '/admin-invoices': return 'Invoice Management'
     case '/admin-management': return 'User Management'
     case '/admin-services': return 'Service Management'
-    case '/admin-rfa': return 'RFA Monitoring'
+    case '/admin-rfa': return 'Request for Assisstance'
     case '/admin-appointment': return 'Appointments'
     case '/admin-result': return 'Results'
     default: return 'Admin Panel'

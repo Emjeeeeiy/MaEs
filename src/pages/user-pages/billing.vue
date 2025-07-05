@@ -1,4 +1,3 @@
-<!-- BillingPage.vue -->
 <template>
   <div class="flex flex-col lg:flex-row bg-gray-100 min-h-screen text-gray-800 overflow-hidden relative">
     <Sidebar />

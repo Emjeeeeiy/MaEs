@@ -15,7 +15,6 @@ import AdminInvoices from '../pages/admin-pages/admin_invoices.vue';
 import admin_management from '../pages/admin-pages/admin_management.vue';
 import settings from '../pages/user-pages/settings.vue';
 import profile from '../pages/user-pages/profile.vue';
-import report from '../pages/user-pages/report.vue';
 import admin_services from '../pages/admin-pages/admin_services.vue';
 import edit_profile from '../pages/user-pages/edit_profile.vue';
 import admin_rfa from '../pages/admin-pages/admin_rfa.vue';
@@ -23,7 +22,7 @@ import appointment from '../pages/user-pages/appointment.vue';
 import admin_appointment from '../pages/admin-pages/admin_appointment.vue';
 import result from '../pages/user-pages/result.vue';
 import admin_result from '../pages/admin-pages/admin_result.vue';
-import admin_report from '../pages/admin-pages/admin_report.vue';
+
 
 
 const routes = [
@@ -40,7 +39,6 @@ const routes = [
   { path: '/admin-rfa', name: 'AdminRFA', component: admin_rfa, meta: { requiresAdmin: true, role: 'admin' },},
   { path: '/admin-appointment', name: 'AdminAppointment', component: admin_appointment, meta: { requiresAdmin: true, role: 'admin' },},
   { path: '/admin-result', name: 'AdminResult', component: admin_result, meta: { requiresAdmin: true, role: 'admin' },},
-  { path: '/admin-report', name: 'AdminReport', component: admin_report, meta: { requiresAdmin: true, role: 'admin' },},
 
   // User Routes
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
@@ -49,7 +47,6 @@ const routes = [
   { path: '/invoices', name: 'Invoices', component: Invoices },
   { path: '/settings', name: 'Settings', component: settings },
   { path: '/profile', name: 'Profile', component: profile },
-  { path : '/report', name: 'Report', component: report },
   { path: '/edit_profile', name: 'EditProfile', component: edit_profile }, 
   { path: '/appointment', name: 'Appointment', component: appointment },
   { path: '/result', name: 'Result', component: result },

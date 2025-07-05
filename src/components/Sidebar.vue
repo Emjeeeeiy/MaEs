@@ -64,10 +64,10 @@
             Appointments
           </router-link>
 
-          <router-link to="/report" class="nav-link group">
+          <!-- <router-link to="/report" class="nav-link group">
             <ClipboardDocumentListIcon class="nav-icon group-hover:animate-bounce" />
             Report
-          </router-link>
+          </router-link> -->
 
           <router-link to="/result" class="nav-link group">
             <ChartBarIcon class="nav-icon group-hover:animate-bounce" />

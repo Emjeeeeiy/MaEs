@@ -1,8 +1,7 @@
-<!-- Admin User‑Invoices Page – FULL FILE -->
 <template>
-  <div class="flex min-h-screen bg-[#1a1a1a] text-gray-200">
+  <div class="flex min-h-screen bg-gradient-to-br from-[#1a1a1a] to-[#111] text-gray-200">
     <!-- Sidebar -->
-    <admin_sidebar class="w-64 border-r border-gray-700" />
+    <admin_sidebar class="w-64 border-r border-gray-800 shadow-xl" />
 
     <!-- Main Content -->
     <div class="flex-1 flex flex-col h-screen">
@@ -10,62 +9,62 @@
       <AdminTopbar />
 
       <!-- Body -->
-      <div class="flex-1 p-6 overflow-y-auto">
-        <h1 class="text-2xl font-bold text-green-400 mb-4">User Invoices</h1>
+      <div class="flex-1 p-6 overflow-y-auto space-y-6 animate-fade-in">
+        <h1 class="text-2xl font-bold text-green-400 mb-4 tracking-wide">User Invoices</h1>
 
-        <!-- 🔍 Search‑as‑type dropdown -->
-        <div class="relative max-w-md mb-4">
+        <!-- 🔍 Search-as-type dropdown -->
+        <div class="relative max-w-md">
           <input
             v-model="userSearchQuery"
             type="text"
             placeholder="Search user..."
-            class="w-full px-3 py-2 bg-[#1a1a1a] border border-gray-600 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:ring-green-500 focus:ring-1 focus:outline-none"
+            class="w-full px-3 py-2 bg-[#1a1a1a] border border-gray-700 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:ring-green-500 focus:ring-2 focus:outline-none shadow"
             @input="showDropdown = true"
           />
           <ul
             v-if="filteredUsers.length && showDropdown"
-            class="absolute z-10 w-full mt-1 bg-[#222] border border-gray-600 rounded-md shadow max-h-44 overflow-auto text-sm"
+            class="absolute z-10 w-full mt-1 bg-[#222] border border-gray-700 rounded-md shadow-lg max-h-44 overflow-auto text-sm animate-fade-in"
           >
             <li
               v-for="user in filteredUsers"
               :key="user.id"
-              class="px-3 py-2 hover:bg-[#2a2a2a] cursor-pointer text-gray-200"
+              class="px-3 py-2 hover:bg-[#2a2a2a] cursor-pointer text-gray-200 transition"
               @click="selectUser(user)"
             >
-              {{ user.username }} - {{ user.email }}
+              {{ user.username }} - {{ user.email }}
             </li>
           </ul>
         </div>
 
-        <!-- 📋 Accounts table -->
+        <!-- 📋 Accounts Table -->
         <div
           v-if="!selectedUserEmail && !userSearchQuery && accountsTable.length"
-          class="bg-[#222] border border-gray-700 rounded-xl shadow-md mb-6"
+          class="bg-[#222] border border-gray-700 rounded-xl shadow-md overflow-x-auto"
         >
           <table class="min-w-full text-sm text-left">
             <thead class="bg-green-900 text-green-300 uppercase text-[11px] font-semibold">
               <tr>
-                <th class="px-3 py-2">Username</th>
-                <th class="px-3 py-2">Email</th>
-                <th class="px-3 py-2 whitespace-nowrap">Last Payment</th>
-                <th class="px-3 py-2 text-center">Action</th>
+                <th class="px-4 py-2">Username</th>
+                <th class="px-4 py-2">Email</th>
+                <th class="px-4 py-2 whitespace-nowrap">Last Payment</th>
+                <th class="px-4 py-2 text-center">Action</th>
               </tr>
             </thead>
             <tbody>
               <tr
                 v-for="user in accountsTable"
                 :key="user.id"
-                class="border-t border-gray-700 hover:bg-[#2b2b2b] even:bg-[#1f1f1f] text-xs"
+                class="border-t border-gray-700 hover:bg-[#2b2b2b] even:bg-[#1f1f1f] text-xs transition"
               >
-                <td class="px-3 py-1.5 whitespace-nowrap">{{ user.username }}</td>
-                <td class="px-3 py-1.5 whitespace-nowrap">{{ user.email }}</td>
-                <td class="px-3 py-1.5 whitespace-nowrap">
+                <td class="px-4 py-2 whitespace-nowrap">{{ user.username }}</td>
+                <td class="px-4 py-2 whitespace-nowrap">{{ user.email }}</td>
+                <td class="px-4 py-2 whitespace-nowrap">
                   {{ user.lastPayment ? formatDate(user.lastPayment) : '—' }}
                 </td>
-                <td class="px-3 py-1.5 text-center">
+                <td class="px-4 py-2 text-center">
                   <button
                     @click="selectUser(user)"
-                    class="bg-green-700 text-white px-2 py-0.5 text-[11px] rounded hover:bg-green-600"
+                    class="bg-green-700 text-white px-3 py-1 rounded-md text-[11px] hover:bg-green-600 transition"
                   >
                     View
                   </button>
@@ -78,25 +77,25 @@
         <!-- 🧾 Invoice list for selected user -->
         <div
           v-if="selectedUserEmail"
-          class="bg-[#222] border border-gray-700 rounded-xl shadow-md p-4"
+          class="bg-[#222] border border-gray-700 rounded-xl shadow-md p-4 space-y-4 animate-fade-in"
         >
-          <div class="flex justify-between items-center mb-3">
+          <div class="flex justify-between items-center">
             <h2 class="text-base font-semibold text-green-300">
               Invoices for <span class="font-medium">{{ selectedUserName }}</span>
             </h2>
           </div>
 
           <!-- Filters -->
-          <div class="flex flex-col md:flex-row gap-2 mb-3">
+          <div class="flex flex-col md:flex-row gap-2">
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Search..."
-              class="w-full md:w-1/2 px-3 py-2 bg-[#1a1a1a] border border-gray-600 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:ring-green-500 focus:ring-1 focus:outline-none"
+              class="w-full md:w-1/2 px-3 py-2 bg-[#1a1a1a] border border-gray-600 rounded-md text-sm text-gray-200 placeholder-gray-500 focus:ring-green-500 focus:ring-2 focus:outline-none"
             />
             <select
               v-model="filterStatus"
-              class="w-full md:w-1/4 px-3 py-2 bg-[#1a1a1a] border border-gray-600 rounded-md text-sm text-gray-200 focus:ring-green-500 focus:ring-1 focus:outline-none"
+              class="w-full md:w-1/4 px-3 py-2 bg-[#1a1a1a] border border-gray-600 rounded-md text-sm text-gray-200 focus:ring-green-500 focus:ring-2 focus:outline-none"
             >
               <option value="">All</option>
               <option value="Paid">Paid</option>
@@ -122,18 +121,16 @@
               <tr
                 v-for="invoice in sortedInvoices"
                 :key="invoice.id"
-                class="border-b border-gray-700 hover:bg-[#2b2b2b] text-xs"
+                class="border-b border-gray-700 hover:bg-[#2b2b2b] text-xs transition"
               >
                 <td class="px-3 py-1.5 whitespace-nowrap">{{ formatDate(invoice.createdAt) }}</td>
-                <td class="px-3 py-1.5">
-                  {{ invoice.services.map((s) => s.serviceName).join(', ') }}
-                </td>
+                <td class="px-3 py-1.5">{{ invoice.services.map((s) => s.serviceName).join(', ') }}</td>
                 <td class="px-3 py-1.5 whitespace-nowrap">₱{{ invoice.totalAmount || 0 }}</td>
                 <td class="px-3 py-1.5 whitespace-nowrap">{{ invoice.paymentMethod || 'N/A' }}</td>
                 <td class="px-3 py-1.5 whitespace-nowrap">{{ invoice.idType || 'None' }}</td>
                 <td class="px-3 py-1.5 whitespace-nowrap">
                   <span
-                    class="text-[10px] font-medium px-2 py-0.5 rounded-full border"
+                    class="text-[10px] font-medium px-2 py-0.5 rounded-full border shadow"
                     :class="{
                       'bg-green-900 text-green-300 border-green-600': invoice.status === 'Paid',
                       'bg-yellow-900 text-yellow-300 border-yellow-600': invoice.status === 'Pending',
@@ -148,13 +145,13 @@
                     <button
                       v-if="invoice.status === 'Pending'"
                       @click="openApproveModal(invoice.id)"
-                      class="bg-blue-700 text-white px-2 py-0.5 text-[11px] rounded hover:bg-blue-600"
+                      class="bg-blue-700 text-white px-2 py-0.5 text-[11px] rounded hover:bg-blue-600 transition"
                     >
                       Approve
                     </button>
                     <button
                       @click="deleteInvoice(invoice.id)"
-                      class="bg-red-700 text-white px-2 py-0.5 text-[11px] rounded hover:bg-red-600"
+                      class="bg-red-700 text-white px-2 py-0.5 text-[11px] rounded hover:bg-red-600 transition"
                     >
                       Delete
                     </button>
@@ -175,34 +172,32 @@
           v-if="showApproveModal"
           class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center"
         >
-          <div
-            class="bg-[#1a1a1a] text-gray-200 w-full max-w-sm p-6 rounded-xl shadow space-y-4 border border-gray-600"
-          >
+          <div class="bg-[#1a1a1a] text-gray-200 w-full max-w-sm p-6 rounded-xl shadow-2xl border border-gray-600 animate-fade-in">
             <h3 class="text-lg font-semibold">Set Invoice Details</h3>
-            <p class="text-sm">Enter total amount and choose ID type.</p>
+            <p class="text-sm mb-2">Enter total amount and choose ID type.</p>
 
             <input
               type="number"
               v-model.number="approveAmount"
               placeholder="Enter total amount"
-              class="w-full px-3 py-2 bg-[#1a1a1a] border border-gray-600 rounded-md text-sm text-gray-200 focus:ring-green-500 focus:ring-1 focus:outline-none"
+              class="w-full px-3 py-2 bg-[#1a1a1a] border border-gray-600 rounded-md text-sm text-gray-200 focus:ring-green-500 focus:ring-2 focus:outline-none"
             />
 
             <select
               v-model="approveIdType"
-              class="w-full px-3 py-2 bg-[#1a1a1a] border border-gray-600 rounded-md text-sm text-gray-200 focus:ring-green-500 focus:ring-1 focus:outline-none"
+              class="w-full mt-2 px-3 py-2 bg-[#1a1a1a] border border-gray-600 rounded-md text-sm text-gray-200 focus:ring-green-500 focus:ring-2 focus:outline-none"
             >
               <option value="">None</option>
               <option value="Senior">Senior Citizen</option>
               <option value="PWD">Person with Disability</option>
             </select>
 
-            <div class="text-sm mt-2">
+            <div class="text-sm mt-4">
               <span class="font-medium">Discounted Total:</span>
               ₱{{ discountedAmount.toFixed(2) }}
             </div>
 
-            <div class="flex justify-end gap-2 mt-4">
+            <div class="flex justify-end gap-2 mt-6">
               <button
                 @click="showApproveModal = false"
                 class="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 text-sm"
@@ -211,7 +206,7 @@
               </button>
               <button
                 @click="approveInvoice"
-                class="px-4 py-2 bg-green-700 text-white rounded hover:bg-green-600 text-sm"
+                class="px-4 py-2 bg-green-700 text-white rounded hover:bg-green-600 text-sm shadow"
               >
                 Confirm
               </button>
@@ -222,6 +217,7 @@
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
