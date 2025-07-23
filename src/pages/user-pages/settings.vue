@@ -1,13 +1,15 @@
 <template>
-  <div class="flex min-h-screen bg-gray-50 text-gray-800">
-    <!-- Sidebar -->
-    <Sidebar class="w-full lg:w-64 border-r border-gray-200" />
+  <div class="h-screen w-screen overflow-hidden bg-gray-50 text-gray-800">
+    <!-- Fixed Topbar -->
+    <Topbar class="fixed top-0 left-0 right-0 h-16 z-30 bg-white shadow-sm" />
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col">
-      <Topbar class="sticky top-0 z-10 bg-white shadow-sm" />
+    <!-- Main Layout -->
+    <div class="pt-16 flex h-[calc(100vh-4rem)]">
+      <!-- Fixed Sidebar -->
+      <Sidebar class="w-64 fixed top-16 bottom-0 left-0 border-r border-gray-200 bg-white z-20" />
 
-      <main class="flex-1 p-6">
+      <!-- Scrollable Content Area -->
+      <main class="ml-64 flex-1 overflow-y-auto p-6">
         <div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-md">
           <h2 class="text-2xl font-bold mb-6">Hospital Billing Settings</h2>
 
@@ -66,7 +68,6 @@ import { ref } from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
 import Topbar from '@/components/Topbar.vue'
 
-// Replace with Firestore or API connection if needed
 const settings = ref({
   taxRate: 0,
   serviceFee: 0,
@@ -83,10 +84,7 @@ const saveSettings = async () => {
   errorMessage.value = ''
 
   try {
-    // Simulate saving to database
     await new Promise(resolve => setTimeout(resolve, 1000))
-
-    // TODO: Save to Firebase or API
     successMessage.value = 'Billing settings updated successfully.'
   } catch (error) {
     errorMessage.value = 'Failed to save settings. Please try again.'

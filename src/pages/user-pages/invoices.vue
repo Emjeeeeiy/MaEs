@@ -1,18 +1,19 @@
 <template>
-  <div class="flex h-screen overflow-hidden bg-gray-100 text-gray-800">
-    <Sidebar />
+  <div class="h-screen overflow-hidden bg-gray-100 text-gray-800 flex flex-col">
+    <!-- Topbar (full width) -->
+    <div class="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
+      <Topbar />
+    </div>
 
-    <div class="flex flex-col flex-1 w-full text-sm">
-      <!-- Topbar -->
-      <div class="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
-        <Topbar />
-      </div>
+    <!-- Main Content Area with Sidebar + Page Content -->
+    <div class="flex flex-1 overflow-hidden">
+      <!-- Sidebar -->
+      <Sidebar />
 
-      <main class="flex-1 overflow-y-auto px-4 py-4 space-y-4 animate-fade-in">
+      <!-- Page Content -->
+      <div class="flex flex-col flex-1 w-full text-sm overflow-y-auto px-4 py-4 space-y-4 animate-fade-in">
         <!-- Filters -->
-        <section
-          class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-wrap gap-2 items-end"
-        >
+        <section class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-wrap gap-2 items-end">
           <div class="flex flex-col">
             <label class="text-xs text-gray-600 mb-0.5">Status</label>
             <select
@@ -153,7 +154,7 @@
             </div>
           </div>
         </section>
-      </main>
+      </div>
     </div>
   </div>
 </template>

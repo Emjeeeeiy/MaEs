@@ -3,76 +3,101 @@
     <!-- Mobile overlay -->
     <div
       v-if="isMobileSidebarOpen"
-      class="fixed inset-0 z-40 backdrop-blur-sm bg-black/10 sm:hidden"
+      class="fixed inset-0 z-40 backdrop-blur-sm bg-black/20 sm:hidden"
       @click="isMobileSidebarOpen = false"
     ></div>
 
     <!-- Sidebar -->
     <aside
       :class="[
-        'fixed sm:static top-0 left-0 h-screen w-64 bg-gray-800 text-white z-50 flex flex-col transition-transform duration-300',
+        'fixed sm:static top-0 left-0 h-screen w-64 bg-white text-gray-800 z-50 flex flex-col shadow-md transition-transform duration-300',
         isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'
       ]"
     >
-      <!-- Logo -->
-      <div class="px-6 py-4 text-2xl font-bold text-green-500 border-b border-gray-700">
-        MaEs
-      </div>
-
       <!-- Profile -->
       <div class="flex-1 overflow-y-auto">
-        <div class="px-6 py-5 border-b border-gray-700 text-center">
-          <div class="mx-auto w-16 h-16 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
+        <router-link
+          to="/profile"
+          class="block px-6 py-6 border-b border-gray-200 text-center hover:bg-gray-50 transition"
+        >
+          <div class="mx-auto w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center shadow">
             <img
               v-if="profileImageUrl"
               :src="profileImageUrl"
               alt="Profile"
               class="w-full h-full object-cover"
             />
-            <div v-else class="text-xl font-semibold text-green-500">
+            <div v-else class="text-2xl font-bold text-green-600">
               {{ username.charAt(0).toUpperCase() }}
             </div>
           </div>
-          <h3 class="mt-2 text-sm font-semibold text-gray-200">{{ username }}</h3>
-          <p class="text-xs text-gray-400">{{ role }}</p>
-        </div>
+          <h3 class="mt-3 text-base font-semibold text-gray-800 hover:underline">{{ username }}</h3>
+          <p class="text-sm text-gray-500">{{ role }}</p>
+        </router-link>
 
         <!-- Navigation Links -->
-        <nav class="px-4 py-6 space-y-2">
-          <router-link to="/dashboard" class="nav-link group">
-            <HomeIcon class="nav-icon group-hover:animate-bounce" />
-            Dashboard
-          </router-link>
+        <nav class="px-4 py-6 space-y-4">
+          <!-- MAIN -->
+          <div>
+            <p class="px-2 mb-2 text-xs text-gray-500 uppercase tracking-wide">Main</p>
+            <router-link
+              to="/dashboard"
+              :class="linkClass('/dashboard')"
+            >
+              <HomeIcon class="w-5 h-5 text-gray-500" />
+              Dashboard
+            </router-link>
+          </div>
 
-          <router-link to="/billing" class="nav-link group">
-            <ClipboardDocumentCheckIcon class="nav-icon group-hover:animate-bounce" />
-            Billing
-          </router-link>
+          <!-- PROCESS -->
+          <div>
+            <p class="px-2 mb-2 text-xs text-gray-500 uppercase tracking-wide">Process</p>
+            <router-link
+              to="/billing"
+              :class="linkClass('/billing')"
+            >
+              <ClipboardDocumentCheckIcon class="w-5 h-5 text-gray-500" />
+              Billing
+            </router-link>
+            <router-link
+              to="/payments"
+              :class="linkClass('/payments')"
+            >
+              <CreditCardIcon class="w-5 h-5 text-gray-500" />
+              Payments
+            </router-link>
+          </div>
 
-          <router-link to="/payments" class="nav-link group">
-            <CreditCardIcon class="nav-icon group-hover:animate-bounce" />
-            Payments
-          </router-link>
+          <!-- INFORMATION -->
+          <div>
+            <p class="px-2 mb-2 text-xs text-gray-500 uppercase tracking-wide">Information</p>
+            <router-link
+              to="/invoices"
+              :class="linkClass('/invoices')"
+            >
+              <DocumentTextIcon class="w-5 h-5 text-gray-500" />
+              Invoices
+            </router-link>
+          </div>
 
-          <router-link to="/invoices" class="nav-link group">
-            <DocumentTextIcon class="nav-icon group-hover:animate-bounce" />
-            Invoices
-          </router-link>
-
-          <router-link to="/appointment" class="nav-link group">
-            <CalendarIcon class="nav-icon group-hover:animate-bounce" />
-            Appointments
-          </router-link>
-
-          <!-- <router-link to="/report" class="nav-link group">
-            <ClipboardDocumentListIcon class="nav-icon group-hover:animate-bounce" />
-            Report
-          </router-link> -->
-
-          <router-link to="/result" class="nav-link group">
-            <ChartBarIcon class="nav-icon group-hover:animate-bounce" />
-            Result
-          </router-link>
+          <!-- OTHER -->
+          <div>
+            <p class="px-2 mb-2 text-xs text-gray-500 uppercase tracking-wide">Other</p>
+            <router-link
+              to="/appointment"
+              :class="linkClass('/appointment')"
+            >
+              <CalendarIcon class="w-5 h-5 text-gray-500" />
+              Appointments
+            </router-link>
+            <router-link
+              to="/result"
+              :class="linkClass('/result')"
+            >
+              <ChartBarIcon class="w-5 h-5 text-gray-500" />
+              Result
+            </router-link>
+          </div>
         </nav>
       </div>
     </aside>
@@ -80,7 +105,7 @@
     <!-- Toggle Button -->
     <button
       @click="isMobileSidebarOpen = !isMobileSidebarOpen"
-      class="fixed top-16 left-4 z-[9999] sm:hidden bg-gray-800 text-white p-1.5 rounded-md shadow-md"
+      class="fixed top-4 left-4 z-[9999] sm:hidden bg-white text-gray-700 border border-gray-300 p-2 rounded-md shadow-md hover:bg-green-100 hover:text-green-600 transition-all"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
         viewBox="0 0 24 24" stroke="currentColor">
@@ -93,6 +118,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute } from 'vue-router'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/firebase'
@@ -104,13 +130,23 @@ import {
   ClipboardDocumentCheckIcon,
   CalendarIcon,
   ChartBarIcon,
-  ClipboardDocumentListIcon
 } from '@heroicons/vue/24/solid'
 
 const username = ref('User')
 const role = ref('Viewer')
 const profileImageUrl = ref('')
 const isMobileSidebarOpen = ref(false)
+
+const route = useRoute()
+
+function linkClass(path) {
+  return [
+    'flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition',
+    route.path === path
+      ? 'bg-green-100 text-green-600'
+      : 'text-gray-700 hover:bg-green-100 hover:text-green-600'
+  ]
+}
 
 let unsubscribeUserDoc = null
 
@@ -136,36 +172,3 @@ onBeforeUnmount(() => {
   if (unsubscribeUserDoc) unsubscribeUserDoc()
 })
 </script>
-
-<style scoped>
-.nav-link {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  color: #e5e7eb; /* text-gray-200 */
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.nav-link:hover {
-  background-color: #16a34a; /* green-600 */
-  color: white;
-}
-
-.nav-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-  color: white;
-}
-
-/* Scrollbar fix */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-</style>

@@ -1,16 +1,20 @@
 <template>
-  <div class="flex flex-col lg:flex-row min-h-screen bg-gray-50">
-    <!-- Sidebar -->
-    <Sidebar class="w-full lg:w-64 border-b lg:border-b-0 lg:border-r border-gray-200" />
+  <div class="h-screen w-full bg-gray-50 overflow-hidden">
+    <!-- Fixed Topbar (stretches full width) -->
+    <div class="fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-200 h-16">
+      <Topbar />
+    </div>
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col">
-      <!-- Topbar -->
-      <Topbar class="sticky top-0 z-10 bg-white shadow-sm" />
+    <!-- Main Layout below Topbar -->
+    <div class="flex pt-16 h-full">
+      <!-- Sidebar fixed below the Topbar -->
+      <aside class="fixed top-16 bottom-0 left-0 w-64 bg-white border-r border-gray-200 z-20 hidden sm:block">
+        <Sidebar />
+      </aside>
 
-      <!-- Page Body -->
-      <main class="flex-1 p-4 sm:p-6 max-w-4xl mx-auto w-full">
-        <div class="bg-white rounded-lg shadow p-4 sm:p-6 border border-black">
+      <!-- Scrollable Main Content Area -->
+      <main class="flex-1 ml-0 sm:ml-64 overflow-y-auto p-4 sm:p-6">
+        <div class="bg-white rounded-lg shadow p-4 sm:p-6 border border-black max-w-4xl mx-auto">
           <!-- Loading Animation -->
           <div v-if="loading" class="flex justify-center py-16">
             <LoadingAnimation />
@@ -18,7 +22,7 @@
 
           <!-- Profile Content -->
           <template v-else>
-            <!-- Header -->
+            <!-- Profile Header -->
             <div class="flex flex-col items-center mb-6 text-center">
               <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center border border-gray-300">
                 <img
@@ -35,7 +39,7 @@
               <p class="text-sm text-gray-500">Manage your account information</p>
             </div>
 
-            <!-- Details Grid -->
+            <!-- Profile Details -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-gray-700 text-sm">
               <div><span class="font-semibold">Username:</span> {{ username || "Not provided" }}</div>
               <div><span class="font-semibold">Email:</span> {{ email || "Not provided" }}</div>

@@ -79,10 +79,17 @@
           v-if="selectedUserEmail"
           class="bg-[#222] border border-gray-700 rounded-xl shadow-md p-4 space-y-4 animate-fade-in"
         >
-          <div class="flex justify-between items-center">
+          <!-- 🔙 Back Button -->
+          <div class="flex justify-between items-center mb-4">
             <h2 class="text-base font-semibold text-green-300">
               Invoices for <span class="font-medium">{{ selectedUserName }}</span>
             </h2>
+            <button
+              @click="clearSelectedUser"
+              class="text-xs bg-gray-700 text-gray-200 px-3 py-1 rounded hover:bg-gray-600 transition"
+            >
+              ← Back to User List
+            </button>
           </div>
 
           <!-- Filters -->
@@ -112,7 +119,7 @@
                 <th class="px-3 py-2">Services</th>
                 <th class="px-3 py-2">Total</th>
                 <th class="px-3 py-2">Method</th>
-                <th class="px-3 py-2">ID</th>
+                <th class="px-3 py-2">Reference No.</th>
                 <th class="px-3 py-2">Status</th>
                 <th class="px-3 py-2 text-center">Actions</th>
               </tr>
@@ -127,7 +134,7 @@
                 <td class="px-3 py-1.5">{{ invoice.services.map((s) => s.serviceName).join(', ') }}</td>
                 <td class="px-3 py-1.5 whitespace-nowrap">₱{{ invoice.totalAmount || 0 }}</td>
                 <td class="px-3 py-1.5 whitespace-nowrap">{{ invoice.paymentMethod || 'N/A' }}</td>
-                <td class="px-3 py-1.5 whitespace-nowrap">{{ invoice.idType || 'None' }}</td>
+                <td class="px-3 py-1.5 whitespace-nowrap">{{ invoice.referenceNumber || 'N/A' }}</td>
                 <td class="px-3 py-1.5 whitespace-nowrap">
                   <span
                     class="text-[10px] font-medium px-2 py-0.5 rounded-full border shadow"
@@ -173,8 +180,8 @@
           class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center"
         >
           <div class="bg-[#1a1a1a] text-gray-200 w-full max-w-sm p-6 rounded-xl shadow-2xl border border-gray-600 animate-fade-in">
-            <h3 class="text-lg font-semibold">Set Invoice Details</h3>
-            <p class="text-sm mb-2">Enter total amount and choose ID type.</p>
+            <h3 class="text-lg font-semibold">Approve Payment</h3>
+            <p class="text-sm mb-2">Set amount and ID type to finalize.</p>
 
             <input
               type="number"
@@ -218,7 +225,6 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import {
@@ -235,7 +241,6 @@ import { db } from '@/firebase'
 import admin_sidebar from '@/components/admin_sidebar.vue'
 import AdminTopbar from '@/components/AdminTopbar.vue'
 
-/* -------------------- reactive state -------------------- */
 const users = ref([])
 const invoices = ref([])
 const selectedUserName = ref('')
@@ -249,11 +254,8 @@ const showApproveModal = ref(false)
 const invoiceToApproveId = ref(null)
 const approveAmount = ref(0)
 const approveIdType = ref('')
-
-/* latest payment per user */
 const userLastPayments = ref({})
 
-/* -------------------- computed -------------------- */
 const discountedAmount = computed(() => {
   const amount = approveAmount.value || 0
   const eligible =
@@ -304,14 +306,12 @@ const sortedInvoices = computed(() =>
   )
 )
 
-/* -------------------- helpers -------------------- */
 const formatDate = (ts) => {
   if (!ts) return 'N/A'
   if (ts.toDate) ts = ts.toDate()
   return ts instanceof Date ? ts.toISOString().split('T')[0] : 'N/A'
 }
 
-/* -------------------- Firestore helpers -------------------- */
 const fetchUsers = async () => {
   const snap = await getDocs(collection(db, 'users'))
   users.value = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
@@ -329,7 +329,6 @@ const fetchLastPayments = async () => {
   userLastPayments.value = latest
 }
 
-/* -------------------- UI actions -------------------- */
 const selectUser = async (user) => {
   selectedUserName.value = user.username
   selectedUserEmail.value = user.email
@@ -339,6 +338,15 @@ const selectUser = async (user) => {
   const qInv = query(collection(db, 'invoices'), where('email', '==', user.email))
   const snap = await getDocs(qInv)
   invoices.value = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
+}
+
+const clearSelectedUser = () => {
+  selectedUserName.value = ''
+  selectedUserEmail.value = ''
+  userSearchQuery.value = ''
+  searchQuery.value = ''
+  filterStatus.value = ''
+  invoices.value = []
 }
 
 const openApproveModal = (id) => {
@@ -356,7 +364,7 @@ const approveInvoice = async () => {
     status: 'Paid',
     totalAmount: discountedAmount.value,
     idType: approveIdType.value,
-    approvedAt // ✅ store date‑approved
+    approvedAt
   })
 
   invoices.value = invoices.value.map((inv) =>
@@ -379,7 +387,6 @@ const deleteInvoice = async (id) => {
   invoices.value = invoices.value.filter((inv) => inv.id !== id)
 }
 
-/* -------------------- lifecycle -------------------- */
 onMounted(async () => {
   await fetchUsers()
   await fetchLastPayments()

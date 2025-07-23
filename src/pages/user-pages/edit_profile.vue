@@ -1,15 +1,19 @@
 <template>
-  <div class="flex min-h-screen bg-gray-50">
-    <!-- Sidebar -->
-    <Sidebar class="w-full lg:w-64 border-r border-gray-200" />
+  <div class="h-screen flex flex-col">
+    <!-- Topbar (fixed height) -->
+    <div class="flex-shrink-0">
+      <Topbar class="w-full bg-white shadow z-10" />
+    </div>
 
-    <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col">
-      <!-- Topbar -->
-      <Topbar class="sticky top-0 z-10 bg-white shadow-sm" />
+    <!-- Content Area with Sidebar and Main -->
+    <div class="flex flex-1 overflow-hidden bg-gray-50">
+      <!-- Sidebar (fixed width, full height) -->
+      <div class="w-64 bg-white border-r hidden sm:block">
+        <Sidebar />
+      </div>
 
-      <!-- Edit Profile Content -->
-      <main class="flex-1 p-6 max-w-4xl mx-auto w-full">
+      <!-- Scrollable Main Content -->
+      <main class="flex-1 overflow-y-auto p-6 max-w-4xl mx-auto w-full">
         <div class="bg-white rounded-lg shadow p-6">
           <form @submit.prevent="updateProfile">
             <!-- Profile Picture -->
@@ -91,7 +95,6 @@ import Topbar from '@/components/Topbar.vue'
 
 const router = useRouter()
 
-// Reactive values
 const username = ref('')
 const email = ref('')
 const completeName = ref('')
@@ -134,7 +137,6 @@ onMounted(async () => {
     errorMessage.value = 'Failed to load profile data.'
   }
 })
-
 
 const handleImageChange = (event) => {
   const file = event.target.files[0]

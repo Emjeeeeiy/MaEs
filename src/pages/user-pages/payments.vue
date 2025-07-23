@@ -1,9 +1,12 @@
 <template>
-  <div class="flex flex-col sm:flex-row min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800">
-    <Sidebar />
-
-    <div class="flex-1 flex flex-col max-h-screen">
+  <div class="flex flex-col h-screen bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800">
+    <div class="flex-shrink-0">
       <Topbar />
+    </div>
+
+    <div class="flex flex-1 overflow-hidden">
+      <Sidebar class="w-64 flex-shrink-0 border-r border-gray-200 bg-white hidden sm:block" />
+
       <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
         <transition name="fade" mode="out-in">
           <div v-if="loading" key="loading" class="flex justify-center items-center min-h-[300px]">
@@ -14,7 +17,7 @@
             <div class="bg-white p-6 rounded-xl shadow border border-gray-200 space-y-4">
               <h3 class="font-medium text-sm text-gray-700 mb-2">Select Unpaid Invoices:</h3>
 
-              <!-- Table for Desktop -->
+              <!-- Desktop Table -->
               <div class="hidden sm:block overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
                   <thead class="bg-gray-100 text-gray-600">
@@ -52,7 +55,7 @@
                 </table>
               </div>
 
-              <!-- Mobile Card View -->
+              <!-- Mobile Cards -->
               <div class="space-y-4 sm:hidden">
                 <div
                   v-for="invoice in sortedInvoices"
@@ -86,9 +89,8 @@
               <!-- Submit Button -->
               <div class="text-right">
                 <button
-                  @click="showPaymentMethodModal = true"
-                  :disabled="selectedInvoices.length === 0"
-                  class="bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-700 disabled:opacity-50"
+                  @click="handleSubmitClick"
+                  class="bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition"
                 >
                   Submit Payment
                 </button>
@@ -101,19 +103,61 @@
 
     <!-- Payment Method Modal -->
     <transition name="fade">
-      <div
-        v-if="showPaymentMethodModal"
-        class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
-      >
+      <div v-if="showPaymentMethodModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
         <div class="bg-white w-80 p-4 rounded-lg shadow-xl space-y-4 animate-fade-in">
           <h3 class="text-base font-bold text-center">Select Payment Method</h3>
           <div class="grid grid-cols-2 gap-2 text-sm font-medium">
             <button @click="submitPayments('Cash')" class="bg-gray-100 hover:bg-gray-200 py-1.5 rounded-md">Cash</button>
             <button @click="submitPayments('GCash')" class="bg-blue-100 hover:bg-blue-200 py-1.5 rounded-md">GCash</button>
-            <button @click="submitPayments('PayMaya')" class="bg-purple-100 hover:bg-purple-200 py-1.5 rounded-md">PayMaya</button>
-            <button @click="submitPayments('PayPal')" class="bg-yellow-100 hover:bg-yellow-200 py-1.5 rounded-md">PayPal</button>
           </div>
           <button @click="showPaymentMethodModal = false" class="w-full text-center text-red-500 hover:underline text-xs">Cancel</button>
+        </div>
+      </div>
+    </transition>
+
+    <!-- GCash Modal (No Upload) -->
+    <transition name="fade">
+      <div v-if="showGCashModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white w-[380px] p-6 rounded-lg shadow-xl space-y-5 animate-fade-in text-gray-700">
+          <h3 class="text-lg font-bold text-blue-600 text-center">Pay with GCash</h3>
+
+          <div class="text-sm space-y-2">
+            <p><strong>Step 1:</strong> Scan the QR code below using your GCash app.</p>
+            <p><strong>Step 2:</strong> Pay the total amount for your selected invoice(s).</p>
+            <p><strong>Step 3:</strong> Enter your 10-digit GCash reference number.</p>
+          </div>
+
+          <img src="/gcash-qr.jpg" alt="GCash QR" class="w-40 mx-auto rounded border shadow" />
+
+          <div class="text-sm mt-4 space-y-3">
+            <label class="block">
+              <span class="font-semibold">GCash Reference Number</span>
+              <input
+                type="text"
+                v-model="gcashReferenceNumber"
+                placeholder="e.g. 1234567890"
+                class="w-full border rounded px-3 py-2 text-sm mt-1"
+              />
+            </label>
+          </div>
+
+          <div class="flex justify-between items-center pt-4 text-sm">
+            <button @click="showGCashModal = false" class="text-red-500 hover:underline">Cancel</button>
+            <button @click="handleGCashSubmit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded">
+              Submit
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Reminder Modal -->
+    <transition name="fade">
+      <div v-if="showReminderModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white w-[300px] p-5 rounded-lg shadow-xl space-y-4 animate-fade-in text-center">
+          <h3 class="text-lg font-bold text-yellow-600">No Service Selected</h3>
+          <p class="text-sm text-gray-700">Please select at least one invoice before submitting.</p>
+          <button @click="showReminderModal = false" class="mt-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1.5 rounded-md text-sm">Okay</button>
         </div>
       </div>
     </transition>
@@ -126,12 +170,7 @@
           <p class="text-sm text-gray-700">
             {{ selectedInvoices.length }} invoice(s) have been submitted and are awaiting admin approval.
           </p>
-          <button
-            @click="showSuccessModal = false"
-            class="mt-2 bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-md text-sm"
-          >
-            Okay
-          </button>
+          <button @click="showSuccessModal = false" class="mt-2 bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-md text-sm">Okay</button>
         </div>
       </div>
     </transition>
@@ -157,11 +196,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default {
   name: "ProcessPaymentPage",
-  components: {
-    Sidebar,
-    Topbar,
-    LoadingAnimation,
-  },
+  components: { Sidebar, Topbar, LoadingAnimation },
   data() {
     return {
       invoices: [],
@@ -170,6 +205,9 @@ export default {
       userEmail: null,
       showPaymentMethodModal: false,
       showSuccessModal: false,
+      showReminderModal: false,
+      showGCashModal: false,
+      gcashReferenceNumber: "",
     };
   },
   computed: {
@@ -183,8 +221,7 @@ export default {
   },
   methods: {
     calculateInvoiceAmount(invoice) {
-      const services = invoice.services || [];
-      return services.reduce((sum, s) => sum + (s.amount || 0), 0);
+      return (invoice.services || []).reduce((sum, s) => sum + (s.amount || 0), 0);
     },
     async fetchUnpaidInvoices() {
       if (!this.userEmail) return;
@@ -209,6 +246,11 @@ export default {
     },
     async submitPayments(method) {
       this.showPaymentMethodModal = false;
+      if (method === "GCash") {
+        this.showGCashModal = true;
+        return;
+      }
+
       if (this.selectedInvoices.length === 0) return;
       try {
         const submittedAt = serverTimestamp();
@@ -234,6 +276,47 @@ export default {
         alert("Error processing payments.");
       }
     },
+    async handleGCashSubmit() {
+      if (!this.gcashReferenceNumber) {
+        alert("Please enter a reference number.");
+        return;
+      }
+
+      try {
+        const submittedAt = serverTimestamp();
+        for (const invoice of this.selectedInvoices) {
+          await addDoc(collection(db, "payments"), {
+            invoiceID: invoice.id,
+            method: "GCash",
+            status: "Pending",
+            submittedAt,
+            email: this.userEmail,
+            referenceNumber: this.gcashReferenceNumber,
+          });
+          await updateDoc(doc(db, "invoices", invoice.id), {
+            status: "Pending",
+            paymentMethod: "GCash",
+            submittedAt,
+          });
+        }
+
+        this.gcashReferenceNumber = "";
+        this.selectedInvoices = [];
+        this.showGCashModal = false;
+        await this.fetchUnpaidInvoices();
+        this.showSuccessModal = true;
+      } catch (error) {
+        console.error("Error uploading GCash payment:", error);
+        alert("Submission failed.");
+      }
+    },
+    handleSubmitClick() {
+      if (this.selectedInvoices.length === 0) {
+        this.showReminderModal = true;
+      } else {
+        this.showPaymentMethodModal = true;
+      }
+    },
     getCurrentUser() {
       const auth = getAuth();
       onAuthStateChanged(auth, async (user) => {
@@ -252,27 +335,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out;
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-</style>

@@ -1,25 +1,25 @@
 <template>
-  <div class="flex flex-col sm:flex-row h-screen bg-gray-100 text-gray-800 overflow-hidden">
-    <!-- Sidebar -->
-    <div class="w-full sm:w-64 sm:h-screen sticky top-0 border-b sm:border-b-0 sm:border-r border-gray-200 bg-white z-20">
-      <Sidebar />
+  <div class="h-screen flex flex-col bg-gray-100 text-gray-800 overflow-hidden">
+    <!-- Topbar -->
+    <div class="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
+      <Topbar />
     </div>
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col max-h-screen overflow-hidden text-sm">
-      <!-- Topbar -->
-      <div class="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm">
-        <Topbar />
+    <!-- Body: Sidebar + Main Content -->
+    <div class="flex flex-1 overflow-hidden">
+      <!-- Sidebar -->
+      <div class="w-64 hidden sm:block border-r border-gray-200 bg-white flex-shrink-0">
+        <Sidebar />
       </div>
 
-      <!-- Page Body -->
-      <main class="flex-1 overflow-y-auto px-4 py-4 sm:py-6 space-y-6 animate-fade-in relative">
+      <!-- Scrollable Main Content -->
+      <main class="flex-1 overflow-y-auto px-4 py-4 sm:py-6 space-y-6 animate-fade-in">
         <!-- Loading -->
         <div v-if="loading" class="flex items-center justify-center h-[60vh]">
           <loading_animation />
         </div>
 
-        <!-- Invoices List -->
+        <!-- Invoices -->
         <template v-else>
           <div
             v-for="inv in invoices"
@@ -55,7 +55,7 @@
               </button>
             </div>
 
-            <!-- Results Section -->
+            <!-- Results -->
             <div>
               <h3 class="text-sm font-semibold text-gray-800 mb-2">Results</h3>
               <ul class="space-y-2">
@@ -73,7 +73,7 @@
             </div>
           </div>
 
-          <!-- No Results Message -->
+          <!-- No Invoices -->
           <p v-if="invoices.length === 0" class="text-center text-sm text-gray-500">
             No results available.
           </p>

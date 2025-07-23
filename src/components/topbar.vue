@@ -1,6 +1,6 @@
 <template>
   <header class="bg-white shadow-md relative z-10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="w-full px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <!-- Dynamic Page Title -->
         <div class="font-bold text-green-700 text-lg sm:text-xl md:text-2xl capitalize">
@@ -31,7 +31,6 @@
               </span>
             </button>
 
-            <!-- ❌ Removed blur here -->
             <div
               v-if="notifDropdownOpen"
               class="fixed inset-0 bg-black/30 z-40"
@@ -67,10 +66,24 @@
                 v-if="dropdownOpen"
                 class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50"
               >
-                <router-link to="/profile" class="block px-4 py-2 text-gray-700 hover:bg-green-100" @click="closeDropdown">
+                <router-link
+                  to="/profile"
+                  class="block px-4 py-2 text-gray-700 hover:bg-green-100"
+                  @click="closeDropdown"
+                >
                   Profile
                 </router-link>
-                <button @click="handleLogout" class="w-full text-left px-4 py-2 text-gray-700 hover:bg-green-100">
+                <router-link
+                  to="/settings"
+                  class="block px-4 py-2 text-gray-700 hover:bg-green-100"
+                  @click="closeDropdown"
+                >
+                  Settings
+                </router-link>
+                <button
+                  @click="handleLogout"
+                  class="w-full text-left px-4 py-2 text-gray-700 hover:bg-green-100"
+                >
                   Logout
                 </button>
               </div>

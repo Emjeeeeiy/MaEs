@@ -56,12 +56,12 @@ import { BellIcon } from '@heroicons/vue/24/solid'
 import { db } from '@/firebase'
 import { collection, query, where, orderBy, onSnapshot, Timestamp } from 'firebase/firestore'
 
-// LocalStorage keys
+// LocalStorage for read tracking
 const READ_KEY = 'readNotifIds'
 const readIds = ref(new Set(JSON.parse(localStorage.getItem(READ_KEY) || '[]')))
 const saveReadIds = () => localStorage.setItem(READ_KEY, JSON.stringify([...readIds.value]))
 
-// Today's time range
+// Today's date range
 const now = new Date()
 const tsStart = Timestamp.fromDate(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0))
 const tsEnd = Timestamp.fromDate(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59))
@@ -73,7 +73,10 @@ const notifDropdownOpen = ref(false)
 const notifications = ref([])
 const notifRef = ref(null)
 
-// UI events
+// Invoice cache to track changes
+const invoiceStatus = new Map()
+
+// UI actions
 const toggleNotifDropdown = () => notifDropdownOpen.value = !notifDropdownOpen.value
 const handleClickOutside = (e) => {
   if (notifRef.value && !notifRef.value.contains(e.target)) notifDropdownOpen.value = false
@@ -89,12 +92,9 @@ const clearAllNotifications = () => {
   saveReadIds()
   notifications.value = []
 }
-const formatDate = (s) => (s ? new Date(s * 1e3).toLocaleString() : '')
+const formatDate = (s) => (s ? new Date(s * 1000).toLocaleString() : '')
 
-// Invoice status tracking
-const invoiceStatus = new Map()
-
-// Add only unread and non-duplicate notifications
+// Merge new notifications (exclude duplicates)
 const updateNotifList = (incoming) => {
   const fresh = incoming.filter(n => !readIds.value.has(n.id))
   const merged = [
@@ -104,11 +104,11 @@ const updateNotifList = (incoming) => {
   notifications.value = merged.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
 }
 
-// Firestore listeners
+// Realtime listeners
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
 
-  // Invoices
+  // Invoice Notifications
   const invQ = query(
     collection(db, 'invoices'),
     where('createdAt', '>=', tsStart),
@@ -117,22 +117,39 @@ onMounted(() => {
   )
   const unsubInv = onSnapshot(invQ, snap => {
     const list = []
-    snap.docChanges().forEach(ch => {
-      const d = ch.doc.data(), id = ch.doc.id
-      const prev = invoiceStatus.get(id), curr = d.status
+    snap.docChanges().forEach(change => {
+      const d = change.doc.data()
+      const id = change.doc.id
+      const prev = invoiceStatus.get(id)
+      const curr = d.status
       invoiceStatus.set(id, curr)
 
-      if (ch.type === 'added') {
-        list.push({ id: `${id}_invoice`, text: `New Invoice for ${d.email || 'a patient'}`, createdAt: d.createdAt, link: '/admin-invoices' })
+      if (change.type === 'added') {
+        list.push({
+          id: `${id}_invoice`,
+          text: `New Invoice from ${d.email || 'a patient'}`,
+          createdAt: d.createdAt,
+          link: '/admin-invoices'
+        })
       }
-      if (ch.type === 'modified' && prev?.toLowerCase() === 'not paid' && curr?.toLowerCase() === 'pending') {
-        list.push({ id: `${id}_payment`, text: `Payment submitted – invoice for ${d.email || 'a patient'} now Pending`, createdAt: Timestamp.now(), link: '/admin-invoices' })
+
+      if (
+        change.type === 'modified' &&
+        prev?.toLowerCase() !== 'pending' &&
+        curr?.toLowerCase() === 'pending'
+      ) {
+        list.push({
+          id: `${id}_payment`,
+          text: `Payment submitted by ${d.email || 'a patient'}`,
+          createdAt: Timestamp.now(),
+          link: '/admin-invoices'
+        })
       }
     })
     if (list.length) updateNotifList(list)
   })
 
-  // Users
+  // New Users
   const userQ = query(
     collection(db, 'users'),
     where('createdAt', '>=', tsStart),
@@ -142,14 +159,14 @@ onMounted(() => {
   const unsubUser = onSnapshot(userQ, snap => {
     const items = snap.docs.map(doc => ({
       id: `${doc.id}_user`,
-      text: `New Account: ${doc.data().email || 'Unknown'}`,
+      text: `New account: ${doc.data().email || 'Unknown'}`,
       createdAt: doc.data().createdAt,
       link: '/admin-management'
     }))
     updateNotifList(items)
   })
 
-  // Appointments
+  // New Appointments
   const apptQ = query(
     collection(db, 'appointments'),
     where('createdAt', '>=', tsStart),
@@ -159,14 +176,14 @@ onMounted(() => {
   const unsubAppt = onSnapshot(apptQ, snap => {
     const items = snap.docs.map(doc => ({
       id: `${doc.id}_appointment`,
-      text: `New Appointment – ${doc.data().department || 'Dept.'}`,
+      text: `New appointment – ${doc.data().department || 'Dept.'}`,
       createdAt: doc.data().createdAt,
       link: '/admin-appointment'
     }))
     updateNotifList(items)
   })
 
-  // Clean up
+  // Cleanup
   onBeforeUnmount(() => {
     document.removeEventListener('click', handleClickOutside)
     unsubInv()
@@ -175,14 +192,14 @@ onMounted(() => {
   })
 })
 
-// Page title
+// Dynamic Page Title
 const pageTitle = computed(() => {
   switch (route.path) {
     case '/admin-dashboard': return 'Admin Dashboard'
     case '/admin-invoices': return 'Invoice Management'
     case '/admin-management': return 'User Management'
     case '/admin-services': return 'Service Management'
-    case '/admin-rfa': return 'Request for Assisstance'
+    case '/admin-rfa': return 'Request for Assistance'
     case '/admin-appointment': return 'Appointments'
     case '/admin-result': return 'Results'
     default: return 'Admin Panel'
@@ -191,8 +208,10 @@ const pageTitle = computed(() => {
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active { transition: opacity .15s ease; }
-.fade-enter-from,
-.fade-leave-to { opacity: 0; }
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
 </style>

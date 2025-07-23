@@ -1,12 +1,17 @@
 <template>
-  <div class="flex flex-col sm:flex-row min-h-screen bg-gray-100 text-gray-800 overflow-hidden">
-    <!-- Sidebar (no longer hidden here) -->
-    <Sidebar />
-
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col max-h-screen">
+  <div class="flex flex-col h-screen bg-gray-100 text-gray-800 overflow-hidden">
+    <!-- Fixed Topbar -->
+    <div class="flex-shrink-0">
       <Topbar />
+    </div>
 
+    <div class="flex flex-1 min-h-0">
+      <!-- Fixed Sidebar -->
+      <div class="w-64 hidden sm:block border-r border-gray-200 bg-white flex-shrink-0">
+        <Sidebar />
+      </div>
+
+      <!-- Scrollable Main Content -->
       <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
         <div v-if="loadingInvoices" class="flex justify-center items-center h-60">
           <LoadingAnimation />
@@ -20,7 +25,9 @@
               <ExclamationTriangleIcon class="w-8 h-8 text-red-600" />
               <div class="text-center flex-1">
                 <h3 class="text-sm text-gray-600 mb-1">Total Not Paid</h3>
-                <p class="text-2xl font-semibold text-red-700">₱{{ unpaidTotalAmount.toFixed(2) }}</p>
+                <p class="text-2xl font-semibold text-red-700">
+                  ₱{{ unpaidTotalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+                </p>
               </div>
             </div>
 
@@ -61,14 +68,18 @@
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-100">
-                  <tr v-for="invoice in invoices" :key="invoice.id" class="hover:bg-gray-50">
+                  <tr
+                    v-for="invoice in invoices"
+                    :key="invoice.id"
+                    class="hover:bg-gray-50 cursor-pointer"
+                    @click="goToInvoices"
+                  >
                     <td class="px-4 py-3">
                       {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
                     </td>
                     <td class="px-4 py-3">
                       <span
-                        :class="[
-                          'px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap',
+                        :class="[ 'px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap',
                           invoice.status?.toLowerCase() === 'paid'
                             ? 'bg-green-100 text-green-700'
                             : invoice.status?.toLowerCase() === 'not paid'
@@ -91,7 +102,8 @@
                 <div
                   v-for="invoice in invoices"
                   :key="invoice.id"
-                  class="border border-gray-200 rounded-lg p-4 shadow-sm bg-white"
+                  class="border border-gray-200 rounded-lg p-4 shadow-sm bg-white cursor-pointer hover:bg-gray-50"
+                  @click="goToInvoices"
                 >
                   <div class="mb-2">
                     <p class="text-xs text-gray-500">Service(s)</p>
@@ -102,8 +114,7 @@
                   <div>
                     <p class="text-xs text-gray-500">Status</p>
                     <span
-                      :class="[
-                        'px-2 py-1 rounded-full text-xs font-semibold',
+                      :class="[ 'px-2 py-1 rounded-full text-xs font-semibold',
                         invoice.status?.toLowerCase() === 'paid'
                           ? 'bg-green-100 text-green-700'
                           : invoice.status?.toLowerCase() === 'not paid'
@@ -129,11 +140,11 @@
 </template>
 
 <script setup>
-import Sidebar from "@/components/Sidebar.vue";
-import Topbar from "@/components/Topbar.vue";
+import Topbar from "@/components/topbar.vue";
+import Sidebar from "@/components/sidebar.vue";
 import LoadingAnimation from "@/components/loading_animation.vue";
-
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "@/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -151,6 +162,7 @@ const unpaidClaims = ref(0);
 const overdueCount = ref(0);
 const unpaidTotalAmount = ref(0);
 const loadingInvoices = ref(true);
+const router = useRouter();
 
 const auth = getAuth();
 
@@ -161,7 +173,6 @@ const fetchInvoicesByEmail = async (email) => {
     const snapshot = await getDocs(q);
     const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
-    // Sort invoices by status
     docs.sort((a, b) => {
       const order = (status) => {
         if (!status) return 3;
@@ -176,7 +187,6 @@ const fetchInvoicesByEmail = async (email) => {
 
     invoices.value = docs;
 
-    // Metrics calculation
     paidClaims.value = 0;
     unpaidClaims.value = 0;
     overdueCount.value = 0;
@@ -204,6 +214,10 @@ const fetchInvoicesByEmail = async (email) => {
   } finally {
     loadingInvoices.value = false;
   }
+};
+
+const goToInvoices = () => {
+  router.push("/invoices");
 };
 
 const loadTawkChatbot = () => {
