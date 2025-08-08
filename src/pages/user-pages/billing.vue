@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-screen bg-gray-100 text-gray-800 overflow-hidden">
+  <div class="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 overflow-hidden">
     <!-- Fixed Topbar -->
     <div class="flex-shrink-0 z-10">
       <Topbar />
@@ -7,36 +7,40 @@
 
     <!-- Sidebar + Main Content -->
     <div class="flex flex-1 min-h-0 overflow-hidden">
-      <!-- Fixed Sidebar -->
-      <aside class="w-64 flex-shrink-0 hidden sm:block border-r bg-white">
+      <!-- Sidebar -->
+      <aside class="w-64 flex-shrink-0 hidden sm:block border-r bg-white shadow-sm">
         <Sidebar />
       </aside>
 
-      <!-- Scrollable Main Content -->
-      <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+      <!-- Main -->
+      <main class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8">
         <transition name="fade" mode="out-in">
+          <!-- Loading State -->
           <div v-if="loading" key="loading" class="flex justify-center items-center min-h-[300px]">
             <LoadingAnimation />
           </div>
 
-          <div v-else key="content" class="space-y-6 animate-fade-in">
-            <div class="bg-white border border-gray-300 rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
-              <!-- Search + Filter -->
+          <!-- Main Content -->
+          <div v-else key="content" class="space-y-8 animate-fade-in">
+            <!-- Search & Filters -->
+            <div class="bg-white border border-gray-200 rounded-2xl shadow p-6 space-y-6">
+              <h2 class="text-lg font-semibold text-blue-600">Generate Invoice</h2>
+
               <div class="flex flex-col sm:flex-row sm:items-end gap-4">
                 <div class="flex-1">
                   <label class="block text-sm font-medium text-gray-700 mb-1">Search Service or Category:</label>
                   <input
                     v-model="searchQuery"
                     type="text"
-                    placeholder="Type to search services or category..."
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm"
+                    placeholder="Search services..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm"
                   />
                 </div>
                 <div class="sm:w-60">
                   <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Category:</label>
                   <select
                     v-model="selectedCategory"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">All Categories</option>
                     <option v-for="cat in availableCategories" :key="cat" :value="cat">{{ cat }}</option>
@@ -46,15 +50,14 @@
 
               <!-- Grouped Services -->
               <div v-for="(services, category) in groupedFilteredServices" :key="category">
-                <h3 class="flex items-center gap-2 text-sm font-semibold text-green-600 mt-4 mb-2 first:mt-0">
-                  <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                  {{ category }}
+                <h3 class="flex items-center gap-2 text-sm font-semibold text-green-600 mt-6 mb-2 first:mt-0">
+                  <span class="w-2 h-2 bg-green-500 rounded-full"></span> {{ category }}
                 </h3>
                 <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
                   <label
                     v-for="service in services"
                     :key="service.id"
-                    class="flex items-center justify-between p-3 border border-gray-200 rounded-md bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+                    class="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
                   >
                     <div class="flex items-center gap-2">
                       <input
@@ -65,21 +68,24 @@
                       />
                       <span class="text-sm text-gray-800">{{ service.serviceName }}</span>
                     </div>
-                    <span class="text-sm font-medium text-gray-700 whitespace-nowrap">₱{{ service.amount }}</span>
+                    <span class="text-sm font-medium text-gray-700">₱{{ service.amount }}</span>
                   </label>
                 </div>
               </div>
 
-              <!-- No services -->
-              <p v-if="Object.keys(groupedFilteredServices).length === 0" class="text-sm text-gray-500">
+              <!-- No Results -->
+              <p
+                v-if="Object.keys(groupedFilteredServices).length === 0"
+                class="text-sm text-gray-500 text-center py-6"
+              >
                 No services found.
               </p>
 
               <!-- Generate Button -->
-              <div class="pt-2 sm:pt-4 text-right">
+              <div class="pt-4 text-right">
                 <button
                   @click="generateInvoice"
-                  class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2 rounded-md shadow-sm transition"
+                  class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg shadow-md transition"
                 >
                   Generate Invoice
                 </button>
@@ -91,11 +97,15 @@
     </div>
 
     <!-- Success Modal -->
-    <div v-if="showSuccessModal" class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/30 px-4">
-      <div class="bg-white p-6 rounded-lg shadow-md max-w-sm w-full text-center space-y-4 animate-fade-in">
+    <div
+      v-if="showSuccessModal"
+      class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/30 px-4"
+    >
+      <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full text-center space-y-4 animate-fade-in">
         <h2 class="text-xl font-semibold text-green-600">Invoice Generated</h2>
         <p class="text-gray-700 text-sm">
-          Invoice <strong>{{ generatedShortId }}</strong> successfully generated for <strong>{{ userEmail }}</strong>.
+          Invoice <strong>{{ generatedShortId }}</strong> successfully generated for
+          <strong>{{ userEmail }}</strong>.
         </p>
         <button
           @click="showSuccessModal = false"
@@ -228,27 +238,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-</style>

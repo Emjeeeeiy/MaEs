@@ -1,15 +1,19 @@
 <template>
-  <div class="flex min-h-screen bg-[#1a1a1a] text-gray-100">
-    <!-- Sidebar -->
-    <AdminSidebar class="w-64 border-r border-gray-700 bg-[#121212]" />
+  <div class="flex h-screen overflow-hidden bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-black text-gray-100">
+    <!-- Sidebar (below Topbar) -->
+    <aside class="w-64 shrink-0 bg-[#121212] border-r border-gray-700 shadow-lg fixed top-16 left-0 bottom-0 z-10 overflow-y-auto">
+      <AdminSidebar />
+    </aside>
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col">
-      <!-- Topbar -->
-      <AdminTopbar class="border-b border-gray-700 bg-[#121212]" />
+    <!-- Main Content Wrapper -->
+    <div class="flex flex-col flex-1 pl-64 min-w-0">
+      <!-- Topbar (Fixed & Full Width) -->
+      <div class="fixed top-0 left-0 right-0 z-20 h-16 shadow-md bg-[#121212] border-b border-gray-700">
+        <AdminTopbar />
+      </div>
 
-      <!-- Page Content -->
-      <main class="flex-1 p-6 space-y-6 overflow-y-auto">
+      <!-- Scrollable Page Content -->
+      <main class="flex-1 overflow-y-auto p-6 space-y-6 mt-16">
         <h1 class="text-2xl font-bold text-green-400">Uploaded Financial Documents</h1>
 
         <div v-if="loading" class="text-gray-400">Loading documents...</div>
@@ -82,3 +86,13 @@ const formatDate = (timestamp) => {
 
 onMounted(fetchDocuments)
 </script>
+
+<style scoped>
+main::-webkit-scrollbar {
+  width: 6px;
+}
+main::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+}
+</style>

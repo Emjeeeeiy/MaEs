@@ -1,21 +1,20 @@
 <template>
   <div class="h-screen overflow-hidden bg-gray-100 text-gray-800 flex flex-col">
-    <!-- Topbar (full width) -->
+    <!-- Topbar -->
     <div class="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
       <Topbar />
     </div>
 
-    <!-- Main Content Area with Sidebar + Page Content -->
     <div class="flex flex-1 overflow-hidden">
       <!-- Sidebar -->
       <Sidebar />
 
       <!-- Page Content -->
-      <div class="flex flex-col flex-1 w-full text-sm overflow-y-auto px-4 py-4 space-y-4 animate-fade-in">
+      <div class="flex flex-col flex-1 w-full text-sm overflow-y-auto px-4 py-6 space-y-6 animate-fade-in">
         <!-- Filters -->
-        <section class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex flex-wrap gap-2 items-end">
+        <section class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-4 items-end">
           <div class="flex flex-col">
-            <label class="text-xs text-gray-600 mb-0.5">Status</label>
+            <label class="text-xs text-gray-600 mb-1">Status</label>
             <select
               v-model="filterStatus"
               class="px-2 py-1 border border-gray-300 rounded-md text-xs bg-white text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -28,7 +27,7 @@
           </div>
 
           <div class="flex flex-col flex-grow min-w-[180px]">
-            <label class="text-xs text-gray-600 mb-0.5">Search</label>
+            <label class="text-xs text-gray-600 mb-1">Search</label>
             <input
               v-model="searchQuery"
               type="text"
@@ -39,60 +38,60 @@
         </section>
 
         <!-- Loading -->
-        <div v-if="loading" class="flex justify-center items-center py-10">
+        <div v-if="loading" class="flex justify-center items-center py-20">
           <LoadingAnimation />
         </div>
 
         <!-- No Results -->
-        <div v-else-if="filteredInvoices.length === 0" class="text-center text-gray-500 text-sm py-10">
+        <div v-else-if="filteredInvoices.length === 0" class="text-center text-gray-500 text-sm py-16">
           No invoices found.
         </div>
 
         <!-- Desktop Table -->
         <section
           v-else
-          class="hidden sm:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto"
+          class="hidden sm:block bg-white rounded-xl shadow-md border border-gray-200 overflow-x-auto"
         >
-          <table class="min-w-full text-sm text-gray-800">
-            <thead class="bg-gray-100 text-[11px] uppercase text-gray-600">
+          <table class="min-w-full text-sm text-gray-800 divide-y divide-gray-100">
+            <thead class="bg-gray-50 text-[11px] uppercase text-gray-600">
               <tr>
-                <th class="px-4 py-2 text-left whitespace-nowrap">Invoice ID</th>
-                <th class="px-4 py-2 text-left whitespace-nowrap">Services</th>
-                <th class="px-4 py-2 text-left whitespace-nowrap">Total</th>
-                <th class="px-4 py-2 text-left whitespace-nowrap">Date</th>
-                <th class="px-4 py-2 text-left whitespace-nowrap">Status</th>
+                <th class="px-4 py-3 text-left whitespace-nowrap">Invoice ID</th>
+                <th class="px-4 py-3 text-left whitespace-nowrap">Services</th>
+                <th class="px-4 py-3 text-left whitespace-nowrap">Total</th>
+                <th class="px-4 py-3 text-left whitespace-nowrap">Date</th>
+                <th class="px-4 py-3 text-left whitespace-nowrap">Status</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-100">
               <tr
                 v-for="invoice in filteredInvoices"
                 :key="invoice.id"
-                class="hover:bg-blue-50 transition-colors border-t border-gray-100"
+                class="hover:bg-blue-50 transition-colors"
               >
-                <td class="px-4 py-2 font-mono text-xs whitespace-nowrap">
+                <td class="px-4 py-3 font-mono text-xs whitespace-nowrap">
                   {{ invoice.shortId || 'N/A' }}
                 </td>
-                <td class="px-4 py-2">
+                <td class="px-4 py-3">
                   <ul class="list-disc list-inside text-xs text-gray-700 space-y-0.5">
                     <li v-for="service in invoice.services" :key="service.serviceName">
                       {{ service.serviceName }} - ₱{{ service.amount?.toFixed(2) || '0.00' }}
                     </li>
                   </ul>
                 </td>
-                <td class="px-4 py-2 text-green-600 font-semibold whitespace-nowrap">
+                <td class="px-4 py-3 text-green-600 font-semibold whitespace-nowrap">
                   ₱{{ calculateInvoiceTotal(invoice).toFixed(2) }}
                 </td>
-                <td class="px-4 py-2 whitespace-nowrap">
+                <td class="px-4 py-3 whitespace-nowrap">
                   {{ formattedDate(invoice.createdAt) }}
                 </td>
-                <td class="px-4 py-2 whitespace-nowrap">
+                <td class="px-4 py-3 whitespace-nowrap">
                   <span
-                    :class="[ 'px-2 py-0.5 rounded-full text-[11px] font-medium',
+                    :class="[ 'inline-block px-2 py-0.5 rounded-full text-[11px] font-medium',
                       invoice.status === 'Paid'
-                        ? 'bg-green-100 text-green-800'
+                        ? 'bg-green-100 text-green-700'
                         : invoice.status === 'Pending'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-yellow-100 text-yellow-700'
+                        : 'bg-red-100 text-red-700'
                     ]"
                   >
                     {{ invoice.status }}
@@ -103,12 +102,12 @@
           </table>
         </section>
 
-        <!-- Mobile Card View -->
+        <!-- Mobile Cards -->
         <section class="sm:hidden space-y-4">
           <div
             v-for="invoice in filteredInvoices"
             :key="invoice.id"
-            class="bg-white rounded-lg border border-gray-200 shadow-sm p-4"
+            class="bg-white rounded-xl border border-gray-200 shadow-md p-4"
           >
             <div class="mb-2 text-xs text-gray-600">
               <span class="font-semibold text-gray-800">Invoice ID:</span> {{ invoice.shortId || 'N/A' }}
@@ -141,12 +140,12 @@
 
             <div class="text-xs mt-1">
               <span
-                :class="[ 'px-2 py-0.5 rounded-full text-[11px] font-medium',
+                :class="[ 'inline-block px-2 py-0.5 rounded-full text-[11px] font-medium',
                   invoice.status === 'Paid'
-                    ? 'bg-green-100 text-green-800'
+                    ? 'bg-green-100 text-green-700'
                     : invoice.status === 'Pending'
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-red-100 text-red-800'
+                    ? 'bg-yellow-100 text-yellow-700'
+                    : 'bg-red-100 text-red-700'
                 ]"
               >
                 {{ invoice.status }}
@@ -247,10 +246,8 @@ export default {
 };
 </script>
 
-<style scoped>
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out;
-}
+<!-- Global animation class -->
+<style>
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -260,5 +257,8 @@ export default {
     opacity: 1;
     transform: translateY(0);
   }
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
 }
 </style>

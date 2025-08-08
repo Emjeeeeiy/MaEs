@@ -1,103 +1,131 @@
 <template>
-  <div class="h-screen w-64 bg-[#1a1a1a] text-white border-r border-gray-700 shadow-lg flex flex-col">
-    <!-- Scrollable Content -->
-    <div class="flex-1 overflow-y-auto">
-      <!-- Profile Section -->
-      <div class="flex flex-col items-center py-6 border-b border-gray-700">
-        <div class="w-16 h-16 bg-green-600 flex items-center justify-center rounded-full text-xl font-semibold">
-          A
-        </div>
-        <h3 class="mt-2 text-lg font-medium text-gray-200">{{ username }}</h3>
-        <p class="text-sm text-gray-400 capitalize">{{ role }}</p>
+  <aside class="h-full flex flex-col bg-[#1a1a1a] text-white">
+    <!-- Profile Header -->
+    <div class="flex flex-col items-center py-6 border-b border-gray-700 px-4">
+      <div
+        class="w-14 h-14 rounded-full bg-green-600 flex items-center justify-center text-2xl font-bold"
+      >
+        A
       </div>
-
-      <!-- Navigation Menu -->
-      <nav class="px-4 py-4 space-y-2">
-        <router-link
-          to="/admin-dashboard"
-          class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
-        >
-          <HomeIcon class="w-5 h-5 transform transition duration-300 group-hover:scale-110 group-hover:rotate-6" />
-          Admin Dashboard
-        </router-link>
-
-        <router-link
-          to="/admin-management"
-          class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
-        >
-          <UsersIcon class="w-5 h-5 transform transition duration-300 group-hover:scale-110 group-hover:-rotate-6" />
-          Manage Users
-        </router-link>
-
-        <router-link
-          to="/admin-invoices"
-          class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
-        >
-          <DocumentTextIcon class="w-5 h-5 transform transition duration-300 group-hover:scale-105 group-hover:rotate-3" />
-          Invoice
-        </router-link>
-
-        <router-link
-          to="/admin-services"
-          class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
-        >
-          <Cog6ToothIcon class="w-5 h-5 transform transition duration-300 group-hover:rotate-90" />
-          Service
-        </router-link>
-
-        <router-link
-          to="/admin-appointment"
-          class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
-        >
-          <CalendarDaysIcon class="w-5 h-5 transform transition duration-300 group-hover:scale-105 group-hover:-rotate-3" />
-          Appointment
-        </router-link>
-
-        <router-link
-          to="/admin-result"
-          class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
-        >
-          <ChartBarIcon class="w-5 h-5 transform transition duration-300 group-hover:scale-110 group-hover:rotate-2" />
-          Result
-        </router-link>
-
-        <router-link
-          to="/admin-rfa"
-          class="flex items-center gap-2 px-4 py-2 rounded text-gray-200 hover:bg-green-700 hover:text-white transition font-medium group"
-        >
-          <ChatBubbleLeftRightIcon class="w-5 h-5 transform transition duration-300 group-hover:scale-110 group-hover:-rotate-3" />
-          Request for Assistance
-        </router-link>
-      </nav>
+      <h2 class="mt-2 text-lg font-semibold">{{ username }}</h2>
+      <p class="text-sm text-gray-400">{{ role }}</p>
     </div>
 
-    <!-- Logout Button -->
+    <!-- Menu Items with Scroll -->
+    <div class="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+      <!-- Main Section -->
+      <div>
+        <h3 class="text-xs uppercase text-gray-500 font-semibold mb-2">Main</h3>
+        <ul class="space-y-2">
+          <li>
+            <RouterLink
+              to="/admin-dashboard"
+              class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-green-500/20 transition-colors"
+            >
+              <LayoutDashboard class="w-5 h-5" />
+              <span>Dashboard</span>
+            </RouterLink>
+          </li>
+          <li>
+            <RouterLink
+              to="/admin-management"
+              class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-green-500/20 transition-colors"
+            >
+              <Users class="w-5 h-5" />
+              <span>Users</span>
+            </RouterLink>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Manage Section -->
+      <div>
+        <h3 class="text-xs uppercase text-gray-500 font-semibold mb-2">Manage</h3>
+        <ul class="space-y-2">
+          <li>
+            <RouterLink
+              to="/admin-invoices"
+              class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-green-500/20 transition-colors"
+            >
+              <FileText class="w-5 h-5" />
+              <span>Invoice</span>
+            </RouterLink>
+          </li>
+          <li>
+            <RouterLink
+              to="/admin-services"
+              class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-green-500/20 transition-colors"
+            >
+              <Settings class="w-5 h-5" />
+              <span>Service</span>
+            </RouterLink>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Others Section -->
+      <div>
+        <h3 class="text-xs uppercase text-gray-500 font-semibold mb-2">Others</h3>
+        <ul class="space-y-2">
+          <li>
+            <RouterLink
+              to="/admin-appointment"
+              class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-green-500/20 transition-colors"
+            >
+              <Calendar class="w-5 h-5" />
+              <span>Appointment</span>
+            </RouterLink>
+          </li>
+          <li>
+            <RouterLink
+              to="/admin-result"
+              class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-green-500/20 transition-colors"
+            >
+              <BarChart class="w-5 h-5" />
+              <span>Result</span>
+            </RouterLink>
+          </li>
+          <li>
+            <RouterLink
+              to="/admin-rfa"
+              class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-green-500/20 transition-colors"
+            >
+              <MessageSquare class="w-5 h-5" />
+              <span>Request for Assistance</span>
+            </RouterLink>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Logout Button (Sticky Footer) -->
     <div class="px-4 py-4 border-t border-gray-700">
       <button
         @click="logout"
-        class="w-full flex items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-600 hover:text-white rounded transition font-medium group"
+        class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold text-sm rounded-lg transition"
       >
-        <ArrowLeftOnRectangleIcon class="w-5 h-5 transform transition duration-300 group-hover:-translate-x-1" />
+        <LogOut class="w-4 h-4" />
         Logout
       </button>
     </div>
-  </div>
+  </aside>
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
+import { useRouter, RouterLink } from "vue-router";
 import { getAuth, signOut } from "firebase/auth";
 
-// Icons
-import { HomeIcon } from "@heroicons/vue/24/outline";
-import { UsersIcon } from "@heroicons/vue/24/outline";
-import { DocumentTextIcon } from "@heroicons/vue/24/outline";
-import { Cog6ToothIcon } from "@heroicons/vue/24/outline";
-import { CalendarDaysIcon } from "@heroicons/vue/24/outline";
-import { ChartBarIcon } from "@heroicons/vue/24/outline";
-import { ChatBubbleLeftRightIcon } from "@heroicons/vue/24/outline";
-import { ArrowLeftOnRectangleIcon } from "@heroicons/vue/24/outline";
-import { ChartPieIcon } from "@heroicons/vue/24/outline"; // ✅ Added for Report
+// Lucide icons
+import {
+  LayoutDashboard,
+  Users,
+  FileText,
+  Settings,
+  Calendar,
+  BarChart,
+  MessageSquare,
+  LogOut,
+} from "lucide-vue-next";
 
 const router = useRouter();
 
@@ -107,7 +135,17 @@ const logout = async () => {
   router.push("/login");
 };
 
-// Placeholder (replace with actual auth info)
+// Replace with actual user info if dynamic
 const username = "Admin";
 const role = "Administrator";
 </script>
+
+<style scoped>
+aside::-webkit-scrollbar {
+  width: 6px;
+}
+aside::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+</style>

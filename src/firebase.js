@@ -1,10 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { getStorage } from "firebase/storage"; 
-import { addDoc, serverTimestamp } from "firebase/firestore";
-
-
+import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // Your Firebase configuration (Replace with actual values if necessary)
 const firebaseConfig = {
@@ -22,7 +19,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
-const storage = getStorage(app); 
+const storage = getStorage(app); // ✅ fixed: only one declaration
 
 // Function for Google Sign-In
 const signInWithGoogle = async () => {
@@ -34,7 +31,7 @@ const signInWithGoogle = async () => {
   }
 };
 
-// Function to Logoutc
+// Function to Logout
 const logout = async () => {
   try {
     await signOut(auth);
@@ -44,5 +41,14 @@ const logout = async () => {
   }
 };
 
-export { auth, db, storage, collection, getDocs, addDoc, serverTimestamp, signInWithGoogle, logout };
-
+export {
+  auth,
+  db,
+  storage,
+  collection,
+  getDocs,
+  addDoc,
+  serverTimestamp,
+  signInWithGoogle,
+  logout
+};

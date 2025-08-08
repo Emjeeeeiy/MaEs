@@ -1,11 +1,18 @@
 <template>
-  <div class="flex min-h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-black text-gray-100 overflow-hidden">
-    <admin_sidebar />
-
-    <div class="flex-1 flex flex-col h-screen">
+  <div class="flex flex-col min-h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-black text-gray-100 overflow-hidden">
+    <!-- Fixed Full Width Topbar -->
+    <div class="fixed top-0 left-0 right-0 z-30">
       <AdminTopbar />
+    </div>
 
-      <main class="flex-1 p-6 sm:p-8 space-y-10 overflow-y-auto">
+    <div class="flex pt-16 h-full">
+      <!-- Sidebar (fixed width, full height below topbar) -->
+      <div class="w-64 flex-shrink-0 border-r border-gray-800 bg-[#1a1a1a] h-[calc(100vh-4rem)] overflow-y-auto">
+        <admin_sidebar />
+      </div>
+
+      <!-- Main Content Area -->
+      <main class="flex-1 p-6 sm:p-8 space-y-10 overflow-y-auto h-[calc(100vh-4rem)]">
         <!-- Summary Cards -->
         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div
@@ -41,7 +48,7 @@
           </button>
         </div>
 
-        <!-- Charts -->
+        <!-- Charts Section -->
         <section class="space-y-10">
           <!-- Revenue Trend -->
           <div class="rounded-2xl border border-gray-700/40 bg-[#1f1f1f]/70 backdrop-blur-md p-6 shadow-lg shadow-black/40 hover:shadow-green-500/40 transition-shadow">
@@ -62,7 +69,7 @@
             </div>
           </div>
 
-          <!-- Service Trend -->
+          <!-- Service Trends -->
           <div
             v-for="(_, index) in serviceChartRefs"
             :key="index"
@@ -182,7 +189,8 @@ async function fetchDashboardData() {
       if (status === 'paid') {
         totalRevenue += amount
 
-        const ts = d.submittedAt?.seconds
+        // ✅ Use approvedAt or fallback to submittedAt
+        const ts = d.approvedAt?.seconds || d.submittedAt?.seconds
         if (ts) {
           const dateStr = new Date(ts * 1000).toISOString().split('T')[0]
           revenueTrend.value[dateStr] = (revenueTrend.value[dateStr] || 0) + amount
@@ -324,13 +332,25 @@ function drawCharts() {
 }
 
 function exportToExcel() {
-  const data = dashboardCards.value.map((c) => ({
+  const metricsData = dashboardCards.value.map((c) => ({
     Metric: c.title,
     Value: c.value
   }))
-  const worksheet = XLSX.utils.json_to_sheet(data)
+
+  const revenueData = Object.entries(getFilteredRevenueData())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, amount]) => ({
+      Date: date,
+      Revenue: `₱${amount.toLocaleString()}`
+    }))
+
+  const metricsSheet = XLSX.utils.json_to_sheet(metricsData)
+  const revenueSheet = XLSX.utils.json_to_sheet(revenueData)
+
   const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Dashboard Metrics')
+  XLSX.utils.book_append_sheet(workbook, metricsSheet, 'Dashboard Metrics')
+  XLSX.utils.book_append_sheet(workbook, revenueSheet, 'Daily Revenue Trend')
+
   XLSX.writeFile(workbook, 'MaEsPayTrack_Admin_Dashboard.xlsx')
 }
 
@@ -345,6 +365,7 @@ watch(selectedWeek, () => {
   drawCharts()
 })
 </script>
+
 
 <style scoped>
 main::-webkit-scrollbar {

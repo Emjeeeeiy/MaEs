@@ -1,22 +1,31 @@
 <template>
-  <div class="flex min-h-screen bg-[#1a1a1a] text-gray-200">
-    <!-- Sidebar -->
-    <AdminSidebar class="w-64 border-r border-gray-800 shadow-md" />
-
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col">
-      <!-- Topbar -->
+  <div class="min-h-screen bg-[#1a1a1a] text-gray-200">
+    <!-- Fixed Topbar -->
+    <div class="fixed top-0 left-0 right-0 z-40">
       <AdminTopbar />
+    </div>
 
-      <!-- Content Area -->
-      <div class="flex-1 p-6 space-y-6 overflow-y-auto">
+    <div class="flex pt-16 h-[calc(100vh-4rem)]"> <!-- 4rem = topbar height -->
+      <!-- Sidebar (Fixed height after topbar) -->
+      <div class="w-64 h-full border-r border-gray-800 bg-[#1a1a1a] shadow-md overflow-y-auto">
+        <AdminSidebar />
+      </div>
+
+      <!-- Main Content -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-6">
         <!-- Error -->
-        <div v-if="errorMessage" class="bg-red-900 border border-red-600 text-red-300 p-4 rounded-lg shadow-sm animate-pulse">
+        <div
+          v-if="errorMessage"
+          class="bg-red-900 border border-red-600 text-red-300 p-4 rounded-lg shadow-sm animate-pulse"
+        >
           {{ errorMessage }}
         </div>
 
         <!-- User Table -->
-        <div v-if="users.length" class="bg-[#222] border border-gray-700 rounded-xl shadow-xl overflow-hidden">
+        <div
+          v-if="users.length"
+          class="bg-[#222] border border-gray-700 rounded-xl shadow-xl overflow-hidden"
+        >
           <table class="w-full text-sm">
             <thead class="bg-green-900 text-green-300 uppercase text-xs font-bold tracking-wide">
               <tr>
@@ -93,9 +102,18 @@
 
         <!-- No Users -->
         <div v-else class="flex flex-col items-center justify-center mt-12 text-gray-400">
-          <svg class="w-16 h-16 mb-4 text-gray-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0M2.25 12a9.75 9.75 0 1119.5 0 9.75 9.75 0 01-19.5 0z" />
+          <svg
+            class="w-16 h-16 mb-4 text-gray-600"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0M2.25 12a9.75 9.75 0 1119.5 0 9.75 9.75 0 01-19.5 0z"
+            />
           </svg>
           <p class="text-sm">No users found in the system.</p>
         </div>

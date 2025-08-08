@@ -2,7 +2,7 @@
   <header class="bg-white shadow-md relative z-10">
     <div class="w-full px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
-        <!-- Dynamic Page Title -->
+        <!-- Page Title -->
         <div class="font-bold text-green-700 text-lg sm:text-xl md:text-2xl capitalize">
           {{ pageTitle }}
         </div>
@@ -31,11 +31,7 @@
               </span>
             </button>
 
-            <div
-              v-if="notifDropdownOpen"
-              class="fixed inset-0 bg-black/30 z-40"
-              @click="notifDropdownOpen = false"
-            ></div>
+            <div v-if="notifDropdownOpen" class="fixed inset-0 bg-black/30 z-40" @click="notifDropdownOpen = false"></div>
 
             <transition name="fade">
               <div
@@ -48,14 +44,19 @@
                   :key="index"
                   class="px-4 py-2 border-b last:border-none text-sm text-gray-700"
                 >
-                  {{ notif.text }}
+                  {{ notif.message }}
                   <span class="block text-xs text-gray-400 mt-1">{{ formatDate(notif.createdAt?.seconds) }}</span>
+                </div>
+                <div class="text-right px-4 py-2">
+                  <button class="text-xs text-red-500 hover:underline" @click="clearNotifications">
+                    Clear All
+                  </button>
                 </div>
               </div>
             </transition>
           </div>
 
-          <!-- Profile Dropdown -->
+          <!-- Profile -->
           <div class="relative" ref="profileDropdownRef">
             <button @click="toggleDropdown" title="Profile">
               <UserIcon class="w-6 h-6 text-blue-600 hover:scale-110 transition" />
@@ -66,18 +67,10 @@
                 v-if="dropdownOpen"
                 class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50"
               >
-                <router-link
-                  to="/profile"
-                  class="block px-4 py-2 text-gray-700 hover:bg-green-100"
-                  @click="closeDropdown"
-                >
+                <router-link to="/profile" class="block px-4 py-2 text-gray-700 hover:bg-green-100" @click="closeDropdown">
                   Profile
                 </router-link>
-                <router-link
-                  to="/settings"
-                  class="block px-4 py-2 text-gray-700 hover:bg-green-100"
-                  @click="closeDropdown"
-                >
+                <router-link to="/settings" class="block px-4 py-2 text-gray-700 hover:bg-green-100" @click="closeDropdown">
                   Settings
                 </router-link>
                 <button
@@ -140,6 +133,7 @@
   </header>
 </template>
 
+
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
@@ -158,7 +152,9 @@ import {
   onSnapshot,
   query,
   where,
-  orderBy
+  orderBy,
+  getDocs,
+  deleteDoc
 } from 'firebase/firestore'
 import {
   ref as storageRef,
@@ -231,7 +227,7 @@ onMounted(() => {
   if (userEmail) {
     const notifQuery = query(
       collection(db, 'notifications'),
-      where('email', '==', userEmail),
+      where('userEmail', '==', userEmail),
       orderBy('createdAt', 'desc')
     )
     onSnapshot(notifQuery, (snapshot) => {
@@ -281,6 +277,17 @@ const sendFeedback = async () => {
     console.error('Feedback send error:', err)
   } finally {
     loading.value = false
+  }
+}
+
+const clearNotifications = async () => {
+  try {
+    const snapshot = await getDocs(query(collection(db, 'notifications'), where('userEmail', '==', userEmail)))
+    const deletions = snapshot.docs.map(doc => deleteDoc(doc.ref))
+    await Promise.all(deletions)
+    notifDropdownOpen.value = false
+  } catch (err) {
+    console.error('Error clearing notifications:', err)
   }
 }
 

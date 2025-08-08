@@ -1,89 +1,99 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-green-300 to-green-700 flex flex-col">
-    <!-- Topbar -->
-    <login_topbar />
+  <div class="min-h-screen bg-gradient-to-br from-green-300 to-green-700 flex items-center justify-center px-4 py-8">
+    <form
+      @submit.prevent="registerUser"
+      class="w-full max-w-md bg-white p-8 rounded-2xl shadow-2xl"
+    >
+      <!-- Title -->
+      <h2 class="text-2xl font-bold text-center text-green-700 mb-2">Create Account</h2>
+      <p class="text-sm text-gray-600 text-center mb-5">
+        Join us and manage your hospital billing seamlessly
+      </p>
 
-    <div class="flex-grow flex items-center justify-center px-4 py-8">
-      <form
-        @submit.prevent="registerUser"
-        class="w-full max-w-sm bg-white p-6 rounded-lg shadow-md"
+      <!-- Error Message -->
+      <p v-if="errorMessage" class="mb-4 text-sm text-red-600 text-center">{{ errorMessage }}</p>
+
+      <!-- Username -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-800 mb-1">Username</label>
+        <input
+          type="text"
+          v-model="username"
+          required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="Enter your username"
+        />
+      </div>
+
+      <!-- Email -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-800 mb-1">Email</label>
+        <input
+          type="email"
+          v-model="email"
+          required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="Enter your email"
+        />
+      </div>
+
+      <!-- Password -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-800 mb-1">Password</label>
+        <input
+          type="password"
+          v-model="password"
+          required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="Create a password"
+        />
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="mb-5">
+        <label class="block text-sm font-medium text-gray-800 mb-1">Confirm Password</label>
+        <input
+          type="password"
+          v-model="confirmPassword"
+          required
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+          placeholder="Confirm your password"
+        />
+      </div>
+
+      <!-- Register Button -->
+      <button
+        type="submit"
+        class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-lg transition"
       >
-        <h2 class="text-xl font-semibold mb-1 text-center text-gray-800">Create Account</h2>
-        <p class="text-xs text-gray-600 text-center mb-5">
-          Join us and manage your hospital billing seamlessly
-        </p>
+        Register
+      </button>
 
-        <!-- Error Message -->
-        <p v-if="errorMessage" class="mb-3 text-xs text-red-600 text-center">{{ errorMessage }}</p>
+      <!-- Divider -->
+      <div class="my-5 flex items-center justify-between">
+        <hr class="w-full border-gray-300" />
+        <span class="text-sm text-gray-500 px-2">or</span>
+        <hr class="w-full border-gray-300" />
+      </div>
 
-        <!-- Username -->
-        <div class="mb-3">
-          <label class="block mb-1 text-gray-700 text-xs">Username</label>
-          <input
-            type="text"
-            v-model="username"
-            required
-            class="w-full px-2 py-1 border rounded text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-            placeholder="Enter your username"
-          />
-        </div>
+      <!-- Google Registration -->
+      <button
+        @click="registerWithGoogle"
+        type="button"
+        class="w-full flex items-center justify-center gap-3 border border-gray-300 py-2 rounded-lg hover:bg-gray-100 transition"
+      >
+        <img src="@/assets/google-icon.png" alt="Google" class="w-5 h-5" />
+        <span class="text-sm text-gray-800 font-medium">Continue with Google</span>
+      </button>
 
-        <!-- Email -->
-        <div class="mb-3">
-          <label class="block mb-1 text-gray-700 text-xs">Email</label>
-          <input
-            type="email"
-            v-model="email"
-            required
-            class="w-full px-2 py-1 border rounded text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-            placeholder="Enter your email"
-          />
-        </div>
-
-        <!-- Password -->
-        <div class="mb-3">
-          <label class="block mb-1 text-gray-700 text-xs">Password</label>
-          <input
-            type="password"
-            v-model="password"
-            required
-            class="w-full px-2 py-1 border rounded text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-            placeholder="Create a password"
-          />
-        </div>
-
-        <!-- Confirm Password -->
-        <div class="mb-4">
-          <label class="block mb-1 text-gray-700 text-xs">Confirm Password</label>
-          <input
-            type="password"
-            v-model="confirmPassword"
-            required
-            class="w-full px-2 py-1 border rounded text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-            placeholder="Confirm your password"
-          />
-        </div>
-
-        <!-- Register Button -->
-        <button
-          type="submit"
-          class="w-full bg-green-600 text-white py-1.5 rounded hover:bg-green-700 transition text-sm font-semibold"
-        >
-          Register
-        </button>
-
-        <!-- Google Registration -->
-        <button
-          @click="registerWithGoogle"
-          type="button"
-          class="w-full mt-3 bg-white border border-gray-300 py-1.5 flex items-center justify-center gap-2 rounded hover:bg-gray-100 transition text-sm"
-        >
-          <img src="@/assets/google-icon.png" alt="Google Logo" class="w-4 h-4" />
-          <span class="text-gray-700">Continue with Google</span>
-        </button>
-        <router-link to="/login" class="text-green-700 hover:underline">back</router-link>
-      </form>
-    </div>
+      <!-- Back to login -->
+      <p class="mt-5 text-center text-sm text-gray-700">
+        Already have an account?
+        <router-link to="/login" class="text-green-700 font-semibold hover:underline">
+          Login
+        </router-link>
+      </p>
+    </form>
   </div>
 </template>
 
@@ -101,7 +111,6 @@ import {
 import { db } from "../firebase";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useRouter } from "vue-router";
-import login_topbar from "@/components/login_topbar.vue";
 
 const username = ref("");
 const email = ref("");
@@ -169,3 +178,14 @@ const registerWithGoogle = async () => {
   }
 };
 </script>
+
+<style scoped>
+button,
+a {
+  transition: transform 0.15s ease;
+}
+button:hover,
+a:hover {
+  transform: translateY(-2px);
+}
+</style>

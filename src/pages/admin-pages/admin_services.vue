@@ -1,15 +1,21 @@
 <template>
-  <div class="flex min-h-screen bg-[#1a1a1a] text-white overflow-hidden">
-    <!-- Sidebar -->
-    <AdminSidebar class="w-64 border-r border-gray-800 bg-[#1a1a1a]" />
+  <div class="flex h-screen overflow-hidden bg-[#1a1a1a] text-white">
+    <!-- Sidebar (fixed below topbar) -->
+    <aside class="w-64 shrink-0 bg-[#1a1a1a] border-r border-gray-800 shadow fixed top-16 left-0 bottom-0 z-10 overflow-y-auto">
+      <AdminSidebar />
+    </aside>
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col h-screen">
-      <AdminTopbar />
+    <!-- Main Content Wrapper -->
+    <div class="flex flex-col flex-1 pl-64 min-w-0">
+      <!-- Topbar (fixed full width) -->
+      <div class="fixed top-0 left-0 right-0 z-20 h-16 shadow-md bg-[#1a1a1a] border-b border-gray-800">
+        <AdminTopbar />
+      </div>
 
-      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+      <!-- Scrollable Page Content -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-6 mt-16 animate-fade-in">
         <!-- Header Controls -->
-        <div class="flex flex-col sm:flex-row sm:items-center gap-3 animate-fade-in">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
           <input v-model="searchTerm" type="text" placeholder="Search services..."
             class="w-full sm:w-1/2 px-3 py-2 rounded-md bg-[#222] border border-gray-700 placeholder-gray-400 text-sm focus:ring-green-500 focus:outline-none transition shadow-sm" />
 
@@ -31,8 +37,8 @@
           </div>
         </div>
 
-        <!-- Table -->
-        <div class="overflow-x-auto border border-gray-800 rounded-xl shadow-xl bg-[#222] animate-fade-in">
+        <!-- Service Table -->
+        <div class="overflow-x-auto border border-gray-800 rounded-xl shadow-xl bg-[#222]">
           <table class="min-w-full text-sm text-left text-gray-200">
             <thead class="bg-gray-700 text-xs uppercase text-green-300 border-b border-gray-600">
               <tr>
@@ -115,7 +121,6 @@ const selectedCategory = ref('')
 const showModal = ref(false)
 const isEditing = ref(false)
 const editId = ref(null)
-const serviceToDelete = ref(null)
 
 const categories = [
   'CHEMISTRY', 'SPECIAL CHEMISTRY', 'ELECTROLYTES', 'CLINICAL MICROSCOPY',
@@ -189,3 +194,14 @@ const closeModal = () => {
 
 onMounted(fetchServices)
 </script>
+
+<style scoped>
+/* Optional scrollbar styling */
+div::-webkit-scrollbar {
+  width: 6px;
+}
+div::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+</style>

@@ -5,78 +5,132 @@
       <Topbar />
     </div>
 
-    <!-- Body: Sidebar + Main Content -->
+    <!-- Body -->
     <div class="flex flex-1 overflow-hidden">
       <!-- Sidebar -->
       <div class="w-64 hidden sm:block border-r border-gray-200 bg-white flex-shrink-0">
         <Sidebar />
       </div>
 
-      <!-- Scrollable Main Content -->
-      <main class="flex-1 overflow-y-auto px-4 py-4 sm:py-6 space-y-6 animate-fade-in">
+      <!-- Main Content -->
+      <main class="flex-1 overflow-y-auto px-4 py-6 sm:px-8 space-y-8 animate-fade-in">
+        <!-- Header -->
+        <div class="flex items-center gap-3">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 12h6m2 8H7a2 2 0 01-2-2V6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v12a2 2 0 01-2 2z" />
+          </svg>
+          <h2 class="text-xl font-semibold text-gray-800">Your Laboratory Results</h2>
+        </div>
+
         <!-- Loading -->
         <div v-if="loading" class="flex items-center justify-center h-[60vh]">
           <loading_animation />
         </div>
 
-        <!-- Invoices -->
+        <!-- Results -->
         <template v-else>
+          <!-- No Invoices -->
+          <div v-if="invoices.length === 0" class="text-center text-gray-500 text-sm py-20">
+            🧪 No laboratory results available.
+          </div>
+
+          <!-- Invoices -->
           <div
+            v-else
             v-for="inv in invoices"
             :key="inv.id"
-            class="bg-white p-4 sm:p-5 rounded-lg shadow-sm border border-gray-200 space-y-4"
+            class="bg-white p-6 rounded-xl shadow border-l-4 transition border-blue-500 hover:shadow-md hover:border-blue-600 space-y-5"
           >
             <!-- Header Row -->
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4">
-              <div class="space-y-0.5">
-                <p class="font-medium text-gray-700">
-                  <span class="text-gray-500">Date:</span> {{ formatDate(inv.createdAt) }}
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+              <div class="space-y-1.5">
+                <p class="font-medium text-gray-800">
+                  📅 Date: <span class="text-gray-600">{{ formatDate(inv.createdAt) }}</span>
                 </p>
-                <p class="text-xs">
-                  <span class="text-gray-500 font-medium">Status:</span>
+                <div class="flex items-center text-sm space-x-2">
+                  <span class="font-medium text-gray-700">Status:</span>
                   <span
                     :class="[
-                      'inline-block px-2 py-0.5 rounded-full text-[10px] font-medium',
-                      inv.status === 'Paid' ? 'bg-green-100 text-green-800' :
-                      inv.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
+                      'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold',
+                      inv.status === 'Paid' ? 'bg-green-100 text-green-700' :
+                      inv.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700'
                     ]"
                   >
+                    <svg
+                      v-if="inv.status === 'Paid'"
+                      class="w-3 h-3 mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      stroke-width="2"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <svg
+                      v-else-if="inv.status === 'Pending'"
+                      class="w-3 h-3 mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      stroke-width="2"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3" />
+                    </svg>
+                    <svg
+                      v-else
+                      class="w-3 h-3 mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      stroke-width="2"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                     {{ inv.status }}
                   </span>
-                </p>
+                </div>
               </div>
 
               <button
                 @click="exportPDF(inv)"
-                class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs transition"
+                class="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded transition"
               >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 4v16m8-8H4" />
+                </svg>
                 Export PDF
               </button>
             </div>
 
-            <!-- Results -->
+            <!-- Service Results -->
             <div>
-              <h3 class="text-sm font-semibold text-gray-800 mb-2">Results</h3>
-              <ul class="space-y-2">
+              <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1">
+                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor"
+                  stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M9 17v-2a4 4 0 018 0v2M12 12h.01M6.938 4.938l1.414 1.414M17.657 4.938l-1.414 1.414" />
+                </svg>
+                Laboratory Findings
+              </h3>
+              <ul class="space-y-2 pl-3 border-l-2 border-blue-100">
                 <li
                   v-for="svc in inv.services"
                   :key="svc.serviceName"
                   class="text-sm text-gray-800"
                 >
-                  <strong>{{ svc.serviceName }}:</strong>
-                  <div class="text-xs text-gray-700 whitespace-pre-line mt-0.5 ml-2">
+                  <strong>{{ svc.serviceName }}</strong>
+                  <div class="text-xs text-gray-600 mt-0.5 ml-2 whitespace-pre-line">
                     {{ svc.result || 'No result yet' }}
                   </div>
                 </li>
               </ul>
             </div>
           </div>
-
-          <!-- No Invoices -->
-          <p v-if="invoices.length === 0" class="text-center text-sm text-gray-500">
-            No results available.
-          </p>
         </template>
       </main>
     </div>
@@ -168,10 +222,12 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style>
+/* global animation, no scoped */
 .animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
+  animation: fadeIn 0.4s ease-out;
 }
+
 @keyframes fadeIn {
   from {
     opacity: 0;

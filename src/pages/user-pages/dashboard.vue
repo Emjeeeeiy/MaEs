@@ -1,77 +1,94 @@
 <template>
-  <div class="flex flex-col h-screen bg-gray-100 text-gray-800 overflow-hidden">
-    <!-- Fixed Topbar -->
+  <div class="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 overflow-hidden">
+    <!-- Topbar -->
     <div class="flex-shrink-0">
       <Topbar />
     </div>
 
     <div class="flex flex-1 min-h-0">
-      <!-- Fixed Sidebar -->
+      <!-- Sidebar -->
       <div class="w-64 hidden sm:block border-r border-gray-200 bg-white flex-shrink-0">
         <Sidebar />
       </div>
 
-      <!-- Scrollable Main Content -->
-      <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+      <!-- Main Content -->
+      <div class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-10">
+        <!-- Loading -->
         <div v-if="loadingInvoices" class="flex justify-center items-center h-60">
           <LoadingAnimation />
         </div>
 
-        <div v-else class="space-y-6">
-          <!-- METRICS CARDS -->
-          <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- Total Not Paid -->
-            <div class="bg-white border border-gray-300 shadow-sm rounded-lg p-4 flex items-center gap-4">
-              <ExclamationTriangleIcon class="w-8 h-8 text-red-600" />
-              <div class="text-center flex-1">
-                <h3 class="text-sm text-gray-600 mb-1">Total Not Paid</h3>
-                <p class="text-2xl font-semibold text-red-700">
-                  ₱{{ unpaidTotalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
-                </p>
+        <!-- Dashboard -->
+        <div v-else class="space-y-12 animate-fadeIn">
+          <!-- Section: Overview -->
+          <section>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <!-- Total Not Paid -->
+              <div
+                class="bg-gradient-to-r from-red-100 to-red-50 border border-red-200 rounded-2xl p-5 shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center gap-4"
+              >
+                <AlertTriangle class="w-10 h-10 text-red-600" />
+                <div class="flex-1 text-center">
+                  <h3 class="text-sm font-medium text-red-700 mb-1">Total Not Paid</h3>
+                  <p class="text-3xl font-bold text-red-800">
+                    ₱{{ unpaidTotalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <!-- Unpaid Claims -->
-            <div class="bg-white border border-gray-300 shadow-sm rounded-lg p-4 flex items-center gap-4">
-              <ClockIcon class="w-8 h-8 text-yellow-500" />
-              <div class="text-center flex-1">
-                <h3 class="text-sm text-gray-600 mb-1">Unpaid Claims</h3>
-                <p class="text-2xl font-semibold text-yellow-600">{{ unpaidClaims }}</p>
+              <!-- Unpaid Claims -->
+              <div
+                class="bg-gradient-to-r from-yellow-100 to-yellow-50 border border-yellow-200 rounded-2xl p-5 shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center gap-4"
+              >
+                <Clock class="w-10 h-10 text-yellow-500" />
+                <div class="flex-1 text-center">
+                  <h3 class="text-sm font-medium text-yellow-600 mb-1">Unpaid Claims</h3>
+                  <p class="text-3xl font-bold text-yellow-700">{{ unpaidClaims }}</p>
+                </div>
               </div>
-            </div>
 
-            <!-- Paid Claims -->
-            <div class="bg-white border border-gray-300 shadow-sm rounded-lg p-4 flex items-center gap-4">
-              <BanknotesIcon class="w-8 h-8 text-green-600" />
-              <div class="text-center flex-1">
-                <h3 class="text-sm text-gray-600 mb-1">Paid Claims</h3>
-                <p class="text-2xl font-semibold text-green-700">{{ paidClaims }}</p>
+              <!-- Paid Claims -->
+              <div
+                class="bg-gradient-to-r from-green-100 to-green-50 border border-green-200 rounded-2xl p-5 shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center gap-4"
+              >
+                <Wallet class="w-10 h-10 text-green-600" />
+                <div class="flex-1 text-center">
+                  <h3 class="text-sm font-medium text-green-600 mb-1">Paid Claims</h3>
+                  <p class="text-3xl font-bold text-green-700">{{ paidClaims }}</p>
+                </div>
               </div>
             </div>
           </section>
 
-          <!-- RECENT INVOICES -->
-          <section class="bg-white border border-gray-300 shadow-sm rounded-xl p-4">
-            <div class="flex items-center gap-2 mb-4">
-              <DocumentTextIcon class="w-6 h-6 text-blue-600" />
-              <h2 class="text-lg sm:text-xl font-semibold text-gray-700">Recent Invoices</h2>
+          <!-- Section: Recent Invoices -->
+          <section>
+            <div class="flex justify-between items-center mb-4">
+              <div class="flex items-center gap-2">
+                <FileText class="w-6 h-6 text-blue-600" />
+                <h2 class="text-xl font-semibold text-gray-700">Recent Invoices</h2>
+              </div>
+              <button
+                class="text-sm px-4 py-2 rounded-full bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
+                @click="goToInvoices"
+              >
+                View All Invoices
+              </button>
             </div>
 
-            <!-- Responsive Table Wrapper -->
             <div class="overflow-x-auto">
               <!-- Desktop Table -->
-              <table class="hidden sm:table w-full text-sm divide-y divide-gray-200">
-                <thead class="bg-gray-100 text-gray-700">
+              <table class="hidden sm:table w-full text-sm divide-y divide-gray-200 shadow-md rounded-xl overflow-hidden">
+                <thead class="bg-gray-50 text-gray-700">
                   <tr>
-                    <th class="px-4 py-2 text-left font-medium">Service(s)</th>
-                    <th class="px-4 py-2 text-left font-medium">Status</th>
+                    <th class="px-4 py-3 text-left font-semibold">Service(s)</th>
+                    <th class="px-4 py-3 text-left font-semibold">Status</th>
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-100">
                   <tr
                     v-for="invoice in invoices"
                     :key="invoice.id"
-                    class="hover:bg-gray-50 cursor-pointer"
+                    class="hover:bg-gray-50 cursor-pointer transition duration-200"
                     @click="goToInvoices"
                   >
                     <td class="px-4 py-3">
@@ -79,7 +96,7 @@
                     </td>
                     <td class="px-4 py-3">
                       <span
-                        :class="[ 'px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap',
+                        :class="[ 'inline-block px-3 py-1 rounded-full text-xs font-semibold',
                           invoice.status?.toLowerCase() === 'paid'
                             ? 'bg-green-100 text-green-700'
                             : invoice.status?.toLowerCase() === 'not paid'
@@ -102,7 +119,7 @@
                 <div
                   v-for="invoice in invoices"
                   :key="invoice.id"
-                  class="border border-gray-200 rounded-lg p-4 shadow-sm bg-white cursor-pointer hover:bg-gray-50"
+                  class="border border-gray-200 rounded-xl p-4 shadow-sm bg-white cursor-pointer hover:bg-gray-50 transition"
                   @click="goToInvoices"
                 >
                   <div class="mb-2">
@@ -114,7 +131,7 @@
                   <div>
                     <p class="text-xs text-gray-500">Status</p>
                     <span
-                      :class="[ 'px-2 py-1 rounded-full text-xs font-semibold',
+                      :class="[ 'inline-block px-3 py-1 rounded-full text-xs font-semibold',
                         invoice.status?.toLowerCase() === 'paid'
                           ? 'bg-green-100 text-green-700'
                           : invoice.status?.toLowerCase() === 'not paid'
@@ -143,18 +160,19 @@
 import Topbar from "@/components/topbar.vue";
 import Sidebar from "@/components/sidebar.vue";
 import LoadingAnimation from "@/components/loading_animation.vue";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "@/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
+// Lucide Icons
 import {
-  DocumentTextIcon,
-  ExclamationTriangleIcon,
-  ClockIcon,
-  BanknotesIcon,
-} from "@heroicons/vue/24/solid";
+  FileText,
+  AlertTriangle,
+  Clock,
+  Wallet
+} from "lucide-vue-next";
 
 const invoices = ref([]);
 const paidClaims = ref(0);
@@ -220,29 +238,38 @@ const goToInvoices = () => {
   router.push("/invoices");
 };
 
+// ✅ Tawk.to Integration
 const loadTawkChatbot = () => {
   if (!window.Tawk_API) {
-    window.Tawk_API = window.Tawk_API || {};
+    window.Tawk_API = {};
     window.Tawk_LoadStart = new Date();
-    (function () {
-      const s1 = document.createElement("script"),
-        s0 = document.getElementsByTagName("script")[0];
-      s1.async = true;
-      s1.src = "https://embed.tawk.to/682390baa582f719105b0cc6/1ir5eqmhl";
-      s1.charset = "UTF-8";
-      s1.setAttribute("crossorigin", "*");
-      s0.parentNode.insertBefore(s1, s0);
-    })();
+
+    const s1 = document.createElement("script");
+    s1.src = "https://embed.tawk.to/682390baa582f719105b0cc6/1ir5eqmhl";
+    s1.async = true;
+    s1.charset = "UTF-8";
+    s1.setAttribute("crossorigin", "*");
+
+    document.body.appendChild(s1);
   }
 };
 
 const removeTawkChatbot = () => {
-  const script = document.querySelector(
-    'script[src="https://embed.tawk.to/682390baa582f719105b0cc6/1ir5eqmhl"]'
-  );
-  if (script) script.remove();
+  const tawkScript = document.querySelector('script[src^="https://embed.tawk.to/"]');
+  if (tawkScript) {
+    tawkScript.remove();
+  }
+
+  const tawkDiv = document.querySelector("#tawkchat-container");
+  if (tawkDiv) {
+    tawkDiv.remove();
+  }
+
+  delete window.Tawk_API;
+  delete window.Tawk_LoadStart;
 };
 
+// ✅ Mount / Unmount Handling
 onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user?.email) {
@@ -257,5 +284,9 @@ onMounted(() => {
       removeTawkChatbot();
     }
   });
+});
+
+onBeforeUnmount(() => {
+  removeTawkChatbot();
 });
 </script>

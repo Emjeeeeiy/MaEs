@@ -1,35 +1,42 @@
 <template>
-  <div class="flex flex-col h-screen overflow-hidden bg-gray-100 text-gray-800">
-    <!-- ░░ Topbar (fixed height) ░░ -->
-    <div class="flex-shrink-0 bg-white shadow-md z-10">
+  <div class="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800">
+    <!-- Topbar -->
+    <div class="flex-shrink-0 bg-white shadow z-20">
       <Topbar />
     </div>
 
-    <!-- ░░ Content: Sidebar + Main Scrollable Content ░░ -->
+    <!-- Main Layout -->
     <div class="flex flex-1 min-h-0">
-      <!-- ░░ Sidebar (fixed width) ░░ -->
+      <!-- Sidebar -->
       <div class="w-64 hidden sm:block border-r border-gray-200 bg-white flex-shrink-0">
         <Sidebar />
       </div>
 
-      <!-- ░░ Main Scrollable Content ░░ -->
-      <div class="flex-1 overflow-y-auto px-4 py-4 sm:py-6 space-y-6 animate-fade-in text-sm">
-        <!-- ───────── LOADING STATE ───────── -->
+      <!-- Main Content -->
+      <div class="flex-1 overflow-y-auto px-4 py-6 space-y-8 animate-fade-in">
+        <!-- LOADING -->
         <div v-if="loading" class="flex items-center justify-center h-[60vh]">
           <loading_animation />
         </div>
 
-        <!-- ───────── PAGE CONTENT ───────── -->
+        <!-- FORM + APPOINTMENTS -->
         <template v-else>
-          <!-- ░░ Appointment Form ░░ -->
+          <!-- Appointment Form -->
           <form
             @submit.prevent="submitAppointment"
-            class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200 space-y-4"
+            class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 space-y-5 animate-fade-in"
           >
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+              <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zM2 9v7a2 2 0 002 2h12a2 2 0 002-2V9H2z" />
+              </svg>
+              Book an Appointment
+            </h2>
+
             <!-- Selected Services -->
             <div>
               <label class="block mb-1 font-medium text-gray-700">Selected Services</label>
-              <p class="text-xs text-gray-600 italic">
+              <p class="text-xs text-gray-500 italic">
                 {{
                   selectedServices.length
                     ? selectedServices.map((s) => s.serviceName).join(', ')
@@ -38,7 +45,7 @@
               </p>
               <button
                 type="button"
-                class="mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs transition"
+                class="mt-2 px-4 py-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 text-xs font-medium transition"
                 @click="openServiceModal"
               >
                 Choose Services
@@ -52,7 +59,7 @@
                 <input
                   type="date"
                   v-model="form.date"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:ring-1 focus:ring-blue-500 text-sm"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 text-sm"
                   :min="today"
                   required
                 />
@@ -70,70 +77,70 @@
               <textarea
                 v-model="form.notes"
                 rows="3"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
               ></textarea>
             </div>
 
             <!-- Submit -->
             <div class="text-right">
-              <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+              <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium transition">
                 Submit Appointment
               </button>
             </div>
           </form>
 
-          <!-- ░░ Appointment List ░░ -->
-          <div v-if="appointments.length" class="space-y-3">
-            <h2 class="text-base font-semibold text-gray-800">Your Appointments</h2>
-            <ul class="space-y-3">
-              <li
+          <!-- Appointments List -->
+          <div class="space-y-4">
+            <h2 class="text-lg font-semibold text-gray-800">Your Appointments</h2>
+            <div v-if="appointments.length" class="grid md:grid-cols-2 gap-4">
+              <div
                 v-for="appt in appointments"
                 :key="appt.id"
-                class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm"
+                class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition"
               >
-                <p><strong>Services:</strong> {{ appt.services.map((s) => s.serviceName).join(', ') }}</p>
-                <p><strong>Date:</strong> {{ appt.date }}</p>
-                <p>
+                <p class="text-sm text-gray-700"><strong>Services:</strong> {{ appt.services.map((s) => s.serviceName).join(', ') }}</p>
+                <p class="text-sm text-gray-700"><strong>Date:</strong> {{ appt.date }}</p>
+                <p class="text-sm">
                   <strong>Status:</strong>
                   <span
                     :class="[
-                      'font-semibold text-xs',
+                      'font-semibold px-2 py-0.5 rounded text-xs',
                       appt.status === 'Pending'
-                        ? 'text-yellow-600'
+                        ? 'bg-yellow-100 text-yellow-700'
                         : appt.status === 'Approved'
-                        ? 'text-green-600'
-                        : 'text-red-600',
+                        ? 'bg-green-100 text-green-700'
+                        : 'bg-red-100 text-red-600',
                     ]"
                   >
                     {{ appt.status }}
                   </span>
                 </p>
-                <p v-if="appt.approvedAt" class="text-xs text-gray-500 mt-1">
-                  <strong>Approved At:</strong> {{ formatTimestamp(appt.approvedAt) }}
+                <p v-if="appt.approvedAt" class="text-xs text-gray-400 mt-1">
+                  Approved At: {{ formatTimestamp(appt.approvedAt) }}
                 </p>
-                <p v-if="appt.declinedAt" class="text-xs text-gray-500 mt-1">
-                  <strong>Declined At:</strong> {{ formatTimestamp(appt.declinedAt) }}
+                <p v-if="appt.declinedAt" class="text-xs text-gray-400 mt-1">
+                  Declined At: {{ formatTimestamp(appt.declinedAt) }}
                 </p>
-              </li>
-            </ul>
+              </div>
+            </div>
+            <div v-else class="text-center text-gray-500 text-sm">No appointments yet.</div>
           </div>
-          <div v-else class="text-center text-sm text-gray-500">No appointments yet.</div>
         </template>
       </div>
     </div>
 
-    <!-- ░░ Service Modal ░░ -->
+    <!-- Service Modal -->
     <div v-if="showServiceModal" class="fixed inset-0 z-50 flex items-center justify-center">
       <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
-      <div class="relative bg-white max-w-2xl w-full mx-4 rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 z-10 space-y-4">
-        <h3 class="text-base font-bold text-gray-800">Select Services</h3>
+      <div class="relative bg-white max-w-2xl w-full mx-4 rounded-xl shadow-lg border border-gray-200 p-6 z-10 space-y-4">
+        <h3 class="text-lg font-bold text-gray-800">Select Services</h3>
         <input
           v-model="serviceSearch"
           type="text"
           placeholder="Search service..."
-          class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-blue-500"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
         />
-        <div class="max-h-[300px] overflow-y-auto pr-1 space-y-4">
+        <div class="max-h-72 overflow-y-auto pr-1 space-y-4">
           <div v-for="(group, category) in filteredServiceGroups" :key="category" class="space-y-1">
             <h4 class="text-sm font-semibold text-gray-600">{{ category }}</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -156,6 +163,7 @@
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'

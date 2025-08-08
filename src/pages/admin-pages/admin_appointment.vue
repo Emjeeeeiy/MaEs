@@ -1,13 +1,19 @@
 <template>
-  <div class="flex min-h-screen bg-[#1a1a1a] text-gray-100">
-    <!-- Sidebar -->
-    <AdminSidebar class="w-64 border-r border-gray-800 bg-[#111]" />
+  <div class="flex h-screen overflow-hidden bg-[#1a1a1a] text-gray-100">
+    <!-- Sidebar (fixed below Topbar) -->
+    <aside class="w-64 shrink-0 bg-[#111] border-r border-gray-800 fixed top-16 left-0 bottom-0 z-10 overflow-y-auto">
+      <AdminSidebar />
+    </aside>
 
-    <!-- Main -->
-    <div class="flex-1 flex flex-col h-screen">
-      <AdminTopbar />
+    <!-- Main Content Wrapper (with padding for sidebar) -->
+    <div class="flex flex-col flex-1 pl-64 min-w-0">
+      <!-- Fixed Topbar -->
+      <div class="fixed top-0 left-0 right-0 z-20 h-16 shadow-md bg-[#1a1a1a] border-b border-gray-800">
+        <AdminTopbar />
+      </div>
 
-      <main class="flex-1 p-6 space-y-6 overflow-y-auto">
+      <!-- Scrollable Content Area -->
+      <main class="flex-1 overflow-y-auto p-6 space-y-6 mt-16">
         <!-- Filters -->
         <div class="flex flex-wrap gap-2 items-center bg-[#222] p-4 rounded-md shadow border border-gray-800">
           <select

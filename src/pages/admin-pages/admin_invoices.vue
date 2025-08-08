@@ -1,18 +1,17 @@
 <template>
-  <div class="flex min-h-screen bg-gradient-to-br from-[#1a1a1a] to-[#111] text-gray-200">
-    <!-- Sidebar -->
-    <admin_sidebar class="w-64 border-r border-gray-800 shadow-xl" />
+  <div class="flex h-screen overflow-hidden bg-gradient-to-br from-[#1a1a1a] to-[#111] text-gray-200">
+    <aside class="w-64 shrink-0 bg-[#1a1a1a] border-r border-gray-800 shadow-lg fixed top-16 left-0 bottom-0 z-10 overflow-y-auto">
+      <admin_sidebar />
+    </aside>
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col h-screen">
-      <!-- Topbar -->
-      <AdminTopbar />
+    <div class="flex flex-col flex-1 pl-64 min-w-0">
+      <div class="fixed top-0 left-0 right-0 z-20 h-16 shadow-md bg-[#1a1a1a] border-b border-gray-800">
+        <AdminTopbar />
+      </div>
 
-      <!-- Body -->
       <div class="flex-1 p-6 overflow-y-auto space-y-6 animate-fade-in">
         <h1 class="text-2xl font-bold text-green-400 mb-4 tracking-wide">User Invoices</h1>
 
-        <!-- 🔍 Search-as-type dropdown -->
         <div class="relative max-w-md">
           <input
             v-model="userSearchQuery"
@@ -36,7 +35,6 @@
           </ul>
         </div>
 
-        <!-- 📋 Accounts Table -->
         <div
           v-if="!selectedUserEmail && !userSearchQuery && accountsTable.length"
           class="bg-[#222] border border-gray-700 rounded-xl shadow-md overflow-x-auto"
@@ -74,12 +72,10 @@
           </table>
         </div>
 
-        <!-- 🧾 Invoice list for selected user -->
         <div
           v-if="selectedUserEmail"
           class="bg-[#222] border border-gray-700 rounded-xl shadow-md p-4 space-y-4 animate-fade-in"
         >
-          <!-- 🔙 Back Button -->
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-base font-semibold text-green-300">
               Invoices for <span class="font-medium">{{ selectedUserName }}</span>
@@ -92,7 +88,6 @@
             </button>
           </div>
 
-          <!-- Filters -->
           <div class="flex flex-col md:flex-row gap-2">
             <input
               v-model="searchQuery"
@@ -111,7 +106,6 @@
             </select>
           </div>
 
-          <!-- Invoice table -->
           <table class="min-w-full text-sm border-t border-gray-600">
             <thead class="bg-green-900 text-green-300 text-[11px] uppercase">
               <tr>
@@ -120,6 +114,7 @@
                 <th class="px-3 py-2">Total</th>
                 <th class="px-3 py-2">Method</th>
                 <th class="px-3 py-2">Reference No.</th>
+                <th class="px-3 py-2">Receipt</th>
                 <th class="px-3 py-2">Status</th>
                 <th class="px-3 py-2 text-center">Actions</th>
               </tr>
@@ -135,6 +130,17 @@
                 <td class="px-3 py-1.5 whitespace-nowrap">₱{{ invoice.totalAmount || 0 }}</td>
                 <td class="px-3 py-1.5 whitespace-nowrap">{{ invoice.paymentMethod || 'N/A' }}</td>
                 <td class="px-3 py-1.5 whitespace-nowrap">{{ invoice.referenceNumber || 'N/A' }}</td>
+                <td class="px-3 py-1.5 whitespace-nowrap">
+                  <a
+                    v-if="invoice.receiptImage"
+                    :href="invoice.receiptImage"
+                    target="_blank"
+                    class="text-green-400 underline text-xs hover:text-green-300"
+                  >
+                    View
+                  </a>
+                  <span v-else class="text-gray-500 italic text-xs">No image</span>
+                </td>
                 <td class="px-3 py-1.5 whitespace-nowrap">
                   <span
                     class="text-[10px] font-medium px-2 py-0.5 rounded-full border shadow"
@@ -166,7 +172,7 @@
                 </td>
               </tr>
               <tr v-if="sortedInvoices.length === 0">
-                <td colspan="7" class="px-3 py-4 text-center text-gray-500 italic text-xs">
+                <td colspan="8" class="px-3 py-4 text-center text-gray-500 italic text-xs">
                   No invoices found.
                 </td>
               </tr>
@@ -235,9 +241,12 @@ import {
   updateDoc,
   deleteDoc,
   doc,
-  Timestamp
+  Timestamp,
+  addDoc,
 } from 'firebase/firestore'
+import { getDownloadURL, getStorage, ref as storageRef } from 'firebase/storage'
 import { db } from '@/firebase'
+
 import admin_sidebar from '@/components/admin_sidebar.vue'
 import AdminTopbar from '@/components/AdminTopbar.vue'
 
@@ -255,6 +264,9 @@ const invoiceToApproveId = ref(null)
 const approveAmount = ref(0)
 const approveIdType = ref('')
 const userLastPayments = ref({})
+
+const receiptPreviewUrl = ref('')
+const showReceiptModal = ref(false)
 
 const discountedAmount = computed(() => {
   const amount = approveAmount.value || 0
@@ -357,9 +369,13 @@ const openApproveModal = (id) => {
 }
 
 const approveInvoice = async () => {
-  const ref = doc(db, 'invoices', invoiceToApproveId.value)
+  const invoiceId = invoiceToApproveId.value
+  const ref = doc(db, 'invoices', invoiceId)
   const approvedAt = Timestamp.now()
 
+  const invoice = invoices.value.find((i) => i.id === invoiceId)
+
+  // ✅ Update invoice status
   await updateDoc(ref, {
     status: 'Paid',
     totalAmount: discountedAmount.value,
@@ -367,8 +383,18 @@ const approveInvoice = async () => {
     approvedAt
   })
 
+  // ✅ Add notification
+  await addDoc(collection(db, 'notifications'), {
+    userEmail: invoice.email,
+    type: 'invoice-approved',
+    message: `Your payment for ${invoice.services?.map(s => s.serviceName).join(', ') || 'a service'} has been approved.`,
+    timestamp: approvedAt,
+    read: false
+  })
+
+  // ✅ Reflect changes in UI
   invoices.value = invoices.value.map((inv) =>
-    inv.id === invoiceToApproveId.value
+    inv.id === invoiceId
       ? {
           ...inv,
           status: 'Paid',
@@ -387,8 +413,29 @@ const deleteInvoice = async (id) => {
   invoices.value = invoices.value.filter((inv) => inv.id !== id)
 }
 
+const viewReceipt = async (referenceNumber) => {
+  if (!referenceNumber) return alert('No reference number found.')
+
+  try {
+    const storage = getStorage()
+    const receiptRef = storageRef(storage, `gcash-receipts/${referenceNumber}.jpg`)
+    const url = await getDownloadURL(receiptRef)
+    receiptPreviewUrl.value = url
+    showReceiptModal.value = true
+  } catch (err) {
+    console.error('Error fetching receipt:', err)
+    alert('Receipt not found.')
+  }
+}
+
+const closeReceiptModal = () => {
+  showReceiptModal.value = false
+  receiptPreviewUrl.value = ''
+}
+
 onMounted(async () => {
   await fetchUsers()
   await fetchLastPayments()
 })
 </script>
+

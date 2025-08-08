@@ -1,5 +1,6 @@
 <template>
   <div class="flex flex-col h-screen bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800">
+    <!-- Topbar & Sidebar -->
     <div class="flex-shrink-0">
       <Topbar />
     </div>
@@ -7,6 +8,7 @@
     <div class="flex flex-1 overflow-hidden">
       <Sidebar class="w-64 flex-shrink-0 border-r border-gray-200 bg-white hidden sm:block" />
 
+      <!-- Main Content -->
       <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
         <transition name="fade" mode="out-in">
           <div v-if="loading" key="loading" class="flex justify-center items-center min-h-[300px]">
@@ -17,7 +19,7 @@
             <div class="bg-white p-6 rounded-xl shadow border border-gray-200 space-y-4">
               <h3 class="font-medium text-sm text-gray-700 mb-2">Select Unpaid Invoices:</h3>
 
-              <!-- Desktop Table -->
+              <!-- Invoice Table -->
               <div class="hidden sm:block overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
                   <thead class="bg-gray-100 text-gray-600">
@@ -28,18 +30,9 @@
                     </tr>
                   </thead>
                   <tbody class="bg-white divide-y divide-gray-100">
-                    <tr
-                      v-for="invoice in sortedInvoices"
-                      :key="invoice.id"
-                      class="hover:bg-gray-50 transition"
-                    >
+                    <tr v-for="invoice in sortedInvoices" :key="invoice.id" class="hover:bg-gray-50 transition">
                       <td class="px-4 py-2">
-                        <input
-                          type="checkbox"
-                          :value="invoice"
-                          v-model="selectedInvoices"
-                          class="form-checkbox text-blue-600"
-                        />
+                        <input type="checkbox" :value="invoice" v-model="selectedInvoices" class="form-checkbox text-blue-600" />
                       </td>
                       <td class="px-4 py-2">
                         {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
@@ -63,12 +56,7 @@
                   class="border border-gray-200 rounded-lg p-4 shadow-sm bg-white"
                 >
                   <label class="flex items-center mb-2">
-                    <input
-                      type="checkbox"
-                      :value="invoice"
-                      v-model="selectedInvoices"
-                      class="form-checkbox text-blue-600 mr-2"
-                    />
+                    <input type="checkbox" :value="invoice" v-model="selectedInvoices" class="form-checkbox text-blue-600 mr-2" />
                     <span class="font-medium text-sm text-gray-700">Select</span>
                   </label>
                   <div class="text-sm text-gray-600">
@@ -86,7 +74,7 @@
                 </div>
               </div>
 
-              <!-- Submit Button -->
+              <!-- Submit -->
               <div class="text-right">
                 <button
                   @click="handleSubmitClick"
@@ -115,37 +103,30 @@
       </div>
     </transition>
 
-    <!-- GCash Modal (No Upload) -->
+    <!-- GCash Modal -->
     <transition name="fade">
       <div v-if="showGCashModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="bg-white w-[380px] p-6 rounded-lg shadow-xl space-y-5 animate-fade-in text-gray-700">
+        <div class="bg-white w-[400px] p-6 rounded-lg shadow-xl space-y-5 animate-fade-in text-gray-700">
           <h3 class="text-lg font-bold text-blue-600 text-center">Pay with GCash</h3>
-
           <div class="text-sm space-y-2">
             <p><strong>Step 1:</strong> Scan the QR code below using your GCash app.</p>
             <p><strong>Step 2:</strong> Pay the total amount for your selected invoice(s).</p>
-            <p><strong>Step 3:</strong> Enter your 10-digit GCash reference number.</p>
+            <p><strong>Step 3:</strong> Upload your GCash receipt & enter reference number.</p>
           </div>
-
           <img src="/gcash-qr.jpg" alt="GCash QR" class="w-40 mx-auto rounded border shadow" />
-
           <div class="text-sm mt-4 space-y-3">
             <label class="block">
               <span class="font-semibold">GCash Reference Number</span>
-              <input
-                type="text"
-                v-model="gcashReferenceNumber"
-                placeholder="e.g. 1234567890"
-                class="w-full border rounded px-3 py-2 text-sm mt-1"
-              />
+              <input v-model="gcashReferenceNumber" type="text" class="w-full border rounded px-3 py-2 text-sm mt-1" />
+            </label>
+            <label class="block">
+              <span class="font-semibold">Upload Receipt</span>
+              <input type="file" accept="image/*" @change="onFileChange" class="w-full mt-1 border border-dashed border-gray-400 rounded px-3 py-2 text-sm" />
             </label>
           </div>
-
           <div class="flex justify-between items-center pt-4 text-sm">
             <button @click="showGCashModal = false" class="text-red-500 hover:underline">Cancel</button>
-            <button @click="handleGCashSubmit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded">
-              Submit
-            </button>
+            <button @click="handleGCashSubmit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded">Submit</button>
           </div>
         </div>
       </div>
@@ -174,6 +155,17 @@
         </div>
       </div>
     </transition>
+
+    <!-- Error Modal -->
+    <transition name="fade">
+      <div v-if="showErrorModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-white w-[300px] p-5 rounded-lg shadow-xl space-y-4 animate-fade-in text-center">
+          <h3 class="text-lg font-bold text-red-600">Error</h3>
+          <p class="text-sm text-gray-700">{{ errorMessage }}</p>
+          <button @click="showErrorModal = false" class="mt-2 bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm">Okay</button>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -181,7 +173,7 @@
 import Sidebar from "@/components/Sidebar.vue";
 import Topbar from "@/components/Topbar.vue";
 import LoadingAnimation from "@/components/loading_animation.vue";
-import { db } from "@/firebase";
+import { db, storage } from "@/firebase";
 import {
   collection,
   getDocs,
@@ -192,6 +184,11 @@ import {
   where,
   serverTimestamp,
 } from "firebase/firestore";
+import {
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default {
@@ -206,8 +203,11 @@ export default {
       showPaymentMethodModal: false,
       showSuccessModal: false,
       showReminderModal: false,
+      showErrorModal: false,
+      errorMessage: "",
       showGCashModal: false,
       gcashReferenceNumber: "",
+      gcashReceiptFile: null,
     };
   },
   computed: {
@@ -222,6 +222,14 @@ export default {
   methods: {
     calculateInvoiceAmount(invoice) {
       return (invoice.services || []).reduce((sum, s) => sum + (s.amount || 0), 0);
+    },
+    onFileChange(event) {
+      this.gcashReceiptFile = event.target.files[0] || null;
+    },
+    async uploadFileToStorage(file) {
+      const fileRef = storageRef(storage, `gcash-receipts/${Date.now()}-${file.name}`);
+      const snapshot = await uploadBytes(fileRef, file);
+      return await getDownloadURL(snapshot.ref);
     },
     async fetchUnpaidInvoices() {
       if (!this.userEmail) return;
@@ -238,8 +246,8 @@ export default {
           services: Array.isArray(doc.data().services) ? doc.data().services : [],
         }));
       } catch (err) {
-        console.error("Error fetching invoices:", err);
-        alert("Error fetching invoices.");
+        this.showError("Error fetching invoices.");
+        console.error(err);
       } finally {
         this.loading = false;
       }
@@ -261,6 +269,8 @@ export default {
             status: "Pending",
             submittedAt,
             email: this.userEmail,
+            referenceNumber: null,
+            receiptURL: null,
           });
           await updateDoc(doc(db, "invoices", invoice.id), {
             status: "Pending",
@@ -272,18 +282,19 @@ export default {
         await this.fetchUnpaidInvoices();
         this.showSuccessModal = true;
       } catch (err) {
-        console.error("Error submitting payments:", err);
-        alert("Error processing payments.");
+        this.showError("Error processing payments.");
+        console.error(err);
       }
     },
     async handleGCashSubmit() {
-      if (!this.gcashReferenceNumber) {
-        alert("Please enter a reference number.");
+      if (!this.gcashReferenceNumber || !this.gcashReceiptFile) {
+        this.showError("Please enter a reference number and upload your receipt.");
         return;
       }
 
       try {
         const submittedAt = serverTimestamp();
+        const receiptURL = await this.uploadFileToStorage(this.gcashReceiptFile);
         for (const invoice of this.selectedInvoices) {
           await addDoc(collection(db, "payments"), {
             invoiceID: invoice.id,
@@ -292,6 +303,7 @@ export default {
             submittedAt,
             email: this.userEmail,
             referenceNumber: this.gcashReferenceNumber,
+            receiptURL,
           });
           await updateDoc(doc(db, "invoices", invoice.id), {
             status: "Pending",
@@ -299,15 +311,15 @@ export default {
             submittedAt,
           });
         }
-
         this.gcashReferenceNumber = "";
+        this.gcashReceiptFile = null;
         this.selectedInvoices = [];
         this.showGCashModal = false;
         await this.fetchUnpaidInvoices();
         this.showSuccessModal = true;
       } catch (error) {
-        console.error("Error uploading GCash payment:", error);
-        alert("Submission failed.");
+        this.showError("Submission failed. Please try again.");
+        console.error(error);
       }
     },
     handleSubmitClick() {
@@ -324,10 +336,14 @@ export default {
           this.userEmail = user.email;
           await this.fetchUnpaidInvoices();
         } else {
-          console.error("User not authenticated");
           this.loading = false;
+          this.showError("User not authenticated.");
         }
       });
+    },
+    showError(message) {
+      this.errorMessage = message;
+      this.showErrorModal = true;
     },
   },
   mounted() {
@@ -335,3 +351,4 @@ export default {
   },
 };
 </script>
+
