@@ -1,19 +1,36 @@
 <template>
   <div class="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800">
     <!-- Topbar -->
-    <div class="flex-shrink-0 bg-white shadow z-20">
-      <Topbar />
+    <div
+      class="flex-shrink-0 z-20 transition-all duration-300"
+      :class="{
+        'backdrop-blur-sm bg-white/70': isMobileSidebarOpen,
+        'bg-white shadow': !isMobileSidebarOpen
+      }"
+    >
+      <Topbar @toggle-sidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
     </div>
 
     <!-- Main Layout -->
-    <div class="flex flex-1 min-h-0">
+    <div class="flex flex-1 min-h-0 relative">
       <!-- Sidebar -->
-      <div class="w-64 hidden sm:block border-r border-gray-200 bg-white flex-shrink-0">
-        <Sidebar />
-      </div>
+      <Sidebar
+        :isMobileSidebarOpen="isMobileSidebarOpen"
+        @close-sidebar="isMobileSidebarOpen = false"
+      />
+
+      <!-- Mobile Overlay -->
+      <div
+        v-if="isMobileSidebarOpen"
+        class="fixed inset-0 bg-black/30 z-10 sm:hidden"
+        @click="isMobileSidebarOpen = false"
+      ></div>
 
       <!-- Main Content -->
-      <div class="flex-1 overflow-y-auto px-4 py-6 space-y-8 animate-fade-in">
+      <div
+        class="flex-1 overflow-y-auto px-4 py-6 space-y-8 animate-fade-in transition-all duration-300"
+        :class="{ 'blur-sm': isMobileSidebarOpen }"
+      >
         <!-- LOADING -->
         <div v-if="loading" class="flex items-center justify-center h-[60vh]">
           <loading_animation />
@@ -164,18 +181,10 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
-import {
-  collection,
-  addDoc,
-  query,
-  where,
-  getDocs,
-  Timestamp,
-} from 'firebase/firestore'
+import { collection, addDoc, query, where, getDocs, Timestamp } from 'firebase/firestore'
 import { db } from '@/firebase'
 
 import Sidebar from '@/components/Sidebar.vue'
@@ -183,18 +192,14 @@ import Topbar from '@/components/Topbar.vue'
 import loading_animation from '@/components/loading_animation.vue'
 
 const loading = ref(true)
-
 const form = ref({ date: '', notes: '' })
 const appointments = ref([])
 const userEmail = ref('')
-
 const selectedServices = ref([])
 const showServiceModal = ref(false)
 const serviceSearch = ref('')
 const allServices = ref([])
-
-const showSuccessModal = ref(false)
-const errorMessage = ref('')
+const isMobileSidebarOpen = ref(false)
 
 const today = new Date().toISOString().split('T')[0]
 
@@ -225,26 +230,18 @@ const openServiceModal = () => (showServiceModal.value = true)
 const closeServiceModal = () => (showServiceModal.value = false)
 
 const submitAppointment = async () => {
-  if (!form.value.date || selectedServices.value.length === 0) {
-    errorMessage.value = 'Please select services and a preferred date.'
-    return
-  }
-  try {
-    await addDoc(collection(db, 'appointments'), {
-      services: selectedServices.value,
-      date: form.value.date,
-      notes: form.value.notes,
-      email: userEmail.value,
-      status: 'Pending',
-      createdAt: Timestamp.now(),
-    })
-    form.value = { date: '', notes: '' }
-    selectedServices.value = []
-    await fetchAppointments()
-    showSuccessModal.value = true
-  } catch (err) {
-    errorMessage.value = 'Error submitting appointment: ' + err.message
-  }
+  if (!form.value.date || selectedServices.value.length === 0) return
+  await addDoc(collection(db, 'appointments'), {
+    services: selectedServices.value,
+    date: form.value.date,
+    notes: form.value.notes,
+    email: userEmail.value,
+    status: 'Pending',
+    createdAt: Timestamp.now(),
+  })
+  form.value = { date: '', notes: '' }
+  selectedServices.value = []
+  await fetchAppointments()
 }
 
 const formatTimestamp = (ts) => {
@@ -277,13 +274,5 @@ onMounted(() => {
     opacity: 1;
     transform: translateY(0);
   }
-}
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>

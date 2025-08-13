@@ -2,14 +2,21 @@
   <div class="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 overflow-hidden">
     <!-- Fixed Topbar -->
     <div class="flex-shrink-0 z-10">
-      <Topbar />
+      <Topbar @toggle-sidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
     </div>
 
-    <!-- Sidebar + Main Content -->
+    <!-- Mobile Sidebar -->
+    <Sidebar
+      :is-mobile-sidebar-open="isMobileSidebarOpen"
+      @close-sidebar="isMobileSidebarOpen = false"
+      class="sm:hidden"
+    />
+
+    <!-- Desktop Sidebar + Main Content -->
     <div class="flex flex-1 min-h-0 overflow-hidden">
-      <!-- Sidebar -->
+      <!-- Sidebar (desktop) -->
       <aside class="w-64 flex-shrink-0 hidden sm:block border-r bg-white shadow-sm">
-        <Sidebar />
+        <Sidebar :is-mobile-sidebar-open="true" />
       </aside>
 
       <!-- Main -->
@@ -143,6 +150,7 @@ export default {
       userEmail: null,
       showSuccessModal: false,
       generatedShortId: "",
+      isMobileSidebarOpen: false, // <-- NEW
     };
   },
   computed: {

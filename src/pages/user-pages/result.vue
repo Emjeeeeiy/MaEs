@@ -1,19 +1,36 @@
 <template>
   <div class="h-screen flex flex-col bg-gray-100 text-gray-800 overflow-hidden">
     <!-- Topbar -->
-    <div class="sticky top-0 z-30 bg-white border-b border-gray-200 shadow-sm">
-      <Topbar />
+    <div
+      class="sticky top-0 z-30 transition-all duration-300"
+      :class="{
+        'backdrop-blur-sm bg-white/70': isMobileSidebarOpen,
+        'bg-white border-b border-gray-200 shadow-sm': !isMobileSidebarOpen
+      }"
+    >
+      <Topbar @toggle-sidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
     </div>
 
     <!-- Body -->
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1 overflow-hidden relative">
       <!-- Sidebar -->
-      <div class="w-64 hidden sm:block border-r border-gray-200 bg-white flex-shrink-0">
-        <Sidebar />
-      </div>
+      <Sidebar
+        :isMobileSidebarOpen="isMobileSidebarOpen"
+        @close-sidebar="isMobileSidebarOpen = false"
+      />
+
+      <!-- Mobile Overlay -->
+      <div
+        v-if="isMobileSidebarOpen"
+        class="fixed inset-0 bg-black/30 z-20 sm:hidden"
+        @click="isMobileSidebarOpen = false"
+      ></div>
 
       <!-- Main Content -->
-      <main class="flex-1 overflow-y-auto px-4 py-6 sm:px-8 space-y-8 animate-fade-in">
+      <main
+        class="flex-1 overflow-y-auto px-4 py-6 sm:px-8 space-y-8 animate-fade-in transition-all duration-300"
+        :class="{ 'blur-sm': isMobileSidebarOpen }"
+      >
         <!-- Header -->
         <div class="flex items-center gap-3">
           <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2"
@@ -151,6 +168,7 @@ import loading_animation from '@/components/loading_animation.vue'
 const invoices = ref([])
 const userEmail = ref('')
 const loading = ref(true)
+const isMobileSidebarOpen = ref(false)
 
 const listenForInvoices = () => {
   if (!userEmail.value) return
@@ -223,7 +241,6 @@ onMounted(() => {
 </script>
 
 <style>
-/* global animation, no scoped */
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out;
 }

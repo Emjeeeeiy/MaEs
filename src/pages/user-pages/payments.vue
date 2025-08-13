@@ -1,12 +1,21 @@
 <template>
   <div class="flex flex-col h-screen bg-gradient-to-br from-gray-100 to-gray-200 text-gray-800">
-    <!-- Topbar & Sidebar -->
+    <!-- Topbar -->
     <div class="flex-shrink-0">
-      <Topbar />
+      <Topbar @toggle-sidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
     </div>
 
     <div class="flex flex-1 overflow-hidden">
+      <!-- Desktop Sidebar -->
       <Sidebar class="w-64 flex-shrink-0 border-r border-gray-200 bg-white hidden sm:block" />
+
+      <!-- Mobile Sidebar -->
+      <Sidebar
+        v-if="isMobileSidebarOpen"
+        :isMobileSidebarOpen="isMobileSidebarOpen"
+        @close-sidebar="isMobileSidebarOpen = false"
+        class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50 sm:hidden"
+      />
 
       <!-- Main Content -->
       <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
@@ -32,7 +41,12 @@
                   <tbody class="bg-white divide-y divide-gray-100">
                     <tr v-for="invoice in sortedInvoices" :key="invoice.id" class="hover:bg-gray-50 transition">
                       <td class="px-4 py-2">
-                        <input type="checkbox" :value="invoice" v-model="selectedInvoices" class="form-checkbox text-blue-600" />
+                        <input
+                          type="checkbox"
+                          :value="invoice"
+                          v-model="selectedInvoices"
+                          class="form-checkbox text-blue-600"
+                        />
                       </td>
                       <td class="px-4 py-2">
                         {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
@@ -56,7 +70,12 @@
                   class="border border-gray-200 rounded-lg p-4 shadow-sm bg-white"
                 >
                   <label class="flex items-center mb-2">
-                    <input type="checkbox" :value="invoice" v-model="selectedInvoices" class="form-checkbox text-blue-600 mr-2" />
+                    <input
+                      type="checkbox"
+                      :value="invoice"
+                      v-model="selectedInvoices"
+                      class="form-checkbox text-blue-600 mr-2"
+                    />
                     <span class="font-medium text-sm text-gray-700">Select</span>
                   </label>
                   <div class="text-sm text-gray-600">
@@ -196,6 +215,7 @@ export default {
   components: { Sidebar, Topbar, LoadingAnimation },
   data() {
     return {
+      isMobileSidebarOpen: false, // <-- added state for mobile sidebar
       invoices: [],
       selectedInvoices: [],
       loading: true,
@@ -258,7 +278,6 @@ export default {
         this.showGCashModal = true;
         return;
       }
-
       if (this.selectedInvoices.length === 0) return;
       try {
         const submittedAt = serverTimestamp();
@@ -291,7 +310,6 @@ export default {
         this.showError("Please enter a reference number and upload your receipt.");
         return;
       }
-
       try {
         const submittedAt = serverTimestamp();
         const receiptURL = await this.uploadFileToStorage(this.gcashReceiptFile);
@@ -351,4 +369,10 @@ export default {
   },
 };
 </script>
+
+
+
+
+
+
 

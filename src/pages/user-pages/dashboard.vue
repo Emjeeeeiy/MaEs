@@ -2,14 +2,12 @@
   <div class="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 overflow-hidden">
     <!-- Topbar -->
     <div class="flex-shrink-0">
-      <Topbar />
+      <Topbar @toggleSidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
     </div>
 
     <div class="flex flex-1 min-h-0">
       <!-- Sidebar -->
-      <div class="w-64 hidden sm:block border-r border-gray-200 bg-white flex-shrink-0">
-        <Sidebar />
-      </div>
+      <Sidebar :isMobileSidebarOpen="isMobileSidebarOpen" @closeSidebar="isMobileSidebarOpen = false" />
 
       <!-- Main Content -->
       <div class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-10">
@@ -24,9 +22,7 @@
           <section>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <!-- Total Not Paid -->
-              <div
-                class="bg-gradient-to-r from-red-100 to-red-50 border border-red-200 rounded-2xl p-5 shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center gap-4"
-              >
+              <div class="bg-gradient-to-r from-red-100 to-red-50 border border-red-200 rounded-2xl p-5 shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center gap-4">
                 <AlertTriangle class="w-10 h-10 text-red-600" />
                 <div class="flex-1 text-center">
                   <h3 class="text-sm font-medium text-red-700 mb-1">Total Not Paid</h3>
@@ -37,9 +33,7 @@
               </div>
 
               <!-- Unpaid Claims -->
-              <div
-                class="bg-gradient-to-r from-yellow-100 to-yellow-50 border border-yellow-200 rounded-2xl p-5 shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center gap-4"
-              >
+              <div class="bg-gradient-to-r from-yellow-100 to-yellow-50 border border-yellow-200 rounded-2xl p-5 shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center gap-4">
                 <Clock class="w-10 h-10 text-yellow-500" />
                 <div class="flex-1 text-center">
                   <h3 class="text-sm font-medium text-yellow-600 mb-1">Unpaid Claims</h3>
@@ -48,9 +42,7 @@
               </div>
 
               <!-- Paid Claims -->
-              <div
-                class="bg-gradient-to-r from-green-100 to-green-50 border border-green-200 rounded-2xl p-5 shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center gap-4"
-              >
+              <div class="bg-gradient-to-r from-green-100 to-green-50 border border-green-200 rounded-2xl p-5 shadow-lg hover:shadow-xl transition duration-300 transform hover:scale-[1.02] flex items-center gap-4">
                 <Wallet class="w-10 h-10 text-green-600" />
                 <div class="flex-1 text-center">
                   <h3 class="text-sm font-medium text-green-600 mb-1">Paid Claims</h3>
@@ -167,12 +159,7 @@ import { db } from "@/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
 // Lucide Icons
-import {
-  FileText,
-  AlertTriangle,
-  Clock,
-  Wallet
-} from "lucide-vue-next";
+import { FileText, AlertTriangle, Clock, Wallet } from "lucide-vue-next";
 
 const invoices = ref([]);
 const paidClaims = ref(0);
@@ -180,8 +167,8 @@ const unpaidClaims = ref(0);
 const overdueCount = ref(0);
 const unpaidTotalAmount = ref(0);
 const loadingInvoices = ref(true);
+const isMobileSidebarOpen = ref(false);
 const router = useRouter();
-
 const auth = getAuth();
 
 const fetchInvoicesByEmail = async (email) => {
@@ -269,7 +256,6 @@ const removeTawkChatbot = () => {
   delete window.Tawk_LoadStart;
 };
 
-// ✅ Mount / Unmount Handling
 onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user?.email) {

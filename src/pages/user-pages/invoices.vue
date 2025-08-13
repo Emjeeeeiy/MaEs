@@ -1,18 +1,36 @@
 <template>
-  <div class="h-screen overflow-hidden bg-gray-100 text-gray-800 flex flex-col">
+  <div class="h-screen overflow-hidden bg-gray-100 text-gray-800 flex flex-col relative">
     <!-- Topbar -->
     <div class="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
-      <Topbar />
+      <Topbar @toggle-sidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
     </div>
 
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1 overflow-hidden relative">
       <!-- Sidebar -->
-      <Sidebar />
+      <Sidebar
+        :isMobileSidebarOpen="isMobileSidebarOpen"
+        @close-sidebar="isMobileSidebarOpen = false"
+        class="z-50"
+      />
+
+      <!-- Overlay + blur effect -->
+      <transition name="fade">
+        <div
+          v-if="isMobileSidebarOpen"
+          @click="isMobileSidebarOpen = false"
+          class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-opacity"
+        ></div>
+      </transition>
 
       <!-- Page Content -->
-      <div class="flex flex-col flex-1 w-full text-sm overflow-y-auto px-4 py-6 space-y-6 animate-fade-in">
+      <div
+        :class="['flex flex-col flex-1 w-full text-sm overflow-y-auto px-4 py-6 space-y-6 animate-fade-in transition-all', 
+                 isMobileSidebarOpen ? 'blur-sm pointer-events-none select-none' : '']"
+      >
         <!-- Filters -->
-        <section class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-4 items-end">
+        <section
+          class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-4 items-end"
+        >
           <div class="flex flex-col">
             <label class="text-xs text-gray-600 mb-1">Status</label>
             <select
@@ -43,7 +61,10 @@
         </div>
 
         <!-- No Results -->
-        <div v-else-if="filteredInvoices.length === 0" class="text-center text-gray-500 text-sm py-16">
+        <div
+          v-else-if="filteredInvoices.length === 0"
+          class="text-center text-gray-500 text-sm py-16"
+        >
           No invoices found.
         </div>
 
@@ -86,7 +107,8 @@
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap">
                   <span
-                    :class="[ 'inline-block px-2 py-0.5 rounded-full text-[11px] font-medium',
+                    :class="[
+                      'inline-block px-2 py-0.5 rounded-full text-[11px] font-medium',
                       invoice.status === 'Paid'
                         ? 'bg-green-100 text-green-700'
                         : invoice.status === 'Pending'
@@ -110,7 +132,8 @@
             class="bg-white rounded-xl border border-gray-200 shadow-md p-4"
           >
             <div class="mb-2 text-xs text-gray-600">
-              <span class="font-semibold text-gray-800">Invoice ID:</span> {{ invoice.shortId || 'N/A' }}
+              <span class="font-semibold text-gray-800">Invoice ID:</span>
+              {{ invoice.shortId || 'N/A' }}
             </div>
 
             <div class="mb-2 text-xs text-gray-600">
@@ -140,7 +163,8 @@
 
             <div class="text-xs mt-1">
               <span
-                :class="[ 'inline-block px-2 py-0.5 rounded-full text-[11px] font-medium',
+                :class="[
+                  'inline-block px-2 py-0.5 rounded-full text-[11px] font-medium',
                   invoice.status === 'Paid'
                     ? 'bg-green-100 text-green-700'
                     : invoice.status === 'Pending'
@@ -176,6 +200,7 @@ export default {
       filterStatus: "",
       searchQuery: "",
       loading: true,
+      isMobileSidebarOpen: false,
     };
   },
   computed: {
@@ -194,7 +219,10 @@ export default {
           const status = (inv.status || "").toLowerCase();
           const statusMatches = !statusFilter || status === statusFilter;
 
-          const servicesText = inv.services.map((s) => s.serviceName).join(" ").toLowerCase();
+          const servicesText = inv.services
+            .map((s) => s.serviceName)
+            .join(" ")
+            .toLowerCase();
           const combined = [
             (inv.shortId || "").toLowerCase(),
             servicesText,
@@ -223,7 +251,10 @@ export default {
     async fetchInvoices() {
       if (!this.userEmail) return;
       try {
-        const q = query(collection(db, "invoices"), where("email", "==", this.userEmail));
+        const q = query(
+          collection(db, "invoices"),
+          where("email", "==", this.userEmail)
+        );
         const snap = await getDocs(q);
         this.invoices = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       } catch (err) {
@@ -237,7 +268,9 @@ export default {
       return ts.toDate().toISOString().split("T")[0];
     },
     calculateInvoiceTotal(invoice) {
-      return invoice.services?.reduce((sum, s) => sum + (s.amount || 0), 0) || 0;
+      return (
+        invoice.services?.reduce((sum, s) => sum + (s.amount || 0), 0) || 0
+      );
     },
   },
   async mounted() {
@@ -246,7 +279,6 @@ export default {
 };
 </script>
 
-<!-- Global animation class -->
 <style>
 @keyframes fadeIn {
   from {
@@ -260,5 +292,19 @@ export default {
 }
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out;
+}
+
+/* Fade transition for overlay */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
 }
 </style>

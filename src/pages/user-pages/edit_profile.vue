@@ -1,20 +1,37 @@
 <template>
-  <div class="h-screen flex flex-col">
-    <!-- Topbar (fixed height) -->
-    <div class="flex-shrink-0">
-      <Topbar class="w-full bg-white shadow z-10" />
+  <div class="h-screen w-full bg-gray-50 overflow-hidden">
+    <!-- Fixed Topbar -->
+    <div
+      class="fixed top-0 left-0 right-0 z-30 transition-all duration-300"
+      :class="{
+        'backdrop-blur-sm bg-white/70': isMobileSidebarOpen,
+        'bg-white border-b border-gray-200 shadow': !isMobileSidebarOpen
+      }"
+    >
+      <Topbar @toggle-sidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
     </div>
 
-    <!-- Content Area with Sidebar and Main -->
-    <div class="flex flex-1 overflow-hidden bg-gray-50">
-      <!-- Sidebar (fixed width, full height) -->
-      <div class="w-64 bg-white border-r hidden sm:block">
-        <Sidebar />
-      </div>
+    <!-- Body -->
+    <div class="flex pt-16 h-full relative">
+      <!-- Sidebar -->
+      <Sidebar
+        :isMobileSidebarOpen="isMobileSidebarOpen"
+        @close-sidebar="isMobileSidebarOpen = false"
+      />
 
-      <!-- Scrollable Main Content -->
-      <main class="flex-1 overflow-y-auto p-6 max-w-4xl mx-auto w-full">
-        <div class="bg-white rounded-lg shadow p-6">
+      <!-- Mobile Overlay -->
+      <div
+        v-if="isMobileSidebarOpen"
+        class="fixed inset-0 bg-black/30 z-20 sm:hidden"
+        @click="isMobileSidebarOpen = false"
+      ></div>
+
+      <!-- Main Content -->
+      <main
+        class="flex-1 overflow-y-auto p-6 max-w-4xl mx-auto w-full transition-all duration-300"
+        :class="{ 'blur-sm': isMobileSidebarOpen }"
+      >
+        <div class="bg-white rounded-lg shadow p-6 animate-fade-in">
           <form @submit.prevent="updateProfile">
             <!-- Profile Picture -->
             <div class="flex items-center space-x-4 mb-6">
@@ -85,15 +102,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { auth, db, storage } from '@/firebase'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 import Sidebar from '@/components/Sidebar.vue'
 import Topbar from '@/components/Topbar.vue'
-
-const router = useRouter()
 
 const username = ref('')
 const email = ref('')
@@ -107,6 +121,8 @@ const profileImage = ref(null)
 const previewImage = ref('')
 const errorMessage = ref('')
 const successMessage = ref('')
+
+const isMobileSidebarOpen = ref(false)
 
 onMounted(async () => {
   const user = auth.currentUser
@@ -176,3 +192,14 @@ const updateProfile = async () => {
   }
 }
 </script>
+
+<style>
+/* optional fade-in animation for main content */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+</style>

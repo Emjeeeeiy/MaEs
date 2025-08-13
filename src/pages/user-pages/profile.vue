@@ -1,21 +1,38 @@
 <template>
   <div class="h-screen w-full bg-gray-50 overflow-hidden">
-    <!-- Fixed Topbar (stretches full width) -->
-    <div class="fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-200 h-16">
-      <Topbar />
+    <!-- Fixed Topbar -->
+    <div
+      class="fixed top-0 left-0 right-0 z-30 transition-all duration-300"
+      :class="{
+        'backdrop-blur-sm bg-white/70': isMobileSidebarOpen,
+        'bg-white border-b border-gray-200': !isMobileSidebarOpen
+      }"
+    >
+      <Topbar @toggle-sidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
     </div>
 
-    <!-- Main Layout below Topbar -->
-    <div class="flex pt-16 h-full">
-      <!-- Sidebar fixed below the Topbar -->
-      <aside class="fixed top-16 bottom-0 left-0 w-64 bg-white border-r border-gray-200 z-20 hidden sm:block">
-        <Sidebar />
-      </aside>
+    <!-- Body -->
+    <div class="flex pt-16 h-full relative">
+      <!-- Sidebar -->
+      <Sidebar
+        :isMobileSidebarOpen="isMobileSidebarOpen"
+        @close-sidebar="isMobileSidebarOpen = false"
+      />
 
-      <!-- Scrollable Main Content Area -->
-      <main class="flex-1 ml-0 sm:ml-64 overflow-y-auto p-4 sm:p-6">
+      <!-- Mobile Overlay -->
+      <div
+        v-if="isMobileSidebarOpen"
+        class="fixed inset-0 bg-black/30 z-20 sm:hidden"
+        @click="isMobileSidebarOpen = false"
+      ></div>
+
+      <!-- Main Content -->
+      <main
+        class="flex-1 overflow-y-auto p-4 sm:p-6 transition-all duration-300"
+        :class="{ 'blur-sm': isMobileSidebarOpen }"
+      >
         <div class="bg-white rounded-lg shadow p-4 sm:p-6 border border-black max-w-4xl mx-auto">
-          <!-- Loading Animation -->
+          <!-- Loading -->
           <div v-if="loading" class="flex justify-center py-16">
             <LoadingAnimation />
           </div>
@@ -102,6 +119,7 @@ const status = ref("inactive");
 const errorMessage = ref("");
 const loading = ref(true);
 
+const isMobileSidebarOpen = ref(false);
 let unsubscribeAuth = null;
 
 const updateStatusInDB = async (userId, newStatus) => {
@@ -155,3 +173,20 @@ onUnmounted(() => {
   if (unsubscribeAuth) unsubscribeAuth();
 });
 </script>
+
+<style>
+/* optional fade-in animation for main content */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>

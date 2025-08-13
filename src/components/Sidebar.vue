@@ -4,7 +4,7 @@
     <div
       v-if="isMobileSidebarOpen"
       class="fixed inset-0 z-40 backdrop-blur-sm bg-black/20 sm:hidden"
-      @click="isMobileSidebarOpen = false"
+      @click="$emit('close-sidebar')"
     ></div>
 
     <!-- Sidebar -->
@@ -20,12 +20,14 @@
           to="/profile"
           class="block px-6 py-6 border-b border-gray-200 text-center hover:bg-gray-50 transition"
         >
-          <div class="mx-auto w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center shadow">
+          <div
+            class="mx-auto w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center shadow transform transition-all duration-500 hover:scale-110 hover:rotate-3 -ml-2"
+          >
             <img
               v-if="profileImageUrl"
               :src="profileImageUrl"
               alt="Profile"
-              class="w-full h-full object-cover"
+              class="w-full h-full object-cover transition-transform duration-500 hover:scale-125"
             />
             <div v-else class="text-2xl font-bold text-green-600">
               {{ username.charAt(0).toUpperCase() }}
@@ -40,10 +42,7 @@
           <!-- MAIN -->
           <div>
             <p class="px-2 mb-2 text-xs text-gray-500 uppercase tracking-wide">Main</p>
-            <router-link
-              to="/dashboard"
-              :class="linkClass('/dashboard')"
-            >
+            <router-link to="/dashboard" :class="linkClass('/dashboard')">
               <HomeIcon class="w-5 h-5 text-gray-500" />
               Dashboard
             </router-link>
@@ -52,17 +51,11 @@
           <!-- PROCESS -->
           <div>
             <p class="px-2 mb-2 text-xs text-gray-500 uppercase tracking-wide">Process</p>
-            <router-link
-              to="/billing"
-              :class="linkClass('/billing')"
-            >
+            <router-link to="/billing" :class="linkClass('/billing')">
               <ClipboardDocumentCheckIcon class="w-5 h-5 text-gray-500" />
               Billing
             </router-link>
-            <router-link
-              to="/payments"
-              :class="linkClass('/payments')"
-            >
+            <router-link to="/payments" :class="linkClass('/payments')">
               <CreditCardIcon class="w-5 h-5 text-gray-500" />
               Payments
             </router-link>
@@ -71,10 +64,7 @@
           <!-- INFORMATION -->
           <div>
             <p class="px-2 mb-2 text-xs text-gray-500 uppercase tracking-wide">Information</p>
-            <router-link
-              to="/invoices"
-              :class="linkClass('/invoices')"
-            >
+            <router-link to="/invoices" :class="linkClass('/invoices')">
               <DocumentTextIcon class="w-5 h-5 text-gray-500" />
               Invoices
             </router-link>
@@ -83,17 +73,11 @@
           <!-- OTHER -->
           <div>
             <p class="px-2 mb-2 text-xs text-gray-500 uppercase tracking-wide">Other</p>
-            <router-link
-              to="/appointment"
-              :class="linkClass('/appointment')"
-            >
+            <router-link to="/appointment" :class="linkClass('/appointment')">
               <CalendarIcon class="w-5 h-5 text-gray-500" />
               Appointments
             </router-link>
-            <router-link
-              to="/result"
-              :class="linkClass('/result')"
-            >
+            <router-link to="/result" :class="linkClass('/result')">
               <ChartBarIcon class="w-5 h-5 text-gray-500" />
               Result
             </router-link>
@@ -101,18 +85,6 @@
         </nav>
       </div>
     </aside>
-
-    <!-- Toggle Button -->
-    <button
-      @click="isMobileSidebarOpen = !isMobileSidebarOpen"
-      class="fixed top-4 left-4 z-[9999] sm:hidden bg-white text-gray-700 border border-gray-300 p-2 rounded-md shadow-md hover:bg-green-100 hover:text-green-600 transition-all"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-        viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M4 6h16M4 12h16M4 18h16" />
-      </svg>
-    </button>
   </div>
 </template>
 
@@ -132,11 +104,16 @@ import {
   ChartBarIcon,
 } from '@heroicons/vue/24/solid'
 
+// Props para makuha state from parent
+const props = defineProps({
+  isMobileSidebarOpen: Boolean
+})
+
+const emit = defineEmits(['close-sidebar'])
+
 const username = ref('User')
 const role = ref('Viewer')
 const profileImageUrl = ref('')
-const isMobileSidebarOpen = ref(false)
-
 const route = useRoute()
 
 function linkClass(path) {
