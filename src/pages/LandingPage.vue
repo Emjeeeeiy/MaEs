@@ -1,40 +1,55 @@
 <template>
   <div class="min-h-screen bg-white text-gray-800">
-    <!-- Navbar -->
-    <header class="bg-white shadow sticky top-0 z-50">
-      <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-md transition-all duration-300">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <!-- Logo -->
         <div class="flex items-center gap-3">
-          <img src="/MaEs_logo2.png" alt="MAES Logo" class="h-9 w-9" />
-          <span class="text-xl font-bold text-green-700">Maria Estrella General Hospital, Inc.</span>
+          <img src="/MaEs_logo2.png" alt="MAES Logo" class="h-10 w-10 rounded-full shadow-sm" />
+          <span class="text-lg sm:text-xl font-bold text-green-700 tracking-tight">Maria Estrella General Hospital, Inc.</span>
         </div>
-        <nav class="hidden md:flex gap-6 text-sm font-medium">
-          <button @click="scrollTo('home')" class="hover:text-green-700 transition">Home</button>
-          <button @click="scrollTo('how')" class="hover:text-green-700 transition">How it Works</button>
-          <button @click="scrollTo('features')" class="hover:text-green-700 transition">Features</button>
-          <button @click="scrollTo('benefits')" class="hover:text-green-700 transition">Benefits</button>
-          <button @click="scrollTo('contact')" class="hover:text-green-700 transition">Contact</button>
+
+        <!-- Desktop Navigation -->
+        <nav class="hidden md:flex gap-8 text-sm font-medium text-gray-700">
+          <button @click="scrollTo('home')" class="hover:text-green-700 transition-colors duration-200">Home</button>
+          <button @click="scrollTo('how')" class="hover:text-green-700 transition-colors duration-200">How it Works</button>
+          <button @click="scrollTo('features')" class="hover:text-green-700 transition-colors duration-200">Features</button>
+          <button @click="scrollTo('benefits')" class="hover:text-green-700 transition-colors duration-200">Benefits</button>
+          <button @click="scrollTo('contact')" class="hover:text-green-700 transition-colors duration-200">Contact</button>
         </nav>
-        <div class="hidden md:flex gap-2">
-          <button @click="goToLogin" class="text-sm px-4 py-2 rounded-lg hover:bg-gray-100 transition">Login</button>
-          <button @click="goToRegister" class="text-sm px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">Register</button>
+
+        <!-- Desktop Action Buttons -->
+        <div class="hidden md:flex gap-3">
+          <button @click="goToLogin" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition duration-200 text-sm font-medium">
+            Login
+          </button>
+          <button @click="goToRegister" class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition duration-200 text-sm font-medium">
+            Register
+          </button>
         </div>
-        <button class="md:hidden" @click="mobileMenu = !mobileMenu">
-          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+        <!-- Mobile Menu Button -->
+        <button class="md:hidden p-2 rounded-md hover:bg-gray-100 transition duration-200" @click="mobileMenu = !mobileMenu">
+          <svg class="h-6 w-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
       </div>
-      <div v-if="mobileMenu" class="md:hidden bg-white px-4 pb-4">
-        <button @click="scrollTo('home'); mobileMenu = false" class="block py-2 text-sm font-medium hover:text-green-700 transition">Home</button>
-        <button @click="scrollTo('how'); mobileMenu = false" class="block py-2 text-sm font-medium hover:text-green-700 transition">How it Works</button>
-        <button @click="scrollTo('features'); mobileMenu = false" class="block py-2 text-sm font-medium hover:text-green-700 transition">Features</button>
-        <button @click="scrollTo('benefits'); mobileMenu = false" class="block py-2 text-sm font-medium hover:text-green-700 transition">Benefits</button>
-        <button @click="scrollTo('contact'); mobileMenu = false" class="block py-2 text-sm font-medium hover:text-green-700 transition">Contact</button>
-        <div class="flex flex-col gap-2 mt-3">
-          <button @click="goToLogin" class="w-full px-4 py-2 rounded-lg border hover:bg-gray-100 transition text-sm">Login</button>
-          <button @click="goToRegister" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm">Register</button>
+
+      <!-- Mobile Menu -->
+      <transition name="slide-fade">
+        <div v-if="mobileMenu" class="md:hidden bg-white shadow-lg rounded-b-xl px-4 py-5 space-y-3">
+          <button @click="scrollTo('home'); mobileMenu=false" class="block w-full text-left py-2 text-gray-700 hover:text-green-700 transition duration-200 text-sm font-medium">Home</button>
+          <button @click="scrollTo('how'); mobileMenu=false" class="block w-full text-left py-2 text-gray-700 hover:text-green-700 transition duration-200 text-sm font-medium">How it Works</button>
+          <button @click="scrollTo('features'); mobileMenu=false" class="block w-full text-left py-2 text-gray-700 hover:text-green-700 transition duration-200 text-sm font-medium">Features</button>
+          <button @click="scrollTo('benefits'); mobileMenu=false" class="block w-full text-left py-2 text-gray-700 hover:text-green-700 transition duration-200 text-sm font-medium">Benefits</button>
+          <button @click="scrollTo('contact'); mobileMenu=false" class="block w-full text-left py-2 text-gray-700 hover:text-green-700 transition duration-200 text-sm font-medium">Contact</button>
+
+          <div class="flex flex-col gap-2 mt-4">
+            <button @click="goToLogin" class="w-full px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition duration-200 text-sm font-medium">Login</button>
+            <button @click="goToRegister" class="w-full px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition duration-200 text-sm font-medium">Register</button>
+          </div>
         </div>
-      </div>
+      </transition>
     </header>
 
     <!-- Hero -->
