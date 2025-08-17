@@ -56,27 +56,29 @@
               </div>
 
               <!-- Grouped Services -->
-              <div v-for="(services, category) in groupedFilteredServices" :key="category">
-                <h3 class="flex items-center gap-2 text-sm font-semibold text-green-600 mt-6 mb-2 first:mt-0">
-                  <span class="w-2 h-2 bg-green-500 rounded-full"></span> {{ category }}
-                </h3>
-                <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-                  <label
-                    v-for="service in services"
-                    :key="service.id"
-                    class="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
-                  >
-                    <div class="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        :value="service"
-                        v-model="selectedServices"
-                        class="form-checkbox text-blue-600 h-4 w-4"
-                      />
-                      <span class="text-sm text-gray-800">{{ service.serviceName }}</span>
-                    </div>
-                    <span class="text-sm font-medium text-gray-700">₱{{ service.amount }}</span>
-                  </label>
+              <div v-for="category in orderedCategories" :key="category">
+                <div v-if="groupedFilteredServices[category]">
+                  <h3 class="flex items-center gap-2 text-sm font-semibold text-green-600 mt-6 mb-2 first:mt-0">
+                    <span class="w-2 h-2 bg-green-500 rounded-full"></span> {{ category }}
+                  </h3>
+                  <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+                    <label
+                      v-for="service in groupedFilteredServices[category]"
+                      :key="service.id"
+                      class="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+                    >
+                      <div class="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          :value="service"
+                          v-model="selectedServices"
+                          class="form-checkbox text-blue-600 h-4 w-4"
+                        />
+                        <span class="text-sm text-gray-800">{{ service.serviceName }}</span>
+                      </div>
+                      <span class="text-sm font-medium text-gray-700">₱{{ service.amount }}</span>
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -150,7 +152,30 @@ export default {
       userEmail: null,
       showSuccessModal: false,
       generatedShortId: "",
-      isMobileSidebarOpen: false, // <-- NEW
+      isMobileSidebarOpen: false,
+      orderedCategories: [
+        "CHEMISTRY",
+        "SPECIAL CHEMISTRY",
+        "ELECTROLYTES",
+        "CLINICAL MICROSCOPY",
+        "SPECIAL MICROSCOPY",
+        "URINE CHEMISTRY",
+        "HEMATOLOGY",
+        "SEROLOGY",
+        "IMMUNOLOGY",
+        "THYROID PROFILE",
+        "HORMONES",
+        "CARDIAC MARKER",
+        "TUMOR MARKER",
+        "DRUG TEST",
+        "HISTOPATHOLOGY",
+        "BLOOD STATION",
+        "TB-DOTS",
+        "OTHERS",
+        "PACKAGES",
+        "SEND OUT",
+        "MICROBIOLOGY",
+      ],
     };
   },
   computed: {

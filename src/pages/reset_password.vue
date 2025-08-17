@@ -1,8 +1,11 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-300 to-green-700 px-4 py-8">
+  <div
+    class="min-h-screen flex items-center justify-center bg-cover bg-center px-4 py-8"
+    style="background-image: url('/MaEs_bg.png')"
+  >
     <form
       @submit.prevent="resetPassword"
-      class="w-full max-w-md bg-white p-8 rounded-2xl shadow-2xl border border-gray-100"
+      class="w-full max-w-md bg-white/90 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-gray-100"
     >
       <!-- Title -->
       <h2 class="text-2xl font-bold text-center text-green-700 mb-6">Reset Your Password</h2>
@@ -57,7 +60,8 @@ const resetPassword = async () => {
     message.value = "Password reset link sent!";
     errorMessage.value = "";
   } catch (error) {
-    errorMessage.value = "Error resetting password. Please enter a valid registered email.";
+    errorMessage.value =
+      "Error resetting password. Please enter a valid registered email.";
     message.value = "";
     console.error("Reset error:", error);
   }

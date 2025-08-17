@@ -1,20 +1,28 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-black text-gray-100 overflow-hidden">
+  <div
+    class="flex flex-col min-h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-black text-gray-100 overflow-hidden custom-scrollbar"
+  >
     <!-- Fixed Full Width Topbar -->
     <div class="fixed top-0 left-0 right-0 z-30">
       <AdminTopbar />
     </div>
 
     <div class="flex pt-16 h-full">
-      <!-- Sidebar (fixed width, full height below topbar) -->
-      <div class="w-64 flex-shrink-0 border-r border-gray-800 bg-[#1a1a1a] h-[calc(100vh-4rem)] overflow-y-auto">
+      <!-- Sidebar -->
+      <div
+        class="w-64 flex-shrink-0 border-r border-gray-800 bg-[#1a1a1a] h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar"
+      >
         <admin_sidebar />
       </div>
 
       <!-- Main Content Area -->
-      <main class="flex-1 p-6 sm:p-8 space-y-10 overflow-y-auto h-[calc(100vh-4rem)]">
+      <main
+        class="flex-1 p-6 sm:p-8 space-y-10 overflow-y-auto h-[calc(100vh-4rem)] custom-scrollbar"
+      >
         <!-- Summary Cards -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <section
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
           <div
             v-for="(card, i) in dashboardCards"
             :key="i"
@@ -26,10 +34,19 @@
             ></div>
 
             <div class="relative z-10 flex items-center gap-4 p-6">
-              <component :is="card.icon" class="w-10 h-10 text-green-400" />
+              <component
+                :is="card.icon"
+                class="w-10 h-10 text-green-400"
+              />
               <div>
-                <p class="text-sm font-medium text-gray-400 tracking-wide">{{ card.title }}</p>
-                <p class="text-2xl font-extrabold text-white">{{ card.value }}</p>
+                <p
+                  class="text-sm font-medium text-gray-400 tracking-wide"
+                >
+                  {{ card.title }}
+                </p>
+                <p class="text-2xl font-extrabold text-white">
+                  {{ card.value }}
+                </p>
               </div>
             </div>
           </div>
@@ -41,8 +58,19 @@
             @click="exportToExcel"
             class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-green-600/30 ring-1 ring-green-400/40 transition-transform duration-200 hover:bg-green-700 hover:shadow-green-600/50 focus:outline-none focus:ring-2 focus:ring-green-500 active:scale-95"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14m7-7H5" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 5v14m7-7H5"
+              />
             </svg>
             Export Metrics to Excel
           </button>
@@ -51,15 +79,27 @@
         <!-- Charts Section -->
         <section class="space-y-10">
           <!-- Revenue Trend -->
-          <div class="rounded-2xl border border-gray-700/40 bg-[#1f1f1f]/70 backdrop-blur-md p-6 shadow-lg shadow-black/40 hover:shadow-green-500/40 transition-shadow">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-lg font-semibold text-gray-200">Revenue Trend (Daily)</h2>
+          <div
+            class="rounded-2xl border border-gray-700/40 bg-[#1f1f1f]/70 backdrop-blur-md p-6 shadow-lg shadow-black/40 hover:shadow-green-500/40 transition-shadow"
+          >
+            <div
+              class="flex items-center justify-between mb-4"
+            >
+              <h2
+                class="text-lg font-semibold text-gray-200"
+              >
+                Revenue Trend (Daily)
+              </h2>
               <select
                 v-model="selectedWeek"
                 class="bg-gray-800 text-gray-100 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring focus:border-green-500"
               >
                 <option value="">All Weeks</option>
-                <option v-for="week in availableWeeks" :key="week.label" :value="week.label">
+                <option
+                  v-for="week in availableWeeks"
+                  :key="week.label"
+                  :value="week.label"
+                >
                   {{ week.label }}
                 </option>
               </select>
@@ -71,23 +111,88 @@
 
           <!-- Service Trends -->
           <div
+            class="flex items-center justify-between"
+          >
+            <h2
+              class="text-lg font-semibold text-gray-200"
+            >
+              Service Trends
+            </h2>
+            <button
+              @click="openServiceModal"
+              class="px-3 py-1.5 text-xs rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium shadow"
+            >
+              View Totals
+            </button>
+          </div>
+
+          <div
             v-for="(_, index) in serviceChartRefs"
             :key="index"
             class="rounded-2xl border border-gray-700/40 bg-[#1f1f1f]/70 backdrop-blur-md p-6 shadow-lg shadow-black/40 transition-shadow hover:shadow-green-500/40"
           >
-            <h2 class="mb-4 text-lg font-semibold text-gray-200">Service Trend (Batch {{ index + 1 }})</h2>
+            <div class="mb-4">
+              <h3
+                class="text-base font-medium text-gray-300"
+              >
+                Batch {{ index + 1 }}
+              </h3>
+            </div>
             <div class="h-72">
-              <canvas :ref="(el) => (serviceChartRefs[index] = el)" class="h-full w-full" />
+              <canvas
+                :ref="(el) => (serviceChartRefs[index] = el)"
+                class="h-full w-full"
+              />
             </div>
           </div>
         </section>
       </main>
     </div>
+
+    <!-- Service Totals Modal -->
+    <div
+      v-if="showServiceModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+    >
+      <div
+        class="bg-[#1f1f1f] w-full max-w-lg rounded-2xl p-6 shadow-xl border border-gray-700 relative custom-scrollbar"
+      >
+        <h2
+          class="text-lg font-semibold text-gray-200 mb-4"
+        >
+          Service Totals
+        </h2>
+        <button
+          @click="showServiceModal = false"
+          class="absolute top-3 right-3 text-gray-400 hover:text-white"
+        >
+          ✕
+        </button>
+        <div
+          class="max-h-96 overflow-y-auto space-y-2 custom-scrollbar"
+        >
+          <div
+            v-for="(count, service) in sortedServiceTotals"
+            :key="service"
+            class="flex justify-between items-center p-2 rounded-lg bg-gray-800/60"
+          >
+            <span
+              class="text-gray-200 text-sm font-medium"
+              >{{ service }}</span
+            >
+            <span
+              class="text-green-400 font-semibold"
+              >{{ count }}</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick, watch } from 'vue'
+import { ref, onMounted, nextTick, watch, computed } from 'vue'
 import { getFirestore, collection, getDocs } from 'firebase/firestore'
 import Chart from 'chart.js/auto'
 import * as XLSX from 'xlsx'
@@ -115,6 +220,17 @@ const availableWeeks = ref([])
 
 let serviceChartInstances = []
 let revenueChartInstance = null
+
+/* ✅ MODAL STATE */
+const showServiceModal = ref(false)
+const openServiceModal = () => {
+  showServiceModal.value = true
+}
+const sortedServiceTotals = computed(() => {
+  return Object.fromEntries(
+    Object.entries(serviceCounts.value).sort((a, b) => b[1] - a[1])
+  )
+})
 
 const chunkServiceCounts = (obj, size = 64) => {
   const entries = Object.entries(obj)
@@ -188,8 +304,6 @@ async function fetchDashboardData() {
 
       if (status === 'paid') {
         totalRevenue += amount
-
-        // ✅ Use approvedAt or fallback to submittedAt
         const ts = d.approvedAt?.seconds || d.submittedAt?.seconds
         if (ts) {
           const dateStr = new Date(ts * 1000).toISOString().split('T')[0]
@@ -366,13 +480,31 @@ watch(selectedWeek, () => {
 })
 </script>
 
+<style>
+/* ✅ Custom scrollbar (dark + green accent) */
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #111;
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #22c55e, #15803d);
+    border-radius: 10px;
+    border: 2px solid #111;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #16a34a, #166534);
+  }
 
-<style scoped>
-main::-webkit-scrollbar {
-  width: 6px;
-}
-main::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 3px;
+  /* Firefox */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #22c55e #111;
+  }
 }
 </style>
+

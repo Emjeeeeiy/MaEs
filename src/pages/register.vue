@@ -1,8 +1,11 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-green-300 to-green-700 flex items-center justify-center px-4 py-8">
+  <div
+    class="min-h-screen flex items-center justify-center px-4 py-8 bg-cover bg-center"
+    style="background-image: url('/MaEs_bg.png');"
+  >
     <form
       @submit.prevent="registerUser"
-      class="w-full max-w-md bg-white p-8 rounded-2xl shadow-2xl"
+      class="w-full max-w-md bg-white/70 backdrop-blur-xl p-8 rounded-2xl shadow-2xl"
     >
       <!-- Title -->
       <h2 class="text-2xl font-bold text-center text-green-700 mb-2">Create Account</h2>
@@ -93,6 +96,16 @@
           Login
         </router-link>
       </p>
+
+      <!-- Back to Home -->
+      <div class="mt-3 text-center">
+        <router-link
+          to="/"
+          class="inline-block text-sm text-gray-700 hover:text-green-700 hover:underline transition"
+        >
+          ← Back to Home
+        </router-link>
+      </div>
     </form>
   </div>
 </template>
