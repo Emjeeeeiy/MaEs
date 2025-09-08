@@ -1,52 +1,32 @@
 <template>
-  <div
-    class="flex flex-col min-h-screen bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-black text-gray-100 overflow-hidden custom-scrollbar"
-  >
-    <!-- Fixed Full Width Topbar -->
-    <div class="fixed top-0 left-0 right-0 z-30">
+  <div class="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
+    <!-- ✅ Topbar -->
+    <div class="fixed top-0 left-0 right-0 z-30 shadow bg-white/90 backdrop-blur-md border-b border-gray-200">
       <AdminTopbar />
     </div>
 
-    <div class="flex pt-16 h-full">
-      <!-- Sidebar -->
-      <div
-        class="w-64 flex-shrink-0 border-r border-gray-800 bg-[#1a1a1a] h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar"
-      >
-        <admin_sidebar />
-      </div>
+    <div class="flex pt-16">
+      <!-- ✅ Sidebar -->
+      <aside class="hidden md:block w-64 flex-shrink-0 border-r border-gray-200 bg-white/90 backdrop-blur-md h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar shadow-sm">
+        <AdminSidebar />
+      </aside>
 
-      <!-- Main Content Area -->
-      <main
-        class="flex-1 p-6 sm:p-8 space-y-10 overflow-y-auto h-[calc(100vh-4rem)] custom-scrollbar"
-      >
-        <!-- Summary Cards -->
-        <section
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
+      <!-- ✅ Main Content -->
+      <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-10 overflow-y-auto h-[calc(100vh-4rem)] custom-scrollbar">
+        <!-- Dashboard Summary Cards -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div
             v-for="(card, i) in dashboardCards"
             :key="i"
-            class="group relative overflow-hidden rounded-2xl border border-gray-700/40 bg-[#1f1f1f]/70 backdrop-blur-md shadow-lg shadow-black/40 transition-all duration-300 hover:shadow-green-500/40 hover:border-green-500/60 hover:-translate-y-1"
+            class="bg-white/80 backdrop-blur-md border border-gray-200 rounded-2xl p-6 shadow hover:shadow-lg transition transform hover:-translate-y-1 hover:scale-[1.02]"
           >
-            <div
-              class="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-40"
-              style="box-shadow: 0 0 40px 8px rgba(34,197,94,0.25)"
-            ></div>
-
-            <div class="relative z-10 flex items-center gap-4 p-6">
-              <component
-                :is="card.icon"
-                class="w-10 h-10 text-green-400"
-              />
+            <div class="flex items-center gap-4">
+              <div class="p-4 rounded-xl bg-green-100 text-green-600 flex items-center justify-center shadow-inner">
+                <component :is="card.icon" class="w-6 h-6" />
+              </div>
               <div>
-                <p
-                  class="text-sm font-medium text-gray-400 tracking-wide"
-                >
-                  {{ card.title }}
-                </p>
-                <p class="text-2xl font-extrabold text-white">
-                  {{ card.value }}
-                </p>
+                <p class="text-sm text-gray-500">{{ card.title }}</p>
+                <p class="text-2xl font-bold text-gray-800">{{ card.value }}</p>
               </div>
             </div>
           </div>
@@ -56,138 +36,83 @@
         <div class="flex justify-end">
           <button
             @click="exportToExcel"
-            class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-green-600/30 ring-1 ring-green-400/40 transition-transform duration-200 hover:bg-green-700 hover:shadow-green-600/50 focus:outline-none focus:ring-2 focus:ring-green-500 active:scale-95"
+            class="px-5 py-2 rounded-xl bg-green-600 hover:bg-green-700 active:scale-95 text-white text-sm font-medium shadow-lg transition"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M12 5v14m7-7H5"
-              />
-            </svg>
             Export Metrics to Excel
           </button>
         </div>
 
         <!-- Charts Section -->
         <section class="space-y-10">
-          <!-- Revenue Trend -->
-          <div
-            class="rounded-2xl border border-gray-700/40 bg-[#1f1f1f]/70 backdrop-blur-md p-6 shadow-lg shadow-black/40 hover:shadow-green-500/40 transition-shadow"
-          >
-            <div
-              class="flex items-center justify-between mb-4"
-            >
-              <h2
-                class="text-lg font-semibold text-gray-200"
-              >
-                Revenue Trend (Daily)
-              </h2>
+          <!-- Revenue Trend Chart -->
+          <div class="border border-gray-200 rounded-2xl p-6 bg-white/80 backdrop-blur-md shadow hover:shadow-lg transition transform hover:-translate-y-1">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <h2 class="text-lg font-semibold text-gray-800">📈 Revenue Trend (Daily)</h2>
               <select
                 v-model="selectedWeek"
-                class="bg-gray-800 text-gray-100 border border-gray-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring focus:border-green-500"
+                class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
               >
                 <option value="">All Weeks</option>
-                <option
-                  v-for="week in availableWeeks"
-                  :key="week.label"
-                  :value="week.label"
-                >
+                <option v-for="week in availableWeeks" :key="week.label" :value="week.label">
                   {{ week.label }}
                 </option>
               </select>
             </div>
-            <div class="h-72">
+            <div class="h-72 sm:h-80">
               <canvas ref="revenueChartRef" class="h-full w-full" />
             </div>
           </div>
 
           <!-- Service Trends -->
-          <div
-            class="flex items-center justify-between"
-          >
-            <h2
-              class="text-lg font-semibold text-gray-200"
-            >
-              Service Trends
-            </h2>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h2 class="text-lg font-semibold text-gray-800">📊 Service Trends</h2>
             <button
-              @click="openServiceModal"
-              class="px-3 py-1.5 text-xs rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium shadow"
+              @click="showServiceModal = true"
+              class="px-4 py-1.5 rounded-lg text-sm bg-green-600 hover:bg-green-700 active:scale-95 text-white shadow-md transition"
             >
               View Totals
             </button>
           </div>
 
+          <!-- Service Charts -->
           <div
             v-for="(_, index) in serviceChartRefs"
             :key="index"
-            class="rounded-2xl border border-gray-700/40 bg-[#1f1f1f]/70 backdrop-blur-md p-6 shadow-lg shadow-black/40 transition-shadow hover:shadow-green-500/40"
+            class="border border-gray-200 rounded-2xl p-6 bg-white/80 backdrop-blur-md shadow hover:shadow-lg transition transform hover:-translate-y-1"
           >
-            <div class="mb-4">
-              <h3
-                class="text-base font-medium text-gray-300"
-              >
-                Batch {{ index + 1 }}
-              </h3>
-            </div>
-            <div class="h-72">
-              <canvas
-                :ref="(el) => (serviceChartRefs[index] = el)"
-                class="h-full w-full"
-              />
+            <h3 class="text-base font-medium mb-4 text-gray-700">Batch {{ index + 1 }}</h3>
+            <div class="h-72 sm:h-80">
+              <canvas :ref="(el) => (serviceChartRefs[index] = el)" class="h-full w-full" />
             </div>
           </div>
         </section>
       </main>
     </div>
 
-    <!-- Service Totals Modal -->
-    <div
-      v-if="showServiceModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-    >
-      <div
-        class="bg-[#1f1f1f] w-full max-w-lg rounded-2xl p-6 shadow-xl border border-gray-700 relative custom-scrollbar"
-      >
-        <h2
-          class="text-lg font-semibold text-gray-200 mb-4"
-        >
-          Service Totals
-        </h2>
-        <button
-          @click="showServiceModal = false"
-          class="absolute top-3 right-3 text-gray-400 hover:text-white"
-        >
-          ✕
-        </button>
-        <div
-          class="max-h-96 overflow-y-auto space-y-2 custom-scrollbar"
-        >
-          <div
-            v-for="(count, service) in sortedServiceTotals"
-            :key="service"
-            class="flex justify-between items-center p-2 rounded-lg bg-gray-800/60"
+    <!-- ✅ Service Totals Modal -->
+    <transition name="fade">
+      <div v-if="showServiceModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+        <div class="bg-white/95 w-full max-w-lg p-6 rounded-2xl border border-gray-200 shadow-xl relative animate-fadeIn">
+          <h2 class="text-lg font-semibold mb-5 text-gray-800">Service Totals</h2>
+          <button
+            @click="showServiceModal = false"
+            class="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
           >
-            <span
-              class="text-gray-200 text-sm font-medium"
-              >{{ service }}</span
+            ✕
+          </button>
+          <div class="max-h-96 overflow-y-auto space-y-2 custom-scrollbar">
+            <div
+              v-for="(count, service) in sortedServiceTotals"
+              :key="service"
+              class="flex justify-between items-center px-4 py-2 border border-gray-100 rounded-lg hover:bg-gray-50 transition"
             >
-            <span
-              class="text-green-400 font-semibold"
-              >{{ count }}</span
-            >
+              <span class="text-sm text-gray-600">{{ service }}</span>
+              <span class="font-semibold text-gray-800">{{ count }}</span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </transition>
   </div>
 </template>
 
@@ -197,41 +122,38 @@ import { getFirestore, collection, getDocs } from 'firebase/firestore'
 import Chart from 'chart.js/auto'
 import * as XLSX from 'xlsx'
 
-import admin_sidebar from '@/components/admin_sidebar.vue'
+import AdminSidebar from '@/components/admin_sidebar.vue'
 import AdminTopbar from '@/components/AdminTopbar.vue'
-import {
-  ChartBarIcon,
-  UsersIcon,
-  CreditCardIcon,
-  CurrencyDollarIcon
-} from '@heroicons/vue/24/solid'
+import { ChartBarIcon, UsersIcon, CreditCardIcon, CurrencyDollarIcon } from '@heroicons/vue/24/solid'
 
 const db = getFirestore()
 
+/* Refs */
 const serviceChartRefs = ref([])
 const revenueChartRef = ref(null)
 
+/* Data */
 const dashboardCards = ref([])
 const serviceCounts = ref({})
 const revenueTrend = ref({})
-
 const selectedWeek = ref('')
 const availableWeeks = ref([])
 
+/* Charts Instances */
 let serviceChartInstances = []
 let revenueChartInstance = null
 
-/* ✅ MODAL STATE */
+/* Modal State */
 const showServiceModal = ref(false)
-const openServiceModal = () => {
-  showServiceModal.value = true
-}
+const openServiceModal = () => { showServiceModal.value = true }
+
 const sortedServiceTotals = computed(() => {
   return Object.fromEntries(
     Object.entries(serviceCounts.value).sort((a, b) => b[1] - a[1])
   )
 })
 
+/* Utils */
 const chunkServiceCounts = (obj, size = 64) => {
   const entries = Object.entries(obj)
   const chunks = []
@@ -244,10 +166,8 @@ const chunkServiceCounts = (obj, size = 64) => {
 function getWeekRange(dateStr) {
   const d = new Date(dateStr)
   const day = d.getDay() || 7
-  const start = new Date(d)
-  start.setDate(d.getDate() - day + 1)
-  const end = new Date(start)
-  end.setDate(start.getDate() + 6)
+  const start = new Date(d); start.setDate(d.getDate() - day + 1)
+  const end = new Date(start); end.setDate(start.getDate() + 6)
   return {
     label: `${start.toISOString().split('T')[0]} to ${end.toISOString().split('T')[0]}`,
     from: start.toISOString().split('T')[0],
@@ -274,24 +194,18 @@ function prepareWeeks() {
 
 function getFilteredRevenueData() {
   if (!selectedWeek.value) return revenueTrend.value
-
   const week = availableWeeks.value.find((w) => w.label === selectedWeek.value)
   if (!week) return revenueTrend.value
-
   const filtered = {}
   for (const [date, value] of Object.entries(revenueTrend.value)) {
-    if (date >= week.from && date <= week.to) {
-      filtered[date] = value
-    }
+    if (date >= week.from && date <= week.to) filtered[date] = value
   }
   return filtered
 }
 
+/* Fetch Dashboard Data */
 async function fetchDashboardData() {
-  let totalRevenue = 0
-  let unpaidClaims = 0
-  let totalPatients = 0
-  let totalUnpaidAmount = 0
+  let totalRevenue = 0, unpaidClaims = 0, totalPatients = 0, totalUnpaidAmount = 0
   serviceCounts.value = {}
   revenueTrend.value = {}
 
@@ -311,8 +225,7 @@ async function fetchDashboardData() {
         }
       }
 
-      if (['pending', 'not paid', 'unpaid', 'overdue'].includes(status))
-        unpaidClaims++
+      if (['pending','not paid','unpaid','overdue'].includes(status)) unpaidClaims++
       if (status === 'not paid') totalUnpaidAmount += amount
 
       for (const s of d.services || []) {
@@ -338,6 +251,7 @@ async function fetchDashboardData() {
   }
 }
 
+/* Draw Charts */
 function drawCharts() {
   serviceChartInstances.forEach((c) => c?.destroy())
   serviceChartInstances = []
@@ -349,46 +263,13 @@ function drawCharts() {
     nextTick(() => {
       const ref = serviceChartRefs.value[index]
       if (!ref) return
-
       const ctx = ref.getContext('2d')
       const labels = Object.keys(chunk)
       const values = Object.values(chunk)
-
       const chart = new Chart(ctx, {
         type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            data: values,
-            label: 'Requests',
-            borderColor: '#22c55e',
-            backgroundColor: 'rgba(34,197,94,0.2)',
-            borderWidth: 2,
-            tension: 0.3,
-            fill: true,
-            pointRadius: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (ctx) => ` ${ctx.parsed.y} requests`
-              }
-            }
-          },
-          scales: {
-            x: { display: false },
-            y: {
-              beginAtZero: true,
-              ticks: { color: '#9ca3af' },
-              grid: { color: '#374151' }
-            }
-          }
-        }
+        data: { labels, datasets: [{ data: values, label: 'Requests', borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.2)', borderWidth: 2, tension: 0.3, fill: true, pointRadius: 2 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.y} requests` } } }, scales: { x: { display: false }, y: { beginAtZero: true, ticks: { color: '#9ca3af' }, grid: { color: '#e5e7eb' } } } }
       })
       serviceChartInstances.push(chart)
     })
@@ -397,77 +278,31 @@ function drawCharts() {
   nextTick(() => {
     if (revenueChartInstance) revenueChartInstance.destroy()
     if (!revenueChartRef.value) return
-
     const ctx = revenueChartRef.value.getContext('2d')
     const filtered = getFilteredRevenueData()
     const labels = Object.keys(filtered).sort()
     const values = labels.map((d) => filtered[d])
-
     revenueChartInstance = new Chart(ctx, {
       type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          data: values,
-          label: 'Revenue',
-          borderColor: '#22c55e',
-          backgroundColor: 'rgba(34,197,94,0.15)',
-          borderWidth: 2,
-          tension: 0.4,
-          fill: true,
-          pointRadius: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: (ctx) => ` ₱${ctx.parsed.y.toLocaleString()}`
-            }
-          }
-        },
-        scales: {
-          x: {
-            ticks: { color: '#9ca3af' },
-            grid: { color: '#374151' }
-          },
-          y: {
-            beginAtZero: true,
-            ticks: { color: '#9ca3af' },
-            grid: { color: '#374151' }
-          }
-        }
-      }
+      data: { labels, datasets: [{ data: values, label: 'Revenue', borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.15)', borderWidth: 2, tension: 0.4, fill: true, pointRadius: 2 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ₱${ctx.parsed.y.toLocaleString()}` } } }, scales: { x: { ticks: { color: '#9ca3af' }, grid: { color: '#e5e7eb' } }, y: { beginAtZero: true, ticks: { color: '#9ca3af' }, grid: { color: '#e5e7eb' } } } }
     })
   })
 }
 
+/* Export Metrics */
 function exportToExcel() {
-  const metricsData = dashboardCards.value.map((c) => ({
-    Metric: c.title,
-    Value: c.value
-  }))
-
-  const revenueData = Object.entries(getFilteredRevenueData())
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([date, amount]) => ({
-      Date: date,
-      Revenue: `₱${amount.toLocaleString()}`
-    }))
-
+  const metricsData = dashboardCards.value.map((c) => ({ Metric: c.title, Value: c.value }))
+  const revenueData = Object.entries(getFilteredRevenueData()).sort(([a],[b]) => a.localeCompare(b)).map(([date, amount]) => ({ Date: date, Revenue: `₱${amount.toLocaleString()}` }))
   const metricsSheet = XLSX.utils.json_to_sheet(metricsData)
   const revenueSheet = XLSX.utils.json_to_sheet(revenueData)
-
   const workbook = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(workbook, metricsSheet, 'Dashboard Metrics')
   XLSX.utils.book_append_sheet(workbook, revenueSheet, 'Daily Revenue Trend')
-
   XLSX.writeFile(workbook, 'MaEsPayTrack_Admin_Dashboard.xlsx')
 }
 
+/* Mount */
 onMounted(async () => {
   await fetchDashboardData()
   prepareWeeks()
@@ -475,36 +310,5 @@ onMounted(async () => {
   drawCharts()
 })
 
-watch(selectedWeek, () => {
-  drawCharts()
-})
+watch(selectedWeek, drawCharts)
 </script>
-
-<style>
-/* ✅ Custom scrollbar (dark + green accent) */
-@layer utilities {
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: #111;
-    border-radius: 10px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #22c55e, #15803d);
-    border-radius: 10px;
-    border: 2px solid #111;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #16a34a, #166534);
-  }
-
-  /* Firefox */
-  .custom-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: #22c55e #111;
-  }
-}
-</style>
-

@@ -1,145 +1,143 @@
 <template>
-  <div class="flex h-screen bg-[#1a1a1a] text-gray-100 overflow-hidden">
-    <!-- Topbar -->
-    <div class="fixed top-0 left-0 right-0 z-30 bg-[#1f1f1f] h-16 border-b border-gray-800 shadow">
-      <AdminTopbar />
-    </div>
-
+  <div class="flex min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
     <!-- Sidebar -->
-    <aside class="fixed top-16 left-0 bottom-0 w-64 bg-[#1f1f1f] border-r border-gray-800 shadow z-20 overflow-y-auto">
+    <aside class="hidden md:block w-64 flex-shrink-0 border-r border-gray-200 bg-white/90 backdrop-blur-md h-screen pt-16 overflow-y-auto shadow-sm custom-scrollbar">
       <AdminSidebar />
     </aside>
 
-    <!-- Main Content -->
-    <div class="flex flex-col flex-1 pl-64 min-w-0">
-      <main class="flex-1 mt-16 p-6 space-y-6 overflow-y-auto">
-        <!-- Search -->
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Search by patient email"
-          class="px-4 py-2 border border-gray-700 rounded-md w-full max-w-md text-sm bg-[#2a2a2a] text-white placeholder-gray-400"
-        />
+    <!-- Main content -->
+    <div class="flex-1 flex flex-col h-screen">
+      <!-- Topbar -->
+      <div class="fixed top-0 z-30 shadow bg-white/90 backdrop-blur-md border-b border-gray-200 md:left-64 md:right-0 w-full h-16 flex items-center px-6">
+        <AdminTopbar />
+      </div>
 
-        <!-- Table -->
-        <table class="w-full mt-4 text-sm border border-gray-700 bg-[#222] rounded shadow">
-          <thead class="bg-[#333] text-gray-300">
-            <tr>
-              <th class="px-4 py-2 border border-gray-700 text-left">Email</th>
-              <th class="px-4 py-2 border border-gray-700 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(group, email) in groupedInvoices"
-              :key="email"
-              class="border-t border-gray-700 hover:bg-[#2a2a2a]"
-            >
-              <td class="px-4 py-2 border border-gray-700">{{ email }}</td>
-              <td class="px-4 py-2 border border-gray-700 text-center">
-                <button
-                  @click="openInvoiceList(email)"
-                  class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
-                >
-                  View
-                </button>
-              </td>
-            </tr>
-            <tr v-if="Object.keys(groupedInvoices).length === 0">
-              <td colspan="2" class="text-center text-gray-400 py-4 italic">
-                No matching accounts found.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Scrollable content -->
+      <main class="flex-1 pt-16 p-4 sm:p-6 lg:p-8 overflow-y-auto custom-scrollbar">
+        <!-- Search -->
+        <div class="mb-4 max-w-md">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search by patient email"
+            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+        </div>
+
+        <!-- Accounts Table -->
+        <div class="overflow-x-auto bg-white rounded-lg shadow border border-gray-300">
+          <table class="w-full text-sm border-collapse">
+            <thead class="bg-gray-200 text-gray-800 text-xs font-bold uppercase">
+              <tr>
+                <th class="px-4 py-2 border-b border-gray-300">Email</th>
+                <th class="px-4 py-2 border-b border-gray-300">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(group, email) in groupedInvoices" :key="email" class="hover:bg-gray-50">
+                <td class="px-4 py-2">{{ email }}</td>
+                <td class="px-4 py-2">
+                  <button
+                    @click="openInvoiceList(email)"
+                    class="px-3 py-1 border border-blue-500 text-blue-600 rounded text-xs hover:bg-blue-50 transition"
+                  >
+                    View
+                  </button>
+                </td>
+              </tr>
+              <tr v-if="Object.keys(groupedInvoices).length === 0">
+                <td colspan="2" class="text-center px-4 py-4 text-gray-500">No matching accounts found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <!-- Modal: List of Invoices -->
-        <div v-if="selectedEmail" class="fixed inset-0 z-50 flex items-center justify-center">
-          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closeAllModals"></div>
-          <div class="relative bg-[#1f1f1f] w-full max-w-3xl rounded-lg shadow p-6 z-10 max-h-[80vh] overflow-y-auto border border-gray-700">
-            <h2 class="text-lg font-semibold mb-4 text-white">Invoices – {{ selectedEmail }}</h2>
-
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div
-                v-for="invoice in groupedInvoices[selectedEmail]"
-                :key="invoice.id"
-                @click="openResultModal(invoice)"
-                class="cursor-pointer bg-[#2a2a2a] p-4 rounded-lg border border-gray-700 hover:border-green-500 transition"
-              >
-                <p class="text-sm text-gray-400">Invoice Date: {{ formatDate(invoice.createdAt) }}</p>
-                <p class="text-sm">
-                  <span class="font-semibold text-gray-300">Status:</span>
-                  <span
-                    :class="{
-                      'text-green-400': invoice.status === 'Paid',
-                      'text-yellow-400': invoice.status === 'Pending',
-                      'text-red-400': invoice.status === 'Not Paid',
-                    }"
-                  >
-                    {{ invoice.status || 'N/A' }}
-                  </span>
-                </p>
-              </div>
-            </div>
-
-            <div class="text-right mt-6">
+        <transition name="fade">
+          <div v-if="selectedEmail" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div class="bg-white/95 w-full max-w-lg p-6 rounded-2xl border border-gray-200 shadow-xl relative animate-fadeIn">
+              <h2 class="text-lg font-semibold mb-4">Invoices – {{ selectedEmail }}</h2>
               <button
                 @click="selectedEmail = null"
-                class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded text-sm text-white"
+                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
               >
-                Close
+                ✕
               </button>
+              <div class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
+                <div
+                  v-for="invoice in groupedInvoices[selectedEmail]"
+                  :key="invoice.id"
+                  @click="openResultModal(invoice)"
+                  class="border border-gray-100 rounded-lg p-3 hover:bg-gray-50 cursor-pointer transition"
+                >
+                  <p class="text-sm">Invoice Date: {{ formatDate(invoice.createdAt) }}</p>
+                  <p class="text-sm">
+                    <span>Status:</span>
+                    <span class="font-medium">{{ invoice.status || 'N/A' }}</span>
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </transition>
 
         <!-- Modal: Enter Results -->
-        <div v-if="selectedInvoice" class="fixed inset-0 z-50 flex items-center justify-center">
-          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="selectedInvoice = null"></div>
-          <div class="relative bg-[#1f1f1f] w-full max-w-2xl rounded-lg shadow p-6 z-10 max-h-[80vh] overflow-y-auto border border-gray-700">
-            <h2 class="text-lg font-semibold mb-4 text-white">Enter Results</h2>
-
-            <div v-for="svc in selectedInvoice.services" :key="svc.serviceName" class="mb-4">
-              <label class="block text-sm font-medium mb-1 text-gray-300">
-                {{ svc.serviceName }}
-              </label>
-              <textarea
-                v-model="results[selectedInvoice.id + '_' + svc.serviceName]"
-                class="w-full border border-gray-700 rounded-md px-3 py-2 text-sm bg-[#2a2a2a] text-white"
-                placeholder="Enter result for this service…"
-              />
-            </div>
-
-            <div class="flex justify-between mt-6">
+        <transition name="fade">
+          <div v-if="selectedInvoice" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div class="bg-white/95 w-full max-w-lg p-6 rounded-2xl border border-gray-200 shadow-xl relative animate-fadeIn">
+              <h2 class="text-lg font-semibold mb-4">Enter Results</h2>
               <button
                 @click="selectedInvoice = null"
-                class="px-4 py-2 bg-gray-600 hover:bg-gray-500 rounded text-sm text-white"
+                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
               >
-                Cancel
+                ✕
               </button>
-              <button
-                @click="submitResults(selectedInvoice)"
-                class="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700"
-              >
-                Save Results
-              </button>
+              <div class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar">
+                <div
+                  v-for="svc in selectedInvoice.services"
+                  :key="svc.serviceName"
+                  class="flex flex-col"
+                >
+                  <label class="text-sm font-medium mb-1">{{ svc.serviceName }}</label>
+                  <textarea
+                    v-model="results[selectedInvoice.id + '_' + svc.serviceName]"
+                    placeholder="Enter result for this service…"
+                    class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 resize-vertical min-h-[80px]"
+                  />
+                </div>
+              </div>
+              <div class="flex justify-end gap-3 mt-4">
+                <button
+                  @click="selectedInvoice = null"
+                  class="px-3 py-1 border border-gray-400 rounded hover:bg-gray-100"
+                >
+                  Cancel
+                </button>
+                <button
+                  @click="submitResults(selectedInvoice)"
+                  class="px-3 py-1 border border-green-500 text-green-600 rounded hover:bg-green-50"
+                >
+                  Save Results
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </transition>
 
         <!-- Success Modal -->
         <transition name="fade">
-          <div v-if="successMessage" class="fixed inset-0 z-50 flex items-center justify-center">
-            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="successMessage = ''"></div>
-            <div class="relative bg-black max-w-sm w-[90%] p-6 rounded-xl shadow-lg text-center space-y-3 z-10">
-              <svg class="w-10 h-10 text-green-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
-              <h3 class="text-lg font-semibold text-green-400">Saved Successfully</h3>
-              <p class="text-sm text-gray-300">{{ successMessage }}</p>
-              <button @click="successMessage = ''" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm">
-                Okay
-              </button>
+          <div v-if="successMessage" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div class="bg-white/95 w-full max-w-sm p-6 rounded-2xl border border-gray-200 shadow-xl relative animate-fadeIn">
+              <h3 class="text-lg font-semibold mb-2">Saved Successfully</h3>
+              <p class="text-sm text-gray-700 mb-4">{{ successMessage }}</p>
+              <div class="flex justify-end">
+                <button
+                  @click="successMessage = ''"
+                  class="px-3 py-1 border border-gray-400 rounded hover:bg-gray-100"
+                >
+                  Okay
+                </button>
+              </div>
             </div>
           </div>
         </transition>
@@ -150,14 +148,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import {
-  collection,
-  getDocs,
-  doc,
-  updateDoc,
-  query,
-  orderBy
-} from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, query, orderBy } from 'firebase/firestore';
 import { db } from '@/firebase';
 import AdminSidebar from '@/components/admin_sidebar.vue';
 import AdminTopbar from '@/components/AdminTopbar.vue';
@@ -211,11 +202,6 @@ const openResultModal = (invoice) => {
   });
 };
 
-const closeAllModals = () => {
-  selectedEmail.value = null;
-  selectedInvoice.value = null;
-};
-
 const submitResults = async (invoice) => {
   const updatedServices = invoice.services.map(svc => {
     const key = invoice.id + '_' + svc.serviceName;
@@ -223,9 +209,7 @@ const submitResults = async (invoice) => {
   });
 
   try {
-    await updateDoc(doc(db, 'invoices', invoice.id), {
-      services: updatedServices
-    });
+    await updateDoc(doc(db, 'invoices', invoice.id), { services: updatedServices });
     invoice.services = updatedServices;
     selectedInvoice.value = null;
     successMessage.value = 'Results saved successfully.';
@@ -236,10 +220,6 @@ const submitResults = async (invoice) => {
 </script>
 
 <style scoped>
-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;

@@ -155,70 +155,68 @@
 
 
     <!-- Features -->
-<section ref="features" class="py-20 bg-gray-100">
-  <div class="max-w-6xl mx-auto px-4">
-    <h2 class="text-3xl font-extrabold text-center mb-14 text-green-700 tracking-tight">
-      Core Features
-    </h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-      
-      <!-- Feature Card -->
-      <div class="group p-8 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-        <div class="flex justify-center mb-6">
-          <div class="p-4 bg-green-100 text-green-700 rounded-full group-hover:scale-110 transition duration-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6h6v6m-7 4h8a2 2 0 002-2v-8a2 2 0 00-2-2H9l-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+    <section ref="features" class="py-20 bg-gray-100">
+      <div class="max-w-6xl mx-auto px-4">
+        <h2 class="text-3xl font-extrabold text-center mb-14 text-green-700 tracking-tight">
+          Core Features
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+          
+          <!-- Feature Card -->
+          <div class="group p-8 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+            <div class="flex justify-center mb-6">
+              <div class="p-4 bg-green-100 text-green-700 rounded-full group-hover:scale-110 transition duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6h6v6m-7 4h8a2 2 0 002-2v-8a2 2 0 00-2-2H9l-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+            <h3 class="text-xl font-semibold text-green-700 mb-3 text-center">
+              Digital Patient Invoicing
+            </h3>
+            <p class="text-sm text-gray-600 text-center leading-relaxed">
+              Automatically generate, track, and approve invoices with real-time visibility for both admins and patients.
+            </p>
           </div>
-        </div>
-        <h3 class="text-xl font-semibold text-green-700 mb-3 text-center">
-          Digital Patient Invoicing
-        </h3>
-        <p class="text-sm text-gray-600 text-center leading-relaxed">
-          Automatically generate, track, and approve invoices with real-time visibility for both admins and patients.
-        </p>
-      </div>
 
-      <!-- Feature Card -->
-      <div class="group p-8 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-        <div class="flex justify-center mb-6">
-          <div class="p-4 bg-green-100 text-green-700 rounded-full group-hover:scale-110 transition duration-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.656 0-3 1.567-3 3.5S10.344 15 12 15s3-1.567 3-3.5S13.656 8 12 8z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364l-1.414-1.414M8.05 8.05L6.636 6.636m0 10.728l1.414-1.414M17.95 6.05l1.414 1.414" />
-            </svg>
+          <!-- Feature Card -->
+          <div class="group p-8 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+            <div class="flex justify-center mb-6">
+              <div class="p-4 bg-green-100 text-green-700 rounded-full group-hover:scale-110 transition duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.656 0-3 1.567-3 3.5S10.344 15 12 15s3-1.567 3-3.5S13.656 8 12 8z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364l-1.414-1.414M8.05 8.05L6.636 6.636m0 10.728l1.414-1.414M17.95 6.05l1.414 1.414" />
+                </svg>
+              </div>
+            </div>
+            <h3 class="text-xl font-semibold text-green-700 mb-3 text-center">
+              GCash & Cash Integration
+            </h3>
+            <p class="text-sm text-gray-600 text-center leading-relaxed">
+              Secure payment channels through cash and GCash uploads with reference number validation for fraud prevention.
+            </p>
           </div>
-        </div>
-        <h3 class="text-xl font-semibold text-green-700 mb-3 text-center">
-          GCash & Cash Integration
-        </h3>
-        <p class="text-sm text-gray-600 text-center leading-relaxed">
-          Secure payment channels through cash and GCash uploads with reference number validation for fraud prevention.
-        </p>
-      </div>
 
-      <!-- Feature Card -->
-      <div class="group p-8 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
-        <div class="flex justify-center mb-6">
-          <div class="p-4 bg-green-100 text-green-700 rounded-full group-hover:scale-110 transition duration-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17l-2.25 2.25m0-4.5L9.75 17m0 0h8.25a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0018 4.5H6a2.25 2.25 0 00-2.25 2.25v8.25" />
-            </svg>
+          <!-- Feature Card -->
+          <div class="group p-8 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+            <div class="flex justify-center mb-6">
+              <div class="p-4 bg-green-100 text-green-700 rounded-full group-hover:scale-110 transition duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17l-2.25 2.25m0-4.5L9.75 17m0 0h8.25a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0018 4.5H6a2.25 2.25 0 00-2.25 2.25v8.25" />
+                </svg>
+              </div>
+            </div>
+            <h3 class="text-xl font-semibold text-green-700 mb-3 text-center">
+              Admin Dashboard
+            </h3>
+            <p class="text-sm text-gray-600 text-center leading-relaxed">
+              Powerful tools to monitor payments, approve invoices, track analytics, and generate detailed reports.
+            </p>
           </div>
+
         </div>
-        <h3 class="text-xl font-semibold text-green-700 mb-3 text-center">
-          Admin Dashboard
-        </h3>
-        <p class="text-sm text-gray-600 text-center leading-relaxed">
-          Powerful tools to monitor payments, approve invoices, track analytics, and generate detailed reports.
-        </p>
       </div>
-
-    </div>
-  </div>
-</section>
-
-
+    </section>
 
     <!-- Benefits -->
     <section ref="benefits" class="py-20 bg-gradient-to-b from-gray-50 to-white">
@@ -303,14 +301,14 @@
 
         <!-- Contact Info -->
         <div class="mt-10 text-sm space-y-2 text-green-100">
-          <p>📞 <span class="font-medium text-white">+63 912 345 6789</span></p>
+          <p>📞 <span class="font-medium text-white">+639-310-783-528</span></p>
           <p>
             📧
             <a
-              href="mailto:maes.hospital@gmail.com"
+              href="mailto:meghlabibis@gmail.com"
               class="underline hover:text-green-200 transition-colors"
             >
-              maes.hospital@gmail.com
+              meghlabibis@gmail.com
             </a>
           </p>
 

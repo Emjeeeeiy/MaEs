@@ -78,8 +78,8 @@
                     />
                     <span class="font-medium text-sm text-gray-700">Select</span>
                   </label>
-                  <div class="text-sm text-gray-600">
-                    <p class="mb-1">
+                  <div class="text-sm text-gray-600 space-y-1">
+                    <p>
                       <span class="font-semibold">Services:</span>
                       {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
                     </p>
@@ -111,13 +111,15 @@
     <!-- Payment Method Modal -->
     <transition name="fade">
       <div v-if="showPaymentMethodModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="bg-white w-80 p-4 rounded-lg shadow-xl space-y-4 animate-fade-in">
-          <h3 class="text-base font-bold text-center">Select Payment Method</h3>
+        <div class="bg-white w-80 p-5 rounded-lg shadow-xl space-y-5 animate-fade-in">
+          <h3 class="text-base font-bold text-gray-800 text-left">Select Payment Method</h3>
           <div class="grid grid-cols-2 gap-2 text-sm font-medium">
             <button @click="submitPayments('Cash')" class="bg-gray-100 hover:bg-gray-200 py-1.5 rounded-md">Cash</button>
             <button @click="submitPayments('GCash')" class="bg-blue-100 hover:bg-blue-200 py-1.5 rounded-md">GCash</button>
           </div>
-          <button @click="showPaymentMethodModal = false" class="w-full text-center text-red-500 hover:underline text-xs">Cancel</button>
+          <div class="flex justify-end">
+            <button @click="showPaymentMethodModal = false" class="text-red-500 hover:underline text-xs">Cancel</button>
+          </div>
         </div>
       </div>
     </transition>
@@ -126,24 +128,24 @@
     <transition name="fade">
       <div v-if="showGCashModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
         <div class="bg-white w-[400px] p-6 rounded-lg shadow-xl space-y-5 animate-fade-in text-gray-700">
-          <h3 class="text-lg font-bold text-blue-600 text-center">Pay with GCash</h3>
-          <div class="text-sm space-y-2">
+          <h3 class="text-lg font-bold text-blue-600 text-left">Pay with GCash</h3>
+          <div class="text-sm space-y-2 text-left">
             <p><strong>Step 1:</strong> Scan the QR code below using your GCash app.</p>
             <p><strong>Step 2:</strong> Pay the total amount for your selected invoice(s).</p>
             <p><strong>Step 3:</strong> Upload your GCash receipt & enter reference number.</p>
           </div>
           <img src="/gcash-qr.jpg" alt="GCash QR" class="w-40 mx-auto rounded border shadow" />
           <div class="text-sm mt-4 space-y-3">
-            <label class="block">
+            <label class="block text-left">
               <span class="font-semibold">GCash Reference Number</span>
               <input v-model="gcashReferenceNumber" type="text" class="w-full border rounded px-3 py-2 text-sm mt-1" />
             </label>
-            <label class="block">
+            <label class="block text-left">
               <span class="font-semibold">Upload Receipt</span>
               <input type="file" accept="image/*" @change="onFileChange" class="w-full mt-1 border border-dashed border-gray-400 rounded px-3 py-2 text-sm" />
             </label>
           </div>
-          <div class="flex justify-between items-center pt-4 text-sm">
+          <div class="flex justify-end items-center pt-4 space-x-3 text-sm">
             <button @click="showGCashModal = false" class="text-red-500 hover:underline">Cancel</button>
             <button @click="handleGCashSubmit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded">Submit</button>
           </div>
@@ -154,10 +156,12 @@
     <!-- Reminder Modal -->
     <transition name="fade">
       <div v-if="showReminderModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="bg-white w-[300px] p-5 rounded-lg shadow-xl space-y-4 animate-fade-in text-center">
+        <div class="bg-white w-[320px] p-5 rounded-lg shadow-xl space-y-4 animate-fade-in text-left">
           <h3 class="text-lg font-bold text-yellow-600">No Service Selected</h3>
           <p class="text-sm text-gray-700">Please select at least one invoice before submitting.</p>
-          <button @click="showReminderModal = false" class="mt-2 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1.5 rounded-md text-sm">Okay</button>
+          <div class="flex justify-end">
+            <button @click="showReminderModal = false" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1.5 rounded-md text-sm">Okay</button>
+          </div>
         </div>
       </div>
     </transition>
@@ -165,12 +169,14 @@
     <!-- Success Modal -->
     <transition name="fade">
       <div v-if="showSuccessModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="bg-white w-[300px] p-5 rounded-lg shadow-xl space-y-4 animate-fade-in text-center">
+        <div class="bg-white w-[320px] p-5 rounded-lg shadow-xl space-y-4 animate-fade-in text-left">
           <h3 class="text-lg font-bold text-green-600">Payment Submitted!</h3>
           <p class="text-sm text-gray-700">
             {{ selectedInvoices.length }} invoice(s) have been submitted and are awaiting admin approval.
           </p>
-          <button @click="showSuccessModal = false" class="mt-2 bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-md text-sm">Okay</button>
+          <div class="flex justify-end">
+            <button @click="showSuccessModal = false" class="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-md text-sm">Okay</button>
+          </div>
         </div>
       </div>
     </transition>
@@ -178,10 +184,12 @@
     <!-- Error Modal -->
     <transition name="fade">
       <div v-if="showErrorModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="bg-white w-[300px] p-5 rounded-lg shadow-xl space-y-4 animate-fade-in text-center">
+        <div class="bg-white w-[320px] p-5 rounded-lg shadow-xl space-y-4 animate-fade-in text-left">
           <h3 class="text-lg font-bold text-red-600">Error</h3>
           <p class="text-sm text-gray-700">{{ errorMessage }}</p>
-          <button @click="showErrorModal = false" class="mt-2 bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm">Okay</button>
+          <div class="flex justify-end">
+            <button @click="showErrorModal = false" class="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm">Okay</button>
+          </div>
         </div>
       </div>
     </transition>

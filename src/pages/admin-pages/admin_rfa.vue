@@ -1,24 +1,25 @@
 <template>
-  <div class="flex h-screen overflow-hidden bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-black text-gray-100">
-    <!-- Sidebar (below Topbar) -->
-    <aside class="w-64 shrink-0 bg-[#121212] border-r border-gray-700 shadow-lg fixed top-16 left-0 bottom-0 z-10 overflow-y-auto">
-      <AdminSidebar />
-    </aside>
+  <div class="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
+    <!-- ✅ Topbar -->
+    <div class="fixed top-0 z-30 shadow bg-white/90 backdrop-blur-md border-b border-gray-200 h-16 w-full md:left-64 md:right-0 flex items-center px-6">
+      <AdminTopbar />
+    </div>
 
-    <!-- Main Content Wrapper -->
-    <div class="flex flex-col flex-1 pl-64 min-w-0">
-      <!-- Topbar (Fixed & Full Width) -->
-      <div class="fixed top-0 left-0 right-0 z-20 h-16 shadow-md bg-[#121212] border-b border-gray-700">
-        <AdminTopbar />
-      </div>
+    <div class="flex pt-16">
+      <!-- ✅ Sidebar -->
+      <aside class="hidden md:block w-64 flex-shrink-0 border-r border-gray-200 bg-white/90 backdrop-blur-md h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar shadow-sm">
+        <AdminSidebar />
+      </aside>
 
-      <!-- Scrollable Page Content -->
-      <main class="flex-1 overflow-y-auto p-6 space-y-6 mt-16">
-        <h1 class="text-2xl font-bold text-green-400">Uploaded Financial Documents</h1>
+      <!-- ✅ Main Content -->
+      <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto h-[calc(100vh-4rem)] space-y-6 custom-scrollbar">
+        <h1 class="text-2xl font-bold mb-4">Uploaded Financial Documents</h1>
 
-        <div v-if="loading" class="text-gray-400">Loading documents...</div>
+        <div v-if="loading" class="text-gray-500">
+          Loading documents...
+        </div>
 
-        <div v-else-if="documents.length === 0" class="text-gray-500 italic">
+        <div v-else-if="documents.length === 0" class="text-gray-500">
           No documents found.
         </div>
 
@@ -26,26 +27,24 @@
           <div
             v-for="(doc, index) in documents"
             :key="index"
-            class="border border-gray-700 bg-[#222] rounded-lg p-5 shadow-md hover:shadow-green-500/20 transition"
+            class="bg-white/80 backdrop-blur-md border border-gray-200 rounded-xl p-4 shadow hover:shadow-lg transition"
           >
-            <div class="flex justify-between items-start">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
               <div>
-                <h2 class="text-lg font-semibold text-white">{{ doc.fileName }}</h2>
-                <p class="text-sm text-gray-400">{{ doc.email }}</p>
-                <p v-if="doc.description" class="text-sm mt-2 text-gray-300">
-                  {{ doc.description }}
-                </p>
+                <h2 class="font-semibold text-gray-800">{{ doc.fileName }}</h2>
+                <p class="text-gray-500 text-sm">{{ doc.email }}</p>
+                <p v-if="doc.description" class="text-gray-600 text-sm">{{ doc.description }}</p>
               </div>
               <a
                 :href="doc.fileUrl"
                 target="_blank"
                 rel="noopener"
-                class="inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                class="text-blue-600 hover:underline text-sm font-medium"
               >
                 View File
               </a>
             </div>
-            <p class="text-xs text-gray-500 mt-3">
+            <p class="text-gray-400 text-xs mt-2">
               Uploaded: {{ formatDate(doc.createdAt?.seconds) }}
             </p>
           </div>
@@ -87,12 +86,13 @@ const formatDate = (timestamp) => {
 onMounted(fetchDocuments)
 </script>
 
-<style scoped>
+<style>
+/* Scrollbar */
 main::-webkit-scrollbar {
   width: 6px;
 }
 main::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.12);
   border-radius: 3px;
 }
 </style>

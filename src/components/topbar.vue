@@ -1,12 +1,12 @@
 <template>
-  <header class="bg-white shadow-md relative z-10">
+  <header class="bg-gradient-to-r from-green-400 via-green-500 to-green-600 shadow-md relative z-10">
     <div class="w-full px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         
        <!-- Mobile Sidebar Toggle -->
       <button
         @click="$emit('toggle-sidebar')"
-        class="sm:hidden p-2 rounded-lg text-gray-700 hover:text-green-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500 transition-colors"
+        class="sm:hidden p-2 rounded-lg text-white hover:text-yellow-200 hover:bg-green-700/30 focus:outline-none focus:ring-2 focus:ring-yellow-300 transition-colors"
         title="Open Menu"
       >
         <svg xmlns="http://www.w3.org/2000/svg"
@@ -22,28 +22,27 @@
         </svg>
       </button>
 
-
         <!-- Page Title -->
-        <div class="font-bold text-green-700 text-lg sm:text-xl md:text-2xl capitalize">
+        <div class="font-bold text-white text-lg sm:text-xl md:text-2xl capitalize drop-shadow">
           {{ pageTitle }}
         </div>
 
         <!-- Topbar Icons -->
-        <nav class="flex gap-6 text-gray-700 relative items-center">
+        <nav class="flex gap-6 text-white relative items-center">
           <!-- Feedback -->
           <button @click="showModal = true" title="Feedback">
-            <ChatBubbleBottomCenterTextIcon class="w-6 h-6 text-green-600 hover:scale-110 transition" />
+            <ChatBubbleBottomCenterTextIcon class="w-6 h-6 text-white hover:scale-110 transition" />
           </button>
 
           <!-- Upload File -->
           <button @click="showDocumentModal = true" title="Upload File">
-            <DocumentArrowUpIcon class="w-6 h-6 text-purple-600 hover:scale-110 transition" />
+            <DocumentArrowUpIcon class="w-6 h-6 text-white hover:scale-110 transition" />
           </button>
 
           <!-- Notifications -->
           <div class="relative z-50" ref="notifRef">
             <button @click="toggleNotifDropdown" title="Notifications">
-              <BellIcon class="w-6 h-6 text-yellow-600 hover:rotate-12 transition" />
+              <BellIcon class="w-6 h-6 text-white hover:rotate-12 transition" />
               <span
                 v-if="notifications.length"
                 class="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center"
@@ -80,7 +79,7 @@
           <!-- Profile -->
           <div class="relative" ref="profileDropdownRef">
             <button @click="toggleDropdown" title="Profile">
-              <UserIcon class="w-6 h-6 text-blue-600 hover:scale-110 transition" />
+              <UserIcon class="w-6 h-6 text-white hover:scale-110 transition" />
             </button>
 
             <transition name="fade">

@@ -10,7 +10,7 @@
     <!-- Sidebar -->
     <aside
       :class="[
-        'fixed sm:static top-0 left-0 h-screen w-64 bg-white text-gray-800 z-50 flex flex-col shadow-md transition-transform duration-300',
+        'fixed sm:static top-0 left-0 h-screen w-64 bg-gray-200 text-gray-800 z-50 flex flex-col shadow-md transition-transform duration-300',
         isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'
       ]"
     >
@@ -18,10 +18,10 @@
       <div class="flex-1 overflow-y-auto">
         <router-link
           to="/profile"
-          class="block px-6 py-6 border-b border-gray-200 text-center hover:bg-gray-50 transition"
+          class="block px-6 py-6 border-b border-gray-300 text-center hover:bg-gray-300 transition"
         >
           <div
-            class="mx-auto w-20 h-20 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center shadow transform transition-all duration-500 hover:scale-110 hover:rotate-3 -ml-2"
+            class="mx-auto w-20 h-20 rounded-full overflow-hidden bg-gray-300 flex items-center justify-center shadow transform transition-all duration-500 hover:scale-110 hover:rotate-3 -ml-2"
           >
             <img
               v-if="profileImageUrl"
@@ -43,7 +43,7 @@
           <div>
             <p class="px-2 mb-2 text-xs text-gray-500 uppercase tracking-wide">Main</p>
             <router-link to="/dashboard" :class="linkClass('/dashboard')">
-              <HomeIcon class="w-5 h-5 text-gray-500" />
+              <HomeIcon class="w-5 h-5 text-gray-600" />
               Dashboard
             </router-link>
           </div>
@@ -52,11 +52,11 @@
           <div>
             <p class="px-2 mb-2 text-xs text-gray-500 uppercase tracking-wide">Process</p>
             <router-link to="/billing" :class="linkClass('/billing')">
-              <ClipboardDocumentCheckIcon class="w-5 h-5 text-gray-500" />
+              <ClipboardDocumentCheckIcon class="w-5 h-5 text-gray-600" />
               Billing
             </router-link>
             <router-link to="/payments" :class="linkClass('/payments')">
-              <CreditCardIcon class="w-5 h-5 text-gray-500" />
+              <CreditCardIcon class="w-5 h-5 text-gray-600" />
               Payments
             </router-link>
           </div>
@@ -65,7 +65,7 @@
           <div>
             <p class="px-2 mb-2 text-xs text-gray-500 uppercase tracking-wide">Information</p>
             <router-link to="/invoices" :class="linkClass('/invoices')">
-              <DocumentTextIcon class="w-5 h-5 text-gray-500" />
+              <DocumentTextIcon class="w-5 h-5 text-gray-600" />
               Invoices
             </router-link>
           </div>
@@ -74,11 +74,11 @@
           <div>
             <p class="px-2 mb-2 text-xs text-gray-500 uppercase tracking-wide">Other</p>
             <router-link to="/appointment" :class="linkClass('/appointment')">
-              <CalendarIcon class="w-5 h-5 text-gray-500" />
+              <CalendarIcon class="w-5 h-5 text-gray-600" />
               Appointments
             </router-link>
             <router-link to="/result" :class="linkClass('/result')">
-              <ChartBarIcon class="w-5 h-5 text-gray-500" />
+              <ChartBarIcon class="w-5 h-5 text-gray-600" />
               Result
             </router-link>
           </div>
@@ -104,7 +104,6 @@ import {
   ChartBarIcon,
 } from '@heroicons/vue/24/solid'
 
-// Props para makuha state from parent
 const props = defineProps({
   isMobileSidebarOpen: Boolean
 })
@@ -121,7 +120,7 @@ function linkClass(path) {
     'flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition',
     route.path === path
       ? 'bg-green-100 text-green-600'
-      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-800'
+      : 'text-gray-700 hover:bg-gray-300 hover:text-gray-900'
   ]
 }
 

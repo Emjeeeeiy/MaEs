@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 overflow-hidden">
     <!-- Fixed Topbar -->
-    <div class="flex-shrink-0 z-10">
+    <div class="flex-shrink-0 z-10 border-b border-gray-200 bg-white shadow-sm">
       <Topbar @toggle-sidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
     </div>
 
@@ -20,22 +20,29 @@
       </aside>
 
       <!-- Main -->
-      <main class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8">
+      <main class="flex-1 p-6 sm:p-10 space-y-8 overflow-hidden">
         <transition name="fade" mode="out-in">
           <!-- Loading State -->
-          <div v-if="loading" key="loading" class="flex justify-center items-center min-h-[300px]">
+          <div
+            v-if="loading"
+            key="loading"
+            class="flex justify-center items-center min-h-[300px]"
+          >
             <LoadingAnimation />
           </div>
 
           <!-- Main Content -->
-          <div v-else key="content" class="space-y-8 animate-fade-in">
+          <div v-else key="content" class="space-y-8 animate-fade-in h-full flex flex-col">
             <!-- Search & Filters -->
-            <div class="bg-white border border-gray-200 rounded-2xl shadow p-6 space-y-6">
+            <div class="bg-white border border-gray-200 rounded-2xl shadow p-6 flex flex-col flex-1 min-h-0">
               <h2 class="text-lg font-semibold text-blue-600">Generate Invoice</h2>
 
-              <div class="flex flex-col sm:flex-row sm:items-end gap-4">
+              <div class="flex flex-col sm:flex-row sm:items-end gap-4 mt-4">
+                <!-- Search -->
                 <div class="flex-1">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Search Service or Category:</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1 text-left">
+                    Search Service or Category:
+                  </label>
                   <input
                     v-model="searchQuery"
                     type="text"
@@ -43,52 +50,66 @@
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm"
                   />
                 </div>
+                <!-- Category Filter -->
                 <div class="sm:w-60">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Category:</label>
+                  <label class="block text-sm font-medium text-gray-700 mb-1 text-left">
+                    Filter by Category:
+                  </label>
                   <select
                     v-model="selectedCategory"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">All Categories</option>
-                    <option v-for="cat in availableCategories" :key="cat" :value="cat">{{ cat }}</option>
+                    <option v-for="cat in availableCategories" :key="cat" :value="cat">
+                      {{ cat }}
+                    </option>
                   </select>
                 </div>
               </div>
 
-              <!-- Grouped Services -->
-              <div v-for="category in orderedCategories" :key="category">
-                <div v-if="groupedFilteredServices[category]">
-                  <h3 class="flex items-center gap-2 text-sm font-semibold text-green-600 mt-6 mb-2 first:mt-0">
-                    <span class="w-2 h-2 bg-green-500 rounded-full"></span> {{ category }}
-                  </h3>
-                  <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-                    <label
-                      v-for="service in groupedFilteredServices[category]"
-                      :key="service.id"
-                      class="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+              <!-- Scrollable Service List -->
+              <div class="flex-1 min-h-0 mt-4 overflow-y-auto pr-2">
+                <div v-for="category in orderedCategories" :key="category">
+                  <div v-if="groupedFilteredServices[category]">
+                    <h3
+                      class="flex items-center gap-2 text-sm font-semibold text-green-600 mt-6 mb-2 first:mt-0"
                     >
-                      <div class="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          :value="service"
-                          v-model="selectedServices"
-                          class="form-checkbox text-blue-600 h-4 w-4"
-                        />
-                        <span class="text-sm text-gray-800">{{ service.serviceName }}</span>
-                      </div>
-                      <span class="text-sm font-medium text-gray-700">₱{{ service.amount }}</span>
-                    </label>
+                      <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                      {{ category }}
+                    </h3>
+                    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+                      <label
+                        v-for="service in groupedFilteredServices[category]"
+                        :key="service.id"
+                        class="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+                      >
+                        <div class="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            :value="service"
+                            v-model="selectedServices"
+                            class="form-checkbox text-blue-600 h-4 w-4"
+                          />
+                          <span class="text-sm text-gray-800 text-left">
+                            {{ service.serviceName }}
+                          </span>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700 whitespace-nowrap">
+                          ₱{{ service.amount }}
+                        </span>
+                      </label>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- No Results -->
-              <p
-                v-if="Object.keys(groupedFilteredServices).length === 0"
-                class="text-sm text-gray-500 text-center py-6"
-              >
-                No services found.
-              </p>
+                <!-- No Results -->
+                <p
+                  v-if="Object.keys(groupedFilteredServices).length === 0"
+                  class="text-sm text-gray-500 text-center py-6"
+                >
+                  No services found.
+                </p>
+              </div>
 
               <!-- Generate Button -->
               <div class="pt-4 text-right">
@@ -110,18 +131,24 @@
       v-if="showSuccessModal"
       class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/30 px-4"
     >
-      <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full text-center space-y-4 animate-fade-in">
-        <h2 class="text-xl font-semibold text-green-600">Invoice Generated</h2>
-        <p class="text-gray-700 text-sm">
-          Invoice <strong>{{ generatedShortId }}</strong> successfully generated for
-          <strong>{{ userEmail }}</strong>.
+      <div
+        class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full text-center space-y-4 animate-fade-in"
+      >
+        <h2 class="text-xl font-semibold text-green-600 text-left">
+          Invoice Generated
+        </h2>
+        <p class="text-gray-700 text-sm text-left">
+          Invoice <strong>{{ generatedShortId }}</strong> successfully generated
+          for <strong>{{ userEmail }}</strong>.
         </p>
-        <button
-          @click="showSuccessModal = false"
-          class="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition w-full sm:w-auto"
-        >
-          Close
-        </button>
+        <div class="text-right">
+          <button
+            @click="showSuccessModal = false"
+            class="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition w-full sm:w-auto"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -137,11 +164,7 @@ import { getAuth } from "firebase/auth";
 
 export default {
   name: "BillingPage",
-  components: {
-    Sidebar,
-    Topbar,
-    LoadingAnimation,
-  },
+  components: { Sidebar, Topbar, LoadingAnimation },
   data() {
     return {
       services: [],
@@ -154,27 +177,11 @@ export default {
       generatedShortId: "",
       isMobileSidebarOpen: false,
       orderedCategories: [
-        "CHEMISTRY",
-        "SPECIAL CHEMISTRY",
-        "ELECTROLYTES",
-        "CLINICAL MICROSCOPY",
-        "SPECIAL MICROSCOPY",
-        "URINE CHEMISTRY",
-        "HEMATOLOGY",
-        "SEROLOGY",
-        "IMMUNOLOGY",
-        "THYROID PROFILE",
-        "HORMONES",
-        "CARDIAC MARKER",
-        "TUMOR MARKER",
-        "DRUG TEST",
-        "HISTOPATHOLOGY",
-        "BLOOD STATION",
-        "TB-DOTS",
-        "OTHERS",
-        "PACKAGES",
-        "SEND OUT",
-        "MICROBIOLOGY",
+        "CHEMISTRY","SPECIAL CHEMISTRY","ELECTROLYTES","CLINICAL MICROSCOPY",
+        "SPECIAL MICROSCOPY","URINE CHEMISTRY","HEMATOLOGY","SEROLOGY",
+        "IMMUNOLOGY","THYROID PROFILE","HORMONES","CARDIAC MARKER",
+        "TUMOR MARKER","DRUG TEST","HISTOPATHOLOGY","BLOOD STATION",
+        "TB-DOTS","OTHERS","PACKAGES","SEND OUT","MICROBIOLOGY",
       ],
     };
   },

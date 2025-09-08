@@ -1,96 +1,74 @@
 <template>
-  <div class="min-h-screen bg-[#1a1a1a] text-gray-200">
-    <!-- Fixed Topbar -->
-    <div class="fixed top-0 left-0 right-0 z-40">
+  <div class="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
+    <!-- ✅ Topbar -->
+    <div class="fixed top-0 left-0 right-0 z-30 shadow bg-white/90 backdrop-blur-md border-b border-gray-200">
       <AdminTopbar />
     </div>
 
-    <div class="flex pt-16 h-[calc(100vh-4rem)]"> <!-- 4rem = topbar height -->
-      <!-- Sidebar (Fixed height after topbar) -->
-      <div class="w-64 h-full border-r border-gray-800 bg-[#1a1a1a] shadow-md overflow-y-auto">
+    <div class="flex pt-16">
+      <!-- ✅ Sidebar -->
+      <aside class="hidden md:block w-64 flex-shrink-0 border-r border-gray-200 bg-white/90 backdrop-blur-md h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar shadow-sm">
         <AdminSidebar />
-      </div>
+      </aside>
 
-      <!-- Main Content -->
-      <div class="flex-1 overflow-y-auto p-6 space-y-6">
-        <!-- Error -->
-        <div
-          v-if="errorMessage"
-          class="bg-red-900 border border-red-600 text-red-300 p-4 rounded-lg shadow-sm animate-pulse"
-        >
+      <!-- ✅ Main Content -->
+      <main class="flex-1 overflow-y-auto p-6 space-y-6 h-[calc(100vh-4rem)] custom-scrollbar">
+        <!-- Error Message -->
+        <div v-if="errorMessage" class="border border-red-400 bg-red-100 text-red-800 p-3 rounded">
           {{ errorMessage }}
         </div>
 
         <!-- User Table -->
-        <div
-          v-if="users.length"
-          class="bg-[#222] border border-gray-700 rounded-xl shadow-xl overflow-hidden"
-        >
-          <table class="w-full text-sm">
-            <thead class="bg-green-900 text-green-300 uppercase text-xs font-bold tracking-wide">
+        <div v-if="users.length" class="border border-gray-300 bg-white rounded-lg overflow-hidden shadow-sm">
+          <table class="w-full text-sm border-collapse">
+            <thead class="bg-gray-200 text-gray-800 text-xs font-bold uppercase">
               <tr>
-                <th class="px-6 py-3 text-left">Username</th>
-                <th class="px-6 py-3 text-left">Email</th>
-                <th class="px-6 py-3 text-left">Role</th>
-                <th class="px-6 py-3 text-left">Status</th>
-                <th class="px-6 py-3 text-left">Last Active</th>
-                <th class="px-6 py-3 text-left">Actions</th>
+                <th class="px-4 py-2 text-left border-b border-gray-300">Username</th>
+                <th class="px-4 py-2 text-left border-b border-gray-300">Email</th>
+                <th class="px-4 py-2 text-left border-b border-gray-300">Role</th>
+                <th class="px-4 py-2 text-left border-b border-gray-300">Status</th>
+                <th class="px-4 py-2 text-left border-b border-gray-300">Last Active</th>
+                <th class="px-4 py-2 text-left border-b border-gray-300">Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr
-                v-for="user in users"
-                :key="user.id"
-                class="border-t border-gray-700 hover:bg-[#2c2c2c] even:bg-[#1d1d1d] transition-all duration-200"
-              >
-                <td class="px-6 py-4 font-semibold text-white">{{ user.username || "Unknown" }}</td>
-                <td class="px-6 py-4 text-sm text-gray-300">{{ user.email }}</td>
-                <td class="px-6 py-4">
+              <tr v-for="user in users" :key="user.id" class="border-b border-gray-200 hover:bg-gray-50 transition">
+                <td class="px-4 py-2">{{ user.username || "Unknown" }}</td>
+                <td class="px-4 py-2">{{ user.email }}</td>
+                <td class="px-4 py-2">
                   <select
                     v-model="user.role"
                     @change="updateUserRole(user)"
-                    class="bg-[#111] border border-gray-600 text-sm rounded px-2 py-1 text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                    class="border border-gray-400 text-sm px-2 py-1 rounded"
                   >
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
                   </select>
                 </td>
-                <td class="px-6 py-4">
-                  <span
-                    :class="[
-                      'px-3 py-1 rounded-full text-xs font-semibold inline-block',
-                      user.status === 'deactivated'
-                        ? 'bg-red-900 text-red-300'
-                        : 'bg-green-800 text-green-300'
-                    ]"
-                  >
+                <td class="px-4 py-2">
+                  <span :class="user.status === 'deactivated' ? 'text-red-600' : 'text-green-600'">
                     {{ user.status === 'deactivated' ? 'Deactivated' : 'Active' }}
                   </span>
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-400">
-                  {{ formatLastActive(user.lastActive) }}
-                </td>
-                <td class="px-6 py-4 space-x-2 whitespace-nowrap">
+                <td class="px-4 py-2">{{ formatLastActive(user.lastActive) }}</td>
+                <td class="px-4 py-2 space-x-2">
                   <button
                     v-if="user.status === 'active'"
                     @click="confirmDeactivation(user)"
-                    class="px-3 py-1 bg-yellow-700 text-yellow-100 rounded hover:bg-yellow-600 text-xs font-medium transition"
-                    title="Deactivate"
+                    class="px-2 py-1 border border-gray-400 text-xs rounded hover:bg-gray-100 transition"
                   >
                     Deactivate
                   </button>
                   <button
                     v-if="user.status === 'deactivated'"
                     @click="confirmReactivation(user)"
-                    class="px-3 py-1 bg-green-700 text-green-100 rounded hover:bg-green-600 text-xs font-medium transition"
-                    title="Reactivate"
+                    class="px-2 py-1 border border-gray-400 text-xs rounded hover:bg-gray-100 transition"
                   >
                     Reactivate
                   </button>
                   <button
                     @click="confirmDeletion(user.id)"
-                    class="px-3 py-1 bg-red-800 text-red-100 rounded hover:bg-red-700 text-xs font-medium transition"
-                    title="Delete"
+                    class="px-2 py-1 border border-red-400 text-xs rounded text-red-600 hover:bg-red-100 transition"
                   >
                     Delete
                   </button>
@@ -101,9 +79,9 @@
         </div>
 
         <!-- No Users -->
-        <div v-else class="flex flex-col items-center justify-center mt-12 text-gray-400">
+        <div v-else class="flex flex-col items-center justify-center mt-12 text-gray-600">
           <svg
-            class="w-16 h-16 mb-4 text-gray-600"
+            class="w-16 h-16 mb-4"
             fill="none"
             stroke="currentColor"
             stroke-width="1.5"
@@ -117,7 +95,7 @@
           </svg>
           <p class="text-sm">No users found in the system.</p>
         </div>
-      </div>
+      </main>
     </div>
   </div>
 </template>
@@ -125,14 +103,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { auth, db } from "@/firebase";
-import {
-  getDoc,
-  doc,
-  collection,
-  updateDoc,
-  deleteDoc,
-  onSnapshot,
-} from "firebase/firestore";
+import { getDoc, doc, collection, updateDoc, deleteDoc, onSnapshot } from "firebase/firestore";
 import AdminSidebar from "@/components/admin_sidebar.vue";
 import AdminTopbar from "@/components/AdminTopbar.vue";
 
@@ -219,21 +190,13 @@ const deleteUser = async (userId) => {
 
 // Confirm dialogs
 const confirmDeactivation = (user) => {
-  if (confirm(`Deactivate ${user.username}?`)) {
-    deactivateUser(user);
-  }
+  if (confirm(`Deactivate ${user.username}?`)) deactivateUser(user);
 };
-
 const confirmReactivation = (user) => {
-  if (confirm(`Reactivate ${user.username}?`)) {
-    reactivateUser(user);
-  }
+  if (confirm(`Reactivate ${user.username}?`)) reactivateUser(user);
 };
-
 const confirmDeletion = (userId) => {
-  if (confirm("Are you sure you want to delete this user?")) {
-    deleteUser(userId);
-  }
+  if (confirm("Are you sure you want to delete this user?")) deleteUser(userId);
 };
 
 onMounted(fetchUsers);

@@ -1,153 +1,160 @@
 <template>
-  <div class="flex h-screen overflow-hidden bg-[#1a1a1a] text-white">
-    <!-- Sidebar -->
-    <aside
-      class="w-64 shrink-0 bg-[#1a1a1a] border-r border-gray-800 shadow fixed top-16 left-0 bottom-0 z-10 overflow-y-auto">
-      <AdminSidebar />
-    </aside>
+  <div class="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
+    <!-- ✅ Topbar -->
+    <div class="fixed top-0 z-30 shadow bg-white/90 backdrop-blur-md border-b border-gray-200 md:left-64 md:right-0 w-full h-16 flex items-center px-6">
+      <AdminTopbar />
+    </div>
 
-    <!-- Main Content -->
-    <div class="flex flex-col flex-1 pl-64 min-w-0">
-      <!-- Topbar -->
-      <div class="fixed top-0 left-0 right-0 z-20 h-16 shadow-md bg-[#1a1a1a] border-b border-gray-800">
-        <AdminTopbar />
-      </div>
+    <div class="flex pt-16">
+      <!-- ✅ Sidebar -->
+      <aside class="hidden md:block w-64 flex-shrink-0 border-r border-gray-200 bg-white/90 backdrop-blur-md h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar shadow-sm">
+        <AdminSidebar />
+      </aside>
 
-      <!-- Content -->
-      <div class="flex-1 overflow-y-auto p-6 space-y-6 mt-16 animate-fade-in">
+      <!-- ✅ Main Content -->
+      <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto h-[calc(100vh-4rem)] custom-scrollbar">
         <!-- Controls -->
-        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-          <input v-model="searchTerm" type="text" placeholder="Search services..."
-            class="w-full sm:w-1/2 px-3 py-2 rounded-md bg-[#222] border border-gray-700 placeholder-gray-400 text-sm focus:ring-green-500 focus:outline-none transition shadow-sm" />
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div class="flex gap-2 items-center flex-wrap">
+            <input
+              v-model="searchTerm"
+              type="text"
+              placeholder="Search services..."
+              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
 
-          <select v-model="selectedCategory"
-            class="w-full sm:w-64 px-3 py-2 rounded-md bg-[#222] border border-gray-700 text-sm text-white focus:ring-green-500 focus:outline-none transition shadow-sm">
-            <option value="">All Categories</option>
-            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-          </select>
+            <select
+              v-model="selectedCategory"
+              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="">All Categories</option>
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+            </select>
+          </div>
 
-          <div class="flex flex-wrap gap-2">
-            <button @click="showModal = true"
-              class="inline-flex items-center gap-1 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 text-sm shadow-md transition">
-              <PlusIcon class="w-4 h-4" /> Add Service
+          <div class="flex gap-2 flex-wrap">
+            <button
+              @click="showModal = true"
+              class="px-4 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 active:scale-95 transition"
+            >
+              Add Service
             </button>
 
-            <button @click="toggleEditMode"
-              class="inline-flex items-center gap-1 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 text-sm shadow-md transition">
-              <PencilIcon class="w-4 h-4" /> {{ editMode ? 'Cancel Edit' : 'Edit' }}
+            <button
+              @click="toggleEditMode"
+              class="px-4 py-2 border border-gray-400 rounded-lg hover:bg-gray-100 active:scale-95 transition"
+            >
+              {{ editMode ? 'Cancel Edit' : 'Edit' }}
             </button>
 
-            <!-- Bulk Actions -->
             <template v-if="editMode && selectedIds.length > 0">
-              <button @click="showDeleteModal = true"
-                class="inline-flex items-center gap-1 bg-red-700/20 text-red-400 px-3 py-2 rounded-md hover:bg-red-700/40 border border-red-600 text-sm shadow-md transition">
-                <TrashIcon class="w-4 h-4" /> Delete
+              <button
+                @click="showDeleteModal = true"
+                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 active:scale-95 transition"
+              >
+                Delete
               </button>
-              <button @click="openBulkEdit"
-                class="inline-flex items-center gap-1 bg-yellow-600 text-white px-3 py-2 rounded-md hover:bg-yellow-700 text-sm shadow-md transition">
-                <PencilIcon class="w-4 h-4" /> Edit
+              <button
+                @click="openBulkEdit"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:scale-95 transition"
+              >
+                Edit
               </button>
             </template>
           </div>
         </div>
 
         <!-- Table -->
-        <div class="overflow-x-auto border border-gray-800 rounded-xl shadow-xl bg-[#222]">
-          <table class="min-w-full text-sm text-left text-gray-200">
-            <thead class="bg-gray-700 text-xs uppercase text-green-300 border-b border-gray-600">
+        <div class="overflow-x-auto bg-white rounded-2xl shadow-sm border border-gray-200">
+          <table class="w-full text-sm border-collapse">
+            <thead class="bg-gray-100 text-gray-700 font-semibold uppercase text-xs">
               <tr>
-                <th v-if="editMode" class="px-3 py-2 w-10 text-center">✔</th>
-                <th class="px-3 py-2 w-12 text-center">No.</th>
-                <th class="px-4 py-2">Service Name</th>
-                <th class="px-4 py-2">Category</th>
-                <th class="px-4 py-2">Amount</th>
-                <th class="px-4 py-2">Special Instructions</th>
+                <th v-if="editMode" class="px-4 py-2 border-b border-gray-300">✔</th>
+                <th class="px-4 py-2 border-b border-gray-300">No.</th>
+                <th class="px-4 py-2 border-b border-gray-300">Service Name</th>
+                <th class="px-4 py-2 border-b border-gray-300">Category</th>
+                <th class="px-4 py-2 border-b border-gray-300">Amount</th>
+                <th class="px-4 py-2 border-b border-gray-300">Special Instructions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(service, idx) in filteredServices" :key="service.id"
-                :class="[
-                  'border-t border-gray-700 hover:bg-gray-700/40 transition duration-200 cursor-pointer',
-                  editMode && selectedIds.includes(service.id) ? 'bg-green-900/30' : ''
-                ]"
-                @click="toggleRowSelection(service.id)">
-                <td v-if="editMode" class="px-3 py-2 text-center">
-                  <!-- Stop propagation para di magdoble click -->
-                  <input type="checkbox" :value="service.id" v-model="selectedIds"
-                    @click.stop
-                    class="w-4 h-4 text-green-600 border-gray-600 rounded focus:ring-green-500">
+              <tr
+                v-for="(service, idx) in filteredServices"
+                :key="service.id"
+                @click="toggleRowSelection(service.id)"
+                class="hover:bg-gray-50 cursor-pointer"
+              >
+                <td v-if="editMode" class="px-4 py-2 text-center">
+                  <input type="checkbox" :value="service.id" v-model="selectedIds" @click.stop />
                 </td>
-                <td class="px-3 py-2 text-center">{{ idx + 1 }}</td>
-                <td class="px-4 py-2 font-medium">{{ service.serviceName }}</td>
+                <td class="px-4 py-2">{{ idx + 1 }}</td>
+                <td class="px-4 py-2">{{ service.serviceName }}</td>
                 <td class="px-4 py-2">{{ service.category }}</td>
                 <td class="px-4 py-2">₱{{ service.amount || 0 }}</td>
-                <td class="px-4 py-2 italic text-gray-400">{{ service.specialInstructions || '—' }}</td>
+                <td class="px-4 py-2">{{ service.specialInstructions || '—' }}</td>
               </tr>
               <tr v-if="filteredServices.length === 0">
-                <td :colspan="editMode ? 6 : 5" class="px-4 py-3 text-center text-gray-400 italic">
-                  No services found.
-                </td>
+                <td :colspan="editMode ? 6 : 5" class="text-center px-4 py-4 text-gray-500">No services found.</td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
+      </main>
     </div>
 
-    <!-- Modal (Add / Edit / Step-by-step bulk edit) -->
-    <div v-if="showModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4 animate-fade-in">
-      <div class="bg-[#222] border border-gray-700 rounded-lg p-6 w-full max-w-lg shadow-2xl">
-        <h2 class="text-lg font-bold text-white mb-4">
-          {{ bulkStepMode ? `Editing Service ${currentBulkIndex + 1} of ${selectedIds.length}` : (isEditing ? 'Edit Service' : 'Add New Service') }}
-        </h2>
+    <!-- ✅ Modal (Add / Edit / Bulk Edit) -->
+    <transition name="fade">
+      <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div class="bg-white/95 w-full max-w-lg p-6 rounded-2xl border border-gray-200 shadow-xl relative animate-fadeIn">
+          <h2 class="text-lg font-semibold mb-4 text-gray-800">
+            {{ bulkStepMode
+              ? `Editing Service ${currentBulkIndex + 1} of ${selectedIds.length}`
+              : (isEditing ? 'Edit Service' : 'Add New Service') }}
+          </h2>
 
-        <div class="space-y-4">
-          <input v-model="form.serviceName" placeholder="Service Name"
-            class="w-full px-3 py-2 rounded bg-[#111] border border-gray-600 text-white focus:ring-green-500 focus:outline-none shadow-sm transition" />
+          <button @click="closeModal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">✕</button>
 
-          <select v-model="form.category"
-            class="w-full px-3 py-2 rounded bg-[#111] border border-gray-600 text-white focus:ring-green-500 focus:outline-none shadow-sm transition">
-            <option value="" disabled>Select Category</option>
-            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-          </select>
+          <div class="space-y-3">
+            <input v-model="form.serviceName" placeholder="Service Name" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
 
-          <input v-model.number="form.amount" type="number" placeholder="Amount"
-            class="w-full px-3 py-2 rounded bg-[#111] border border-gray-600 text-white focus:ring-green-500 focus:outline-none shadow-sm transition" />
+            <select v-model="form.category" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+              <option value="" disabled>Select Category</option>
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+            </select>
 
-          <textarea v-model="form.specialInstructions" placeholder="Special Instructions (optional)" rows="2"
-            class="w-full px-3 py-2 rounded bg-[#111] border border-gray-600 text-white focus:ring-green-500 focus:outline-none shadow-sm transition" />
+            <input v-model.number="form.amount" type="number" placeholder="Amount" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
 
-          <div class="flex justify-end gap-3 pt-2">
-            <button @click="closeModal" class="text-gray-400 hover:underline">Cancel</button>
-            <button @click="handleSubmit"
-              class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow transition">
-              {{ bulkStepMode ? (currentBulkIndex < selectedIds.length - 1 ? 'Save & Next' : 'Finish') : (isEditing ? 'Update' : 'Add') }}
-            </button>
+            <textarea v-model="form.specialInstructions" placeholder="Special Instructions (optional)" rows="2" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+
+            <div class="flex justify-end gap-3 mt-2">
+              <button @click="closeModal" class="px-3 py-1 border border-gray-400 rounded hover:bg-gray-100">Cancel</button>
+              <button @click="handleSubmit" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 active:scale-95 transition">
+                {{ bulkStepMode
+                  ? (currentBulkIndex < selectedIds.length - 1 ? 'Save & Next' : 'Finish')
+                  : (isEditing ? 'Update' : 'Add') }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </transition>
 
-    <!-- Delete Confirmation Modal -->
-    <div v-if="showDeleteModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 animate-fade-in">
-      <div class="bg-[#222] border border-red-600 rounded-lg p-6 w-full max-w-sm shadow-2xl text-center">
-        <h2 class="text-lg font-bold text-red-400 mb-3">Confirm Delete</h2>
-        <p class="text-gray-300 mb-5">
-          Are you sure you want to delete <span class="font-semibold">{{ selectedIds.length }}</span> selected
-          service<span v-if="selectedIds.length > 1">s</span>?
-        </p>
-        <div class="flex justify-center gap-3">
-          <button @click="showDeleteModal = false"
-            class="px-4 py-2 rounded bg-gray-600 text-white hover:bg-gray-500 transition">
-            Cancel
-          </button>
-          <button @click="bulkDelete"
-            class="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700 transition">
-            Yes, Delete
-          </button>
+    <!-- ✅ Delete Confirmation Modal -->
+    <transition name="fade">
+      <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div class="bg-white/95 w-full max-w-md p-6 rounded-2xl border border-gray-200 shadow-xl relative animate-fadeIn">
+          <h2 class="text-lg font-semibold mb-2 text-gray-800">Confirm Delete</h2>
+          <p class="mb-4 text-gray-700">
+            Are you sure you want to delete <span class="font-semibold">{{ selectedIds.length }}</span>
+            selected service<span v-if="selectedIds.length > 1">s</span>?
+          </p>
+          <div class="flex justify-end gap-3">
+            <button @click="showDeleteModal = false" class="px-3 py-1 border border-gray-400 rounded hover:bg-gray-100">Cancel</button>
+            <button @click="bulkDelete" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 active:scale-95 transition">Yes, Delete</button>
+          </div>
         </div>
       </div>
-    </div>
+    </transition>
   </div>
 </template>
 
@@ -157,7 +164,6 @@ import { db } from '@/firebase'
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore'
 import AdminSidebar from '@/components/admin_sidebar.vue'
 import AdminTopbar from '@/components/AdminTopbar.vue'
-import { PlusIcon, TrashIcon, PencilIcon } from '@heroicons/vue/24/solid'
 
 const services = ref([])
 const searchTerm = ref('')
@@ -168,8 +174,6 @@ const editMode = ref(false)
 const editId = ref(null)
 const selectedIds = ref([])
 const showDeleteModal = ref(false)
-
-// Bulk step-by-step editing
 const bulkStepMode = ref(false)
 const currentBulkIndex = ref(0)
 
@@ -180,24 +184,17 @@ const categories = [
   'HISTOPATHOLOGY', 'BLOOD STATION', 'TB-DOTS', 'OTHERS', 'PACKAGES', 'SEND OUT', 'MICROBIOLOGY'
 ]
 
-const form = ref({
-  serviceName: '',
-  category: '',
-  amount: null,
-  specialInstructions: ''
-})
+const form = ref({ serviceName: '', category: '', amount: null, specialInstructions: '' })
 
 const fetchServices = async () => {
   const snapshot = await getDocs(collection(db, 'services'))
-  services.value = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }))
+  services.value = snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
 }
 
 const filteredServices = computed(() => {
   const term = searchTerm.value.toLowerCase()
   const cat = selectedCategory.value
-  return services.value.filter(
-    (s) => s.serviceName?.toLowerCase().includes(term) && (!cat || s.category === cat)
-  )
+  return services.value.filter(s => s.serviceName?.toLowerCase().includes(term) && (!cat || s.category === cat))
 })
 
 const addService = async () => {
@@ -215,7 +212,6 @@ const updateService = async () => {
   exitEditMode()
 }
 
-// 🔹 Bulk step-by-step edit
 const openBulkEdit = () => {
   if (selectedIds.value.length === 0) return
   bulkStepMode.value = true
@@ -281,25 +277,22 @@ const exitEditMode = () => {
   selectedIds.value = []
 }
 
-// 🔹 Toggle row selection
 const toggleRowSelection = (id) => {
   if (!editMode.value) return
-  if (selectedIds.value.includes(id)) {
-    selectedIds.value = selectedIds.value.filter(sid => sid !== id)
-  } else {
-    selectedIds.value.push(id)
-  }
+  if (selectedIds.value.includes(id)) selectedIds.value = selectedIds.value.filter(sid => sid !== id)
+  else selectedIds.value.push(id)
 }
 
 onMounted(fetchServices)
 </script>
 
-<style scoped>
+<style>
+/* Scrollbar */
 div::-webkit-scrollbar {
   width: 6px;
 }
 div::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.15);
   border-radius: 3px;
 }
 </style>

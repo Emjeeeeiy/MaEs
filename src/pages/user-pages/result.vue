@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen flex flex-col bg-gray-100 text-gray-800 overflow-hidden">
+  <div class="h-screen flex flex-col bg-gray-50 text-gray-800 overflow-hidden">
     <!-- Topbar -->
     <div
       class="sticky top-0 z-30 transition-all duration-300"
@@ -28,7 +28,7 @@
 
       <!-- Main Content -->
       <main
-        class="flex-1 overflow-y-auto px-4 py-6 sm:px-8 space-y-8 animate-fade-in transition-all duration-300"
+        class="flex-1 overflow-y-auto px-4 py-6 sm:px-8 space-y-8 animate-fade-in transition-all duration-300 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
         :class="{ 'blur-sm': isMobileSidebarOpen }"
       >
         <!-- Header -->
@@ -48,17 +48,17 @@
 
         <!-- Results -->
         <template v-else>
-          <!-- No Invoices -->
+          <!-- No Results -->
           <div v-if="invoices.length === 0" class="text-center text-gray-500 text-sm py-20">
             🧪 No laboratory results available.
           </div>
 
-          <!-- Invoices -->
+          <!-- Results List -->
           <div
             v-else
             v-for="inv in invoices"
             :key="inv.id"
-            class="bg-white p-6 rounded-xl shadow border-l-4 transition border-blue-500 hover:shadow-md hover:border-blue-600 space-y-5"
+            class="bg-white p-6 rounded-2xl shadow-md border-l-4 border-blue-500 hover:shadow-lg hover:border-blue-600 transition space-y-5"
           >
             <!-- Header Row -->
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
@@ -70,7 +70,7 @@
                   <span class="font-medium text-gray-700">Status:</span>
                   <span
                     :class="[
-                      'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold',
+                      'inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold gap-1',
                       inv.status === 'Paid' ? 'bg-green-100 text-green-700' :
                       inv.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
                       'bg-red-100 text-red-700'
@@ -78,7 +78,7 @@
                   >
                     <svg
                       v-if="inv.status === 'Paid'"
-                      class="w-3 h-3 mr-1"
+                      class="w-3 h-3"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -88,7 +88,7 @@
                     </svg>
                     <svg
                       v-else-if="inv.status === 'Pending'"
-                      class="w-3 h-3 mr-1"
+                      class="w-3 h-3"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -98,7 +98,7 @@
                     </svg>
                     <svg
                       v-else
-                      class="w-3 h-3 mr-1"
+                      class="w-3 h-3"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -113,7 +113,7 @@
 
               <button
                 @click="exportPDF(inv)"
-                class="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded transition"
+                class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition"
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                   stroke-width="2">
@@ -124,8 +124,8 @@
               </button>
             </div>
 
-            <!-- Service Results -->
-            <div>
+            <!-- Laboratory Findings -->
+            <div class="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
               <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1">
                 <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor"
                   stroke-width="2" viewBox="0 0 24 24">
@@ -134,14 +134,14 @@
                 </svg>
                 Laboratory Findings
               </h3>
-              <ul class="space-y-2 pl-3 border-l-2 border-blue-100">
+              <ul class="space-y-3 pl-3 border-l-2 border-blue-100">
                 <li
                   v-for="svc in inv.services"
                   :key="svc.serviceName"
-                  class="text-sm text-gray-800"
+                  class="text-sm text-gray-800 bg-gray-50 p-2 rounded-lg shadow-sm"
                 >
-                  <strong>{{ svc.serviceName }}</strong>
-                  <div class="text-xs text-gray-600 mt-0.5 ml-2 whitespace-pre-line">
+                  <div class="font-medium">{{ svc.serviceName }}</div>
+                  <div class="text-xs text-gray-600 mt-0.5 whitespace-pre-line">
                     {{ svc.result || 'No result yet' }}
                   </div>
                 </li>
@@ -254,5 +254,18 @@ onMounted(() => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Tailwind-compatible scrollbar for results and page */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #D1D5DB; /* gray-300 */
+  border-radius: 3px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background-color: #F3F4F6; /* gray-100 */
 }
 </style>
