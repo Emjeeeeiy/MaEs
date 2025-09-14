@@ -1,52 +1,69 @@
 <template>
   <div class="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
     <!-- ✅ Topbar -->
-    <div class="fixed top-0 z-30 shadow bg-white/90 backdrop-blur-md border-b border-gray-200 h-16 w-full md:left-64 md:right-0 flex items-center px-6">
+    <div class="fixed top-0 left-0 right-0 z-30 shadow bg-white/90 backdrop-blur-md border-b border-gray-200">
       <AdminTopbar />
     </div>
 
     <div class="flex pt-16">
       <!-- ✅ Sidebar -->
-      <aside class="hidden md:block w-64 flex-shrink-0 border-r border-gray-200 bg-white/90 backdrop-blur-md h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar shadow-sm">
+      <aside
+        class="hidden md:block w-64 flex-shrink-0 border-r border-gray-200 bg-white/90 backdrop-blur-md h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar shadow-sm"
+      >
         <AdminSidebar />
       </aside>
 
       <!-- ✅ Main Content -->
-      <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto h-[calc(100vh-4rem)] space-y-6 custom-scrollbar">
-        <h1 class="text-2xl font-bold mb-4">Uploaded Financial Documents</h1>
+      <main
+        class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto h-[calc(100vh-4rem)] custom-scrollbar"
+      >
+        <!-- Page Title -->
+        <h1 class="text-2xl font-bold text-gray-800">📂 Uploaded Financial Documents</h1>
 
-        <div v-if="loading" class="text-gray-500">
-          Loading documents...
+        <!-- Loading State -->
+        <div v-if="loading" class="flex items-center justify-center h-40">
+          <p class="text-gray-500 text-lg">Loading documents...</p>
         </div>
 
-        <div v-else-if="documents.length === 0" class="text-gray-500">
-          No documents found.
+        <!-- Empty State -->
+        <div
+          v-else-if="documents.length === 0"
+          class="flex flex-col items-center justify-center h-40 text-center space-y-2"
+        >
+          <p class="text-gray-500 text-lg">No documents found.</p>
+          <p class="text-gray-400 text-sm">Uploaded files will appear here once available.</p>
         </div>
 
-        <div v-else class="space-y-4">
+        <!-- Documents List -->
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <div
             v-for="(doc, index) in documents"
             :key="index"
-            class="bg-white/80 backdrop-blur-md border border-gray-200 rounded-xl p-4 shadow hover:shadow-lg transition"
+            class="bg-white/80 backdrop-blur-md border border-gray-200 rounded-2xl p-5 shadow hover:shadow-lg transition transform hover:-translate-y-1 hover:scale-[1.01] flex flex-col justify-between"
           >
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-              <div>
-                <h2 class="font-semibold text-gray-800">{{ doc.fileName }}</h2>
-                <p class="text-gray-500 text-sm">{{ doc.email }}</p>
-                <p v-if="doc.description" class="text-gray-600 text-sm">{{ doc.description }}</p>
-              </div>
+            <!-- Document Info -->
+            <div class="space-y-2">
+              <h2 class="text-lg font-semibold text-gray-800 truncate">
+                {{ doc.fileName }}
+              </h2>
+              <p class="text-sm text-gray-500">{{ doc.email }}</p>
+              <p v-if="doc.description" class="text-sm text-gray-600 line-clamp-3">
+                {{ doc.description }}
+              </p>
+            </div>
+
+            <!-- File Actions -->
+            <div class="mt-4 flex items-center justify-between text-sm text-gray-600">
+              <p class="text-xs">📅 Uploaded: {{ formatDate(doc.createdAt?.seconds) }}</p>
               <a
                 :href="doc.fileUrl"
                 target="_blank"
                 rel="noopener"
-                class="text-blue-600 hover:underline text-sm font-medium"
+                class="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 active:scale-95 text-white font-medium shadow transition text-xs"
               >
                 View File
               </a>
             </div>
-            <p class="text-gray-400 text-xs mt-2">
-              Uploaded: {{ formatDate(doc.createdAt?.seconds) }}
-            </p>
           </div>
         </div>
       </main>
@@ -56,7 +73,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { collection, getDocs, orderBy, query } from 'firebase/firestore'
+import {
+  collection,
+  orderBy,
+  query,
+  onSnapshot
+} from 'firebase/firestore'
 import { db } from '@/firebase'
 
 import AdminSidebar from '@/components/admin_sidebar.vue'
@@ -65,34 +87,41 @@ import AdminTopbar from '@/components/AdminTopbar.vue'
 const documents = ref([])
 const loading = ref(true)
 
-const fetchDocuments = async () => {
-  try {
-    const q = query(collection(db, 'financialDocuments'), orderBy('createdAt', 'desc'))
-    const snapshot = await getDocs(q)
+// 🔥 Real-time fetch ng financial documents
+const fetchDocuments = () => {
+  const q = query(collection(db, 'financialDocuments'), orderBy('createdAt', 'desc'))
+  onSnapshot(q, (snapshot) => {
     documents.value = snapshot.docs.map((doc) => doc.data())
-  } catch (error) {
-    console.error('Error fetching documents:', error)
-  } finally {
     loading.value = false
-  }
+  }, (error) => {
+    console.error('Error fetching documents:', error)
+    loading.value = false
+  })
 }
 
 const formatDate = (timestamp) => {
   if (!timestamp) return 'N/A'
   const date = new Date(timestamp * 1000)
-  return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  return (
+    date.toLocaleDateString() +
+    ' ' +
+    date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  )
 }
 
 onMounted(fetchDocuments)
 </script>
 
 <style>
-/* Scrollbar */
-main::-webkit-scrollbar {
-  width: 6px;
+/* Optional: Reuse custom-scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
 }
-main::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.12);
-  border-radius: 3px;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
 </style>

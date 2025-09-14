@@ -2,25 +2,22 @@
   <header class="bg-gradient-to-r from-green-400 via-green-500 to-green-600 shadow-md relative z-10">
     <div class="w-full px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
-        
-       <!-- Mobile Sidebar Toggle -->
-      <button
-        @click="$emit('toggle-sidebar')"
-        class="sm:hidden p-2 rounded-lg text-white hover:text-yellow-200 hover:bg-green-700/30 focus:outline-none focus:ring-2 focus:ring-yellow-300 transition-colors"
-        title="Open Menu"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg"
+        <!-- Mobile Sidebar Toggle -->
+        <button
+          @click="$emit('toggle-sidebar')"
+          class="sm:hidden p-2 rounded-lg text-white hover:text-yellow-200 hover:bg-green-700/30 focus:outline-none focus:ring-2 focus:ring-yellow-300 transition-colors"
+          title="Open Menu"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg"
             class="h-7 w-7 transform transition-transform duration-200 hover:scale-110"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
-        >
-          <path stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M4 6h16M4 12h16M4 18h16"/>
-        </svg>
-      </button>
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
 
         <!-- Page Title -->
         <div class="font-bold text-white text-lg sm:text-xl md:text-2xl capitalize drop-shadow">
@@ -140,12 +137,15 @@
     <div v-if="showDocumentModal" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
       <div class="bg-white text-gray-800 rounded-lg w-full max-w-lg shadow-lg p-6">
         <h2 class="text-xl font-bold mb-4">Upload Financial Document</h2>
-        <form class="space-y-4">
-          <input type="file" class="w-full border rounded px-3 py-2 text-sm" />
-          <textarea placeholder="Optional description..." class="w-full border rounded px-3 py-2 text-sm"></textarea>
+        <form @submit.prevent="uploadDocument" class="space-y-4">
+          <input ref="fileInput" type="file" class="w-full border rounded px-3 py-2 text-sm" @change="handleFileSelect" />
+          <textarea v-model="docDescription" placeholder="Optional description..." class="w-full border rounded px-3 py-2 text-sm"></textarea>
           <div class="flex justify-end gap-3">
             <button type="button" @click="showDocumentModal = false" class="text-gray-600 hover:underline">Cancel</button>
-            <button type="submit" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">Upload</button>
+            <button type="submit" :disabled="!selectedFile || uploading" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 disabled:opacity-50">
+              <span v-if="uploading">Uploading...</span>
+              <span v-else>Upload</span>
+            </button>
           </div>
         </form>
       </div>
@@ -176,7 +176,7 @@ import {
   deleteDoc
 } from 'firebase/firestore'
 import {
-  ref as storageRef,
+  ref as sRef,
   uploadBytes,
   getDownloadURL
 } from 'firebase/storage'
@@ -200,6 +200,11 @@ const imageFile = ref(null)
 const imageInput = ref(null)
 const loading = ref(false)
 const notifications = ref([])
+
+const selectedFile = ref(null)
+const docDescription = ref('')
+const uploading = ref(false)
+const fileInput = ref(null)
 
 const toggleDropdown = () => dropdownOpen.value = !dropdownOpen.value
 const closeDropdown = () => dropdownOpen.value = false
@@ -275,7 +280,7 @@ const sendFeedback = async () => {
 
   try {
     if (imageFile.value) {
-      const fileRef = storageRef(storage, `billingFeedbackImages/${Date.now()}-${imageFile.value.name}`)
+      const fileRef = sRef(storage, `billingFeedbackImages/${Date.now()}-${imageFile.value.name}`)
       await uploadBytes(fileRef, imageFile.value)
       imageUrl = await getDownloadURL(fileRef)
     }
@@ -296,6 +301,40 @@ const sendFeedback = async () => {
     console.error('Feedback send error:', err)
   } finally {
     loading.value = false
+  }
+}
+
+// ✅ Document Upload Logic
+const handleFileSelect = (e) => {
+  selectedFile.value = e.target.files[0] || null
+}
+
+const uploadDocument = async () => {
+  if (!selectedFile.value) return
+  uploading.value = true
+
+  try {
+    const fileRef = sRef(storage, `financialDocuments/${Date.now()}-${selectedFile.value.name}`)
+    await uploadBytes(fileRef, selectedFile.value)
+    const fileUrl = await getDownloadURL(fileRef)
+
+    await addDoc(collection(db, 'financialDocuments'), {
+      fileName: selectedFile.value.name,
+      fileUrl,
+      description: docDescription.value || '',
+      email: userEmail,
+      createdAt: serverTimestamp()
+    })
+
+    // Reset form
+    selectedFile.value = null
+    docDescription.value = ''
+    if (fileInput.value) fileInput.value.value = '' // clear input
+    showDocumentModal.value = false
+  } catch (err) {
+    console.error('Upload error:', err)
+  } finally {
+    uploading.value = false
   }
 }
 

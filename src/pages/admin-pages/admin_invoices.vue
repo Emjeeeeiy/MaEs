@@ -1,72 +1,67 @@
 <template>
-  <div class="flex min-h-screen bg-gray-50 text-gray-800 overflow-x-hidden">
-    <!-- ✅ Sidebar -->
-    <aside
-      class="hidden md:block w-64 flex-shrink-0 border-r border-gray-200 bg-white/90 backdrop-blur-md h-screen pt-16 overflow-y-auto shadow-sm custom-scrollbar"
-    >
-      <AdminSidebar />
-    </aside>
+  <div class="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
+    <!-- ✅ Topbar -->
+    <div class="fixed top-0 left-0 right-0 z-30 shadow bg-white/90 backdrop-blur-md border-b border-gray-200">
+      <AdminTopbar />
+    </div>
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col">
-      <!-- ✅ Fixed Topbar -->
-      <div
-        class="fixed top-0 left-0 right-0 z-30 shadow bg-white/90 backdrop-blur-md border-b border-gray-200 h-16 flex items-center px-6"
-      >
-        <AdminTopbar />
-      </div>
+    <div class="flex pt-16">
+      <!-- ✅ Sidebar -->
+      <aside class="hidden md:block w-64 flex-shrink-0 border-r border-gray-200 bg-white/90 backdrop-blur-md h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar shadow-sm">
+        <AdminSidebar />
+      </aside>
 
-      <!-- Scrollable Content -->
-      <main class="flex-1 pt-16 p-6 overflow-y-auto custom-scrollbar md:ml-64">
-        <h1 class="text-2xl font-bold mb-4">User Invoices</h1>
+      <!-- ✅ Main Content -->
+      <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-8 overflow-y-auto h-[calc(100vh-4rem)] custom-scrollbar">
+        <h1 class="text-2xl font-bold text-gray-800">📑 User Invoices</h1>
 
-        <!-- Search User -->
-        <div class="relative w-full max-w-md mb-4">
+        <!-- 🔍 Search User -->
+        <div class="relative max-w-lg">
           <input
             v-model="userSearchQuery"
             type="text"
             placeholder="Search user..."
+            class="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
             @input="showDropdown = true"
-            class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <ul
             v-if="filteredUsers.length && showDropdown"
-            class="absolute w-full bg-white border border-gray-300 rounded mt-1 z-20 max-h-60 overflow-y-auto custom-scrollbar"
+            class="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
           >
             <li
               v-for="user in filteredUsers"
               :key="user.id"
               @click="selectUser(user)"
-              class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+              class="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
             >
               {{ user.username }} - {{ user.email }}
             </li>
           </ul>
         </div>
 
-        <!-- Accounts Table -->
+        <!-- 📋 Accounts Table -->
         <div
           v-if="!selectedUserEmail && !userSearchQuery && accountsTable.length"
-          class="overflow-x-auto bg-white rounded shadow-sm border border-gray-300"
+          class="overflow-x-auto bg-white/80 backdrop-blur-md border border-gray-200 rounded-2xl shadow-sm"
         >
-          <table class="w-full text-sm border-collapse">
-            <thead class="bg-gray-200 text-gray-800 text-xs font-bold uppercase">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-100 text-gray-700">
               <tr>
-                <th class="px-4 py-2 border-b border-gray-300">Username</th>
-                <th class="px-4 py-2 border-b border-gray-300">Email</th>
-                <th class="px-4 py-2 border-b border-gray-300">Last Payment</th>
-                <th class="px-4 py-2 border-b border-gray-300">Action</th>
+                <th class="px-4 py-3 text-left">Username</th>
+                <th class="px-4 py-3 text-left">Email</th>
+                <th class="px-4 py-3 text-left">Last Payment</th>
+                <th class="px-4 py-3">Action</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-200">
               <tr v-for="user in accountsTable" :key="user.id" class="hover:bg-gray-50">
-                <td class="px-4 py-2">{{ user.username }}</td>
-                <td class="px-4 py-2">{{ user.email }}</td>
-                <td class="px-4 py-2">{{ user.lastPayment ? formatDate(user.lastPayment) : '—' }}</td>
-                <td class="px-4 py-2">
+                <td class="px-4 py-3">{{ user.username }}</td>
+                <td class="px-4 py-3">{{ user.email }}</td>
+                <td class="px-4 py-3">{{ user.lastPayment ? formatDate(user.lastPayment) : '—' }}</td>
+                <td class="px-4 py-3 text-center">
                   <button
                     @click="selectUser(user)"
-                    class="px-2 py-1 border border-gray-400 text-xs rounded hover:bg-gray-100 transition"
+                    class="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-medium shadow transition"
                   >
                     View
                   </button>
@@ -76,29 +71,31 @@
           </table>
         </div>
 
-        <!-- Selected User Invoices -->
-        <div v-if="selectedUserEmail">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-semibold">Invoices for {{ selectedUserName }}</h2>
+        <!-- 📂 Selected User Invoices -->
+        <div v-if="selectedUserEmail" class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h2 class="text-lg font-semibold text-gray-800">
+              Invoices for {{ selectedUserName }}
+            </h2>
             <button
               @click="clearSelectedUser"
-              class="px-2 py-1 border border-gray-400 rounded text-sm hover:bg-gray-100"
+              class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-sm font-medium transition"
             >
-              Back to User List
+              ← Back to User List
             </button>
           </div>
 
           <!-- Filters -->
-          <div class="flex items-center gap-3 mb-4 flex-wrap">
+          <div class="flex flex-col sm:flex-row gap-3">
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Search invoices..."
-              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="flex-1 border border-gray-300 rounded-xl px-4 py-2 text-sm shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
             />
             <select
               v-model="filterStatus"
-              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="border border-gray-300 rounded-xl px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
             >
               <option value="">All Status</option>
               <option value="Paid">Paid</option>
@@ -108,97 +105,123 @@
           </div>
 
           <!-- Invoices Table -->
-          <div class="overflow-x-auto bg-white rounded shadow-sm border border-gray-300">
-            <table class="w-full text-sm border-collapse">
-              <thead class="bg-gray-200 text-gray-800 text-xs font-bold uppercase">
+          <div class="overflow-x-auto bg-white/80 backdrop-blur-md border border-gray-200 rounded-2xl shadow-sm">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-100 text-gray-700">
                 <tr>
-                  <th class="px-4 py-2 border-b border-gray-300">Date</th>
-                  <th class="px-4 py-2 border-b border-gray-300">Services</th>
-                  <th class="px-4 py-2 border-b border-gray-300">Total</th>
-                  <th class="px-4 py-2 border-b border-gray-300">Method</th>
-                  <th class="px-4 py-2 border-b border-gray-300">Reference No.</th>
-                  <th class="px-4 py-2 border-b border-gray-300">Receipt</th>
-                  <th class="px-4 py-2 border-b border-gray-300">Status</th>
-                  <th class="px-4 py-2 border-b border-gray-300">Actions</th>
+                  <th class="px-4 py-3 text-left">Date</th>
+                  <th class="px-4 py-3 text-left">Services</th>
+                  <th class="px-4 py-3 text-left">Total</th>
+                  <th class="px-4 py-3 text-left">Method</th>
+                  <th class="px-4 py-3 text-left">Reference No.</th>
+                  <th class="px-4 py-3 text-left">Receipt</th>
+                  <th class="px-4 py-3 text-left">Status</th>
+                  <th class="px-4 py-3 text-center">Actions</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr v-for="invoice in sortedInvoices" :key="invoice.id" class="hover:bg-gray-50">
-                  <td class="px-4 py-2">{{ formatDate(invoice.createdAt) }}</td>
-                  <td class="px-4 py-2">{{ invoice.services.map(s => s.serviceName).join(', ') }}</td>
-                  <td class="px-4 py-2">₱{{ invoice.totalAmount || 0 }}</td>
-                  <td class="px-4 py-2">{{ invoice.paymentMethod || 'N/A' }}</td>
-                  <td class="px-4 py-2">{{ invoice.referenceNumber || 'N/A' }}</td>
-                  <td class="px-4 py-2">
+              <tbody class="divide-y divide-gray-200">
+                <tr
+                  v-for="invoice in sortedInvoices"
+                  :key="invoice.id"
+                  class="hover:bg-gray-50"
+                >
+                  <td class="px-4 py-3">{{ formatDate(invoice.createdAt) }}</td>
+                  <td class="px-4 py-3">{{ invoice.services.map(s => s.serviceName).join(', ') }}</td>
+                  <td class="px-4 py-3 font-medium">₱{{ invoice.totalAmount || 0 }}</td>
+                  <td class="px-4 py-3">{{ invoice.paymentMethod || 'N/A' }}</td>
+                  <td class="px-4 py-3">{{ invoice.referenceNumber || 'N/A' }}</td>
+                  <td class="px-4 py-3">
                     <a
                       v-if="invoice.receiptImage"
                       :href="invoice.receiptImage"
                       target="_blank"
-                      class="text-blue-600 underline"
-                    >View</a>
-                    <span v-else>No image</span>
+                      class="text-green-600 hover:underline"
+                    >
+                      View
+                    </a>
+                    <span v-else class="text-gray-400">No image</span>
                   </td>
-                  <td class="px-4 py-2">{{ invoice.status }}</td>
-                  <td class="px-4 py-2 flex gap-2 flex-wrap">
+                  <td class="px-4 py-3">{{ invoice.status }}</td>
+                  <td class="px-4 py-3 text-center space-x-2">
                     <button
                       v-if="invoice.status === 'Pending'"
                       @click="openApproveModal(invoice.id)"
-                      class="px-2 py-1 border border-green-500 text-green-600 rounded text-xs hover:bg-green-50 transition"
-                    >Approve</button>
+                      class="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-medium shadow transition"
+                    >
+                      Approve
+                    </button>
                     <button
                       @click="deleteInvoice(invoice.id)"
-                      class="px-2 py-1 border border-red-500 text-red-600 rounded text-xs hover:bg-red-50 transition"
-                    >Delete</button>
+                      class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-medium shadow transition"
+                    >
+                      Delete
+                    </button>
                   </td>
                 </tr>
                 <tr v-if="sortedInvoices.length === 0">
-                  <td colspan="8" class="text-center px-4 py-4 text-gray-500">No invoices found.</td>
+                  <td colspan="8" class="px-4 py-6 text-center text-gray-500">
+                    No invoices found.
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Approve Modal -->
-        <div v-if="showApproveModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md space-y-4">
-            <h3 class="text-lg font-semibold">Approve Payment</h3>
-            <p class="text-sm text-gray-600">Set total amount and ID type to finalize the payment.</p>
-
-            <input
-              type="number"
-              v-model.number="approveAmount"
-              placeholder="Enter total amount"
-              class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-
-            <select
-              v-model="approveIdType"
-              class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        <!-- ✅ Approve Modal -->
+        <transition name="fade">
+          <div
+            v-if="showApproveModal"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
+          >
+            <div
+              class="bg-white/95 w-full max-w-md p-6 rounded-2xl border border-gray-200 shadow-xl relative animate-fadeIn"
             >
-              <option value="">None</option>
-              <option value="Senior">Senior Citizen</option>
-              <option value="PWD">Person with Disability</option>
-            </select>
+              <h3 class="text-lg font-semibold mb-2 text-gray-800">
+                Approve Payment
+              </h3>
+              <p class="text-sm text-gray-600 mb-4">
+                Set total amount and ID type to finalize the payment.
+              </p>
 
-            <div class="flex justify-between items-center">
-              <span class="font-semibold">Discounted Total:</span>
-              <span class="text-green-600 font-bold">₱{{ discountedAmount.toFixed(2) }}</span>
-            </div>
+              <input
+                type="number"
+                v-model.number="approveAmount"
+                placeholder="Enter total amount"
+                class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm mb-3 shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
+              />
 
-            <div class="flex justify-end gap-3 mt-4">
-              <button
-                @click="showApproveModal = false"
-                class="px-4 py-2 border rounded hover:bg-gray-100"
-              >Cancel</button>
-              <button
-                @click="approveInvoice"
-                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-              >Confirm</button>
+              <select
+                v-model="approveIdType"
+                class="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm mb-3 shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
+              >
+                <option value="">None</option>
+                <option value="Senior">Senior Citizen</option>
+                <option value="PWD">Person with Disability</option>
+              </select>
+
+              <div class="flex justify-between items-center mb-4 text-sm">
+                <span class="text-gray-600">Discounted Total:</span>
+                <span class="font-semibold text-gray-800">₱{{ discountedAmount.toFixed(2) }}</span>
+              </div>
+
+              <div class="flex justify-end gap-3">
+                <button
+                  @click="showApproveModal = false"
+                  class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-sm font-medium transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  @click="approveInvoice"
+                  class="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-medium shadow transition"
+                >
+                  Confirm
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-
+        </transition>
       </main>
     </div>
   </div>
