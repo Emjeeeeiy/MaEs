@@ -111,17 +111,3 @@ const formatDate = (timestamp) => {
 
 onMounted(fetchDocuments)
 </script>
-
-<style>
-/* Optional: Reuse custom-scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
-  border-radius: 9999px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-</style>

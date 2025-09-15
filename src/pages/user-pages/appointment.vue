@@ -51,7 +51,7 @@
             </h2>
 
             <!-- Selected Services -->
-            <div>
+            <div class="text-left">
               <label class="block mb-1 font-medium text-gray-700">Selected Services</label>
               <p class="text-xs text-gray-500 italic">
                 {{
@@ -70,7 +70,7 @@
             </div>
 
             <!-- Preferred Date -->
-            <div>
+            <div class="text-left">
               <label class="block mb-1 font-medium text-gray-700">Preferred Date</label>
               <div class="relative">
                 <input
@@ -89,7 +89,7 @@
             </div>
 
             <!-- Notes -->
-            <div>
+            <div class="text-left">
               <label class="block mb-1 font-medium text-gray-700">Additional Notes</label>
               <textarea
                 v-model="form.notes"
@@ -108,12 +108,12 @@
 
           <!-- Appointments List -->
           <div class="space-y-4">
-            <h2 class="text-lg font-semibold text-gray-800">Your Appointments</h2>
+            <h2 class="text-lg font-semibold text-gray-800 text-left">Your Appointments</h2>
             <div v-if="appointments.length" class="grid md:grid-cols-2 gap-4">
               <div
                 v-for="appt in appointments"
                 :key="appt.id"
-                class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition"
+                class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition text-left"
               >
                 <p class="text-sm text-gray-700"><strong>Services:</strong> {{ appt.services.map((s) => s.serviceName).join(', ') }}</p>
                 <p class="text-sm text-gray-700"><strong>Date:</strong> {{ appt.date }}</p>
@@ -150,7 +150,7 @@
     <div v-if="showServiceModal" class="fixed inset-0 z-50 flex items-center justify-center">
       <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
       <div class="relative bg-white max-w-2xl w-full mx-4 rounded-xl shadow-lg border border-gray-200 p-6 z-10 space-y-4">
-        <h3 class="text-lg font-bold text-gray-800">Select Services</h3>
+        <h3 class="text-lg font-bold text-gray-800 text-left">Select Services</h3>
         <input
           v-model="serviceSearch"
           type="text"
@@ -158,7 +158,7 @@
           class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
         />
         <div class="max-h-72 overflow-y-auto pr-1 space-y-4">
-          <div v-for="(group, category) in filteredServiceGroups" :key="category" class="space-y-1">
+          <div v-for="(group, category) in filteredServiceGroups" :key="category" class="space-y-1 text-left">
             <h4 class="text-sm font-semibold text-gray-600">{{ category }}</h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <label

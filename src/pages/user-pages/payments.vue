@@ -40,7 +40,7 @@
                   </thead>
                   <tbody class="bg-white divide-y divide-gray-100">
                     <tr v-for="invoice in sortedInvoices" :key="invoice.id" class="hover:bg-gray-50 transition">
-                      <td class="px-4 py-2">
+                      <td class="px-4 py-2 text-left">
                         <input
                           type="checkbox"
                           :value="invoice"
@@ -48,10 +48,10 @@
                           class="form-checkbox text-blue-600"
                         />
                       </td>
-                      <td class="px-4 py-2">
+                      <td class="px-4 py-2 text-left">
                         {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
                       </td>
-                      <td class="px-4 py-2 text-green-600 font-medium">
+                      <td class="px-4 py-2 text-left text-green-600 font-medium">
                         ₱{{ calculateInvoiceAmount(invoice).toFixed(2) }}
                       </td>
                     </tr>
@@ -128,7 +128,12 @@
     <transition name="fade">
       <div v-if="showGCashModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
         <div class="bg-white w-[400px] p-6 rounded-lg shadow-xl space-y-5 animate-fade-in text-gray-700">
-          <h3 class="text-lg font-bold text-blue-600 text-left">Pay with GCash</h3>
+          <!-- ✅ GCash Logo -->
+          <div class="flex justify-center">
+            <img src="/gcash_logo.jpg" alt="GCash Logo" class="w-16 h-16 rounded-full shadow border" />
+          </div>
+          <h3 class="text-lg font-bold text-blue-600 text-center">Pay with GCash</h3>
+
           <div class="text-sm space-y-2 text-left">
             <p><strong>Step 1:</strong> Scan the QR code below using your GCash app.</p>
             <p><strong>Step 2:</strong> Pay the total amount for your selected invoice(s).</p>

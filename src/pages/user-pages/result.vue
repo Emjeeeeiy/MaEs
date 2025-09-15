@@ -1,17 +1,17 @@
 <template>
-  <div class="h-screen flex flex-col bg-gray-50 text-gray-800 overflow-hidden">
-    <!-- Topbar -->
+  <div class="h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-hidden">
+    <!-- ✅ Topbar -->
     <div
       class="sticky top-0 z-30 transition-all duration-300"
       :class="{
-        'backdrop-blur-sm bg-white/70': isMobileSidebarOpen,
-        'bg-white border-b border-gray-200 shadow-sm': !isMobileSidebarOpen
+        'backdrop-blur-md bg-white/70': isMobileSidebarOpen,
+        'bg-white/95 border-b border-gray-200 shadow-sm': !isMobileSidebarOpen
       }"
     >
       <Topbar @toggle-sidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
     </div>
 
-    <!-- Body -->
+    <!-- ✅ Body -->
     <div class="flex flex-1 overflow-hidden relative">
       <!-- Sidebar -->
       <Sidebar
@@ -22,23 +22,24 @@
       <!-- Mobile Overlay -->
       <div
         v-if="isMobileSidebarOpen"
-        class="fixed inset-0 bg-black/30 z-20 sm:hidden"
+        class="fixed inset-0 bg-black/40 backdrop-blur-sm z-20 sm:hidden"
         @click="isMobileSidebarOpen = false"
       ></div>
 
-      <!-- Main Content -->
+      <!-- ✅ Main Content -->
       <main
-        class="flex-1 overflow-y-auto px-4 py-6 sm:px-8 space-y-8 animate-fade-in transition-all duration-300 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
+        class="flex-1 overflow-y-auto px-5 sm:px-10 py-8 space-y-8 transition-all duration-300 custom-scrollbar"
         :class="{ 'blur-sm': isMobileSidebarOpen }"
       >
-        <!-- Header -->
+        <!-- Page Header -->
         <div class="flex items-center gap-3">
-          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2"
-            viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round"
-              d="M9 12h6m2 8H7a2 2 0 01-2-2V6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v12a2 2 0 01-2 2z" />
-          </svg>
-          <h2 class="text-xl font-semibold text-gray-800">Your Laboratory Results</h2>
+          <div class="p-2 rounded-xl bg-blue-100 text-blue-600 shadow-sm">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 12h6m2 8H7a2 2 0 01-2-2V6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v12a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800 tracking-tight">Your Laboratory Results</h2>
         </div>
 
         <!-- Loading -->
@@ -48,9 +49,11 @@
 
         <!-- Results -->
         <template v-else>
-          <!-- No Results -->
-          <div v-if="invoices.length === 0" class="text-center text-gray-500 text-sm py-20">
-            🧪 No laboratory results available.
+          <!-- Empty State -->
+          <div v-if="invoices.length === 0" class="text-center py-24">
+            <div class="text-5xl mb-3">🧪</div>
+            <p class="text-gray-600 text-lg font-medium">No laboratory results available</p>
+            <p class="text-gray-400 text-sm mt-1">Please check back later for updates</p>
           </div>
 
           <!-- Results List -->
@@ -58,51 +61,51 @@
             v-else
             v-for="inv in invoices"
             :key="inv.id"
-            class="bg-white p-6 rounded-2xl shadow-md border-l-4 border-blue-500 hover:shadow-lg hover:border-blue-600 transition space-y-5"
+            class="bg-white rounded-2xl shadow-md border border-gray-100 hover:shadow-lg transition-all duration-300"
           >
-            <!-- Header Row -->
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-              <div class="space-y-1.5">
-                <p class="font-medium text-gray-800">
-                  📅 Date: <span class="text-gray-600">{{ formatDate(inv.createdAt) }}</span>
+            <!-- Card Header -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 gap-4 border-b border-gray-100">
+              <div class="space-y-1">
+                <p class="font-semibold text-gray-700 flex items-center gap-2">
+                  📅 <span class="font-medium text-gray-600">{{ formatDate(inv.createdAt) }}</span>
                 </p>
-                <div class="flex items-center text-sm space-x-2">
+                <div class="flex items-center text-sm gap-2">
                   <span class="font-medium text-gray-700">Status:</span>
                   <span
                     :class="[
-                      'inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold gap-1',
-                      inv.status === 'Paid' ? 'bg-green-100 text-green-700' :
-                      inv.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-red-100 text-red-700'
+                      'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm',
+                      inv.status === 'Paid' ? 'bg-green-100 text-green-700 ring-1 ring-green-200' :
+                      inv.status === 'Pending' ? 'bg-yellow-100 text-yellow-700 ring-1 ring-yellow-200' :
+                      'bg-red-100 text-red-700 ring-1 ring-red-200'
                     ]"
                   >
                     <svg
                       v-if="inv.status === 'Paid'"
-                      class="w-3 h-3"
+                      class="w-3 h-3 mr-1"
                       fill="none"
                       stroke="currentColor"
-                      viewBox="0 0 24 24"
                       stroke-width="2"
+                      viewBox="0 0 24 24"
                     >
                       <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                     <svg
                       v-else-if="inv.status === 'Pending'"
-                      class="w-3 h-3"
+                      class="w-3 h-3 mr-1"
                       fill="none"
                       stroke="currentColor"
-                      viewBox="0 0 24 24"
                       stroke-width="2"
+                      viewBox="0 0 24 24"
                     >
                       <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3" />
                     </svg>
                     <svg
                       v-else
-                      class="w-3 h-3"
+                      class="w-3 h-3 mr-1"
                       fill="none"
                       stroke="currentColor"
-                      viewBox="0 0 24 24"
                       stroke-width="2"
+                      viewBox="0 0 24 24"
                     >
                       <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -111,37 +114,35 @@
                 </div>
               </div>
 
+              <!-- PDF Export Button -->
               <button
                 @click="exportPDF(inv)"
-                class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition"
+                class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-sm font-medium px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition"
               >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                  stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M12 4v16m8-8H4" />
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
                 Export PDF
               </button>
             </div>
 
-            <!-- Laboratory Findings -->
-            <div class="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-              <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1">
-                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor"
-                  stroke-width="2" viewBox="0 0 24 24">
+            <!-- Lab Findings -->
+            <div class="p-6">
+              <h3 class="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round"
                     d="M9 17v-2a4 4 0 018 0v2M12 12h.01M6.938 4.938l1.414 1.414M17.657 4.938l-1.414 1.414" />
                 </svg>
                 Laboratory Findings
               </h3>
-              <ul class="space-y-3 pl-3 border-l-2 border-blue-100">
+              <ul class="space-y-3">
                 <li
                   v-for="svc in inv.services"
                   :key="svc.serviceName"
-                  class="text-sm text-gray-800 bg-gray-50 p-2 rounded-lg shadow-sm"
+                  class="p-3 bg-gray-50 rounded-xl border border-gray-100 shadow-sm hover:bg-gray-100 transition"
                 >
-                  <div class="font-medium">{{ svc.serviceName }}</div>
-                  <div class="text-xs text-gray-600 mt-0.5 whitespace-pre-line">
+                  <div class="font-medium text-gray-800">{{ svc.serviceName }}</div>
+                  <div class="text-xs text-gray-600 mt-1 whitespace-pre-line leading-relaxed">
                     {{ svc.result || 'No result yet' }}
                   </div>
                 </li>
@@ -241,31 +242,18 @@ onMounted(() => {
 </script>
 
 <style>
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out;
+/* ✅ Custom scrollbar - fixed sa right side */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
 }
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
-
-/* Tailwind-compatible scrollbar for results and page */
-.scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.6); /* gray-400 */
+  border-radius: 10px;
 }
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: #D1D5DB; /* gray-300 */
-  border-radius: 3px;
-}
-.scrollbar-thin::-webkit-scrollbar-track {
-  background-color: #F3F4F6; /* gray-100 */
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 114, 128, 0.8); /* gray-500 */
 }
 </style>

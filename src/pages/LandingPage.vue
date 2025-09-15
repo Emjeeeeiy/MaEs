@@ -55,7 +55,7 @@
     <!-- Hero -->
     <section ref="home" class="py-20 bg-gradient-to-br from-green-300 to-green-700 text-center text-white">
       <div class="max-w-4xl mx-auto px-4">
-        <h1 class="text-4xl font-bold mb-4">Modern Automated E-Hospital System</h1>
+        <h1 class="text-4xl font-bold mb-4">MaEs - Paytrack</h1>
         <p class="text-lg text-white/90 mb-6">A fully digital hospital billing and management platform built for efficiency, transparency, and ease of use.</p>
         <div class="flex justify-center gap-4">
           <button @click="goToRegister" class="bg-white text-green-700 px-6 py-3 rounded-lg hover:bg-gray-100 transition font-medium">Get Started</button>

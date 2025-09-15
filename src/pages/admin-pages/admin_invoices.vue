@@ -25,7 +25,7 @@
             @input="showDropdown = true"
           />
           <ul
-            v-if="filteredUsers.length && showDropdown"
+            v-if="userSearchQuery && filteredUsers.length && showDropdown"
             class="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-y-auto"
           >
             <li
@@ -230,13 +230,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { collection, getDocs, query, where, updateDoc, deleteDoc, doc, Timestamp, addDoc } from 'firebase/firestore'
-import { getStorage, ref as storageRef, getDownloadURL } from 'firebase/storage'
 import { db } from '@/firebase'
 
 import AdminSidebar from '@/components/admin_sidebar.vue'
 import AdminTopbar from '@/components/AdminTopbar.vue'
 
-/* --- State and Functions same as your original code --- */
 const users = ref([])
 const invoices = ref([])
 const selectedUserName = ref('')
@@ -257,7 +255,8 @@ const discountedAmount = computed(() => {
 })
 
 const filteredUsers = computed(() => {
-  const q = userSearchQuery.value.toLowerCase()
+  const q = userSearchQuery.value.toLowerCase().trim()
+  if (!q) return [] // 🔒 kapag walang laman input, walang dropdown
   return users.value.filter(
     u => u.role !== 'admin' &&
     (u.username?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q))

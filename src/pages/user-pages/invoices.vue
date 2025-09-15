@@ -89,23 +89,23 @@
                 :key="invoice.id"
                 class="hover:bg-blue-50 transition-colors"
               >
-                <td class="px-4 py-3 font-mono text-xs whitespace-nowrap">
+                <td class="px-4 py-3 font-mono text-xs whitespace-nowrap text-left">
                   {{ invoice.shortId || 'N/A' }}
                 </td>
-                <td class="px-4 py-3">
+                <td class="px-4 py-3 text-left">
                   <ul class="list-disc list-inside text-xs text-gray-700 space-y-0.5">
                     <li v-for="service in invoice.services" :key="service.serviceName">
                       {{ service.serviceName }} - ₱{{ service.amount?.toFixed(2) || '0.00' }}
                     </li>
                   </ul>
                 </td>
-                <td class="px-4 py-3 text-green-600 font-semibold whitespace-nowrap">
+                <td class="px-4 py-3 text-green-600 font-semibold whitespace-nowrap text-left">
                   ₱{{ calculateInvoiceTotal(invoice).toFixed(2) }}
                 </td>
-                <td class="px-4 py-3 whitespace-nowrap">
+                <td class="px-4 py-3 whitespace-nowrap text-left">
                   {{ formattedDate(invoice.createdAt) }}
                 </td>
-                <td class="px-4 py-3 whitespace-nowrap">
+                <td class="px-4 py-3 whitespace-nowrap text-left">
                   <span
                     :class="[
                       'inline-block px-2 py-0.5 rounded-full text-[11px] font-medium',

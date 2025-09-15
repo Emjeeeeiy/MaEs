@@ -126,7 +126,8 @@
               :disabled="loading || (!newMessage && !imageFile)"
               class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
             >
-              Send
+              <span v-if="loading">Sending...</span>
+              <span v-else>Send</span>
             </button>
           </div>
         </form>
@@ -187,6 +188,7 @@ const route = useRoute()
 const user = auth.currentUser
 const userEmail = user?.email || ''
 
+// Dropdowns + state
 const dropdownOpen = ref(false)
 const notifDropdownOpen = ref(false)
 const profileDropdownRef = ref(null)
@@ -226,6 +228,7 @@ const pageTitle = computed(() => {
   return routeMap[route.path] || 'Page'
 })
 
+// Logout
 const handleLogout = async () => {
   try {
     await signOut(auth)
@@ -236,6 +239,7 @@ const handleLogout = async () => {
   }
 }
 
+// Click outside
 const handleClickOutside = (e) => {
   if (profileDropdownRef.value && !profileDropdownRef.value.contains(e.target)) {
     dropdownOpen.value = false
@@ -264,6 +268,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 
+// Feedback
 const handleImageUpload = (e) => {
   const file = e.target.files[0]
   if (file && file.type.startsWith('image/')) {
@@ -281,8 +286,8 @@ const sendFeedback = async () => {
   try {
     if (imageFile.value) {
       const fileRef = sRef(storage, `billingFeedbackImages/${Date.now()}-${imageFile.value.name}`)
-      await uploadBytes(fileRef, imageFile.value)
-      imageUrl = await getDownloadURL(fileRef)
+      const snapshot = await uploadBytes(fileRef, imageFile.value)
+      imageUrl = await getDownloadURL(snapshot.ref)
     }
 
     await addDoc(collection(db, 'billingFeedback'), {
@@ -295,7 +300,7 @@ const sendFeedback = async () => {
 
     newMessage.value = ''
     imageFile.value = null
-    imageInput.value.value = ''
+    if (imageInput.value) imageInput.value.value = ''
     showModal.value = false
   } catch (err) {
     console.error('Feedback send error:', err)
@@ -304,7 +309,7 @@ const sendFeedback = async () => {
   }
 }
 
-// ✅ Document Upload Logic
+// Document Upload
 const handleFileSelect = (e) => {
   selectedFile.value = e.target.files[0] || null
 }
@@ -315,8 +320,8 @@ const uploadDocument = async () => {
 
   try {
     const fileRef = sRef(storage, `financialDocuments/${Date.now()}-${selectedFile.value.name}`)
-    await uploadBytes(fileRef, selectedFile.value)
-    const fileUrl = await getDownloadURL(fileRef)
+    const snapshot = await uploadBytes(fileRef, selectedFile.value)
+    const fileUrl = await getDownloadURL(snapshot.ref)
 
     await addDoc(collection(db, 'financialDocuments'), {
       fileName: selectedFile.value.name,
@@ -329,7 +334,7 @@ const uploadDocument = async () => {
     // Reset form
     selectedFile.value = null
     docDescription.value = ''
-    if (fileInput.value) fileInput.value.value = '' // clear input
+    if (fileInput.value) fileInput.value.value = ''
     showDocumentModal.value = false
   } catch (err) {
     console.error('Upload error:', err)
@@ -338,6 +343,7 @@ const uploadDocument = async () => {
   }
 }
 
+// Clear Notifications
 const clearNotifications = async () => {
   try {
     const snapshot = await getDocs(query(collection(db, 'notifications'), where('userEmail', '==', userEmail)))
