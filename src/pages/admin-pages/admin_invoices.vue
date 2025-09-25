@@ -131,14 +131,13 @@
                   <td class="px-4 py-3">{{ invoice.paymentMethod || 'N/A' }}</td>
                   <td class="px-4 py-3">{{ invoice.referenceNumber || 'N/A' }}</td>
                   <td class="px-4 py-3">
-                    <a
-                      v-if="invoice.receiptImage"
-                      :href="invoice.receiptImage"
-                      target="_blank"
-                      class="text-green-600 hover:underline"
+                    <button
+                      v-if="invoice.receiptUrl"
+                      @click="openReceiptModal(invoice.receiptUrl)"
+                      class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium shadow transition"
                     >
                       View
-                    </a>
+                    </button>
                     <span v-else class="text-gray-400">No image</span>
                   </td>
                   <td class="px-4 py-3">{{ invoice.status }}</td>
@@ -222,6 +221,25 @@
             </div>
           </div>
         </transition>
+
+        <!-- ✅ Receipt Modal -->
+        <transition name="fade">
+          <div
+            v-if="showReceiptModal"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4"
+          >
+            <div class="bg-white w-full max-w-2xl p-6 rounded-2xl shadow-xl relative">
+              <button
+                @click="closeReceiptModal"
+                class="absolute top-3 right-3 px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+              >
+                ✕
+              </button>
+              <h3 class="text-lg font-semibold mb-4 text-gray-800">Receipt Image</h3>
+              <img :src="currentReceiptUrl" alt="Receipt" class="rounded-lg max-h-[70vh] mx-auto object-contain" />
+            </div>
+          </div>
+        </transition>
       </main>
     </div>
   </div>
@@ -230,7 +248,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { collection, getDocs, query, where, updateDoc, deleteDoc, doc, Timestamp, addDoc } from 'firebase/firestore'
-import { db } from '@/firebase'
+import { getDownloadURL, ref as storageRef } from 'firebase/storage'
+import { db, storage } from '@/firebase'
 
 import AdminSidebar from '@/components/admin_sidebar.vue'
 import AdminTopbar from '@/components/AdminTopbar.vue'
@@ -249,6 +268,10 @@ const approveAmount = ref(0)
 const approveIdType = ref('')
 const userLastPayments = ref({})
 
+// ✅ Receipt modal state
+const showReceiptModal = ref(false)
+const currentReceiptUrl = ref('')
+
 const discountedAmount = computed(() => {
   const amount = approveAmount.value || 0
   return approveIdType.value === 'Senior' || approveIdType.value === 'PWD' ? amount * 0.8 : amount
@@ -256,7 +279,7 @@ const discountedAmount = computed(() => {
 
 const filteredUsers = computed(() => {
   const q = userSearchQuery.value.toLowerCase().trim()
-  if (!q) return [] // 🔒 kapag walang laman input, walang dropdown
+  if (!q) return []
   return users.value.filter(
     u => u.role !== 'admin' &&
     (u.username?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q))
@@ -304,8 +327,24 @@ const selectUser = async user => {
   selectedUserEmail.value = user.email
   userSearchQuery.value = `${user.username} - ${user.email}`
   showDropdown.value = false
+
   const snap = await getDocs(query(collection(db, 'invoices'), where('email', '==', user.email)))
-  invoices.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+  const docs = await Promise.all(
+    snap.docs.map(async d => {
+      const data = d.data()
+      let receiptUrl = null
+      if (data.receiptImage) {
+        try {
+          const url = await getDownloadURL(storageRef(storage, data.receiptImage))
+          receiptUrl = url
+        } catch (e) {
+          console.error('Error fetching receipt URL:', e)
+        }
+      }
+      return { id: d.id, ...data, receiptUrl }
+    })
+  )
+  invoices.value = docs
 }
 
 const clearSelectedUser = () => {
@@ -344,6 +383,17 @@ const approveInvoice = async () => {
   )
 
   showApproveModal.value = false
+}
+
+// ✅ Modal controls for receipt
+const openReceiptModal = url => {
+  currentReceiptUrl.value = url
+  showReceiptModal.value = true
+}
+
+const closeReceiptModal = () => {
+  currentReceiptUrl.value = ''
+  showReceiptModal.value = false
 }
 
 const deleteInvoice = async id => {
