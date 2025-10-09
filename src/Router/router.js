@@ -97,7 +97,7 @@ const routes = [
   { path: '/result', name: 'Result', component: Result, meta: { requiresAuth: true } },
 
   // Catch-all (404)
-  { path: '/:pathMatch(.*)*', name: 'notFound', component: notFound },
+  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
 ];
 
 const router = createRouter({
