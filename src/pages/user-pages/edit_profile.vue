@@ -107,7 +107,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 import Sidebar from '@/components/Sidebar.vue'
-import Topbar from '@/components/Topbar.vue'
+import Topbar from '@/components/topbar.vue'
 
 const username = ref('')
 const email = ref('')

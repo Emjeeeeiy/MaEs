@@ -84,7 +84,7 @@
 <script setup>
 import { ref } from 'vue'
 import Sidebar from '@/components/Sidebar.vue'
-import Topbar from '@/components/Topbar.vue'
+import Topbar from '@/components/topbar.vue'
 
 const settings = ref({
   taxRate: 0,

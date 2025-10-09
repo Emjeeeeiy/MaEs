@@ -103,7 +103,7 @@ import { auth, db } from "@/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import Sidebar from "@/components/Sidebar.vue";
-import Topbar from "@/components/Topbar.vue";
+import Topbar from "@/components/topbar.vue";
 import LoadingAnimation from "@/components/loading_animation.vue";
 
 const username = ref("");

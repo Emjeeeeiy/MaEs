@@ -184,7 +184,7 @@
 
 <script>
 import Sidebar from "@/components/Sidebar.vue";
-import Topbar from "@/components/Topbar.vue";
+import Topbar from "@/components/topbar.vue";
 import LoadingAnimation from "@/components/loading_animation.vue";
 import { db } from "@/firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";

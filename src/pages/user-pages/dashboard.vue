@@ -164,7 +164,7 @@
 
 <script setup>
 import Topbar from "@/components/topbar.vue";
-import Sidebar from "@/components/sidebar.vue";
+import Sidebar from "@/components/Sidebar.vue";
 import LoadingAnimation from "@/components/loading_animation.vue";
 import { ref } from "vue";
 import { useRouter } from "vue-router";

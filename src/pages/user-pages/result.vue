@@ -163,7 +163,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import html2pdf from 'html2pdf.js'
 
 import Sidebar from '@/components/Sidebar.vue'
-import Topbar from '@/components/Topbar.vue'
+import Topbar from '@/components/topbar.vue'
 import loading_animation from '@/components/loading_animation.vue'
 
 const invoices = ref([])
