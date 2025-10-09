@@ -23,11 +23,11 @@
               v-model="searchTerm"
               type="text"
               placeholder="Search services..."
-              class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none w-full sm:w-64"
+              class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none w-full sm:w-64 text-left"
             />
             <select
               v-model="selectedCategory"
-              class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none w-full sm:w-52"
+              class="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none w-full sm:w-52 text-left"
             >
               <option value="">All Categories</option>
               <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
@@ -68,15 +68,15 @@
 
         <!-- Services Table -->
         <div class="bg-white/80 backdrop-blur-md rounded-2xl shadow border border-gray-200 overflow-hidden">
-          <table class="w-full text-sm">
-            <thead class="bg-gray-100 text-gray-700 text-left">
+          <table class="w-full text-sm text-left">
+            <thead class="bg-gray-100 text-gray-700">
               <tr>
-                <th v-if="editMode" class="px-4 py-2">✔</th>
-                <th class="px-4 py-2">No.</th>
-                <th class="px-4 py-2">Service Name</th>
-                <th class="px-4 py-2">Category</th>
-                <th class="px-4 py-2">Amount</th>
-                <th class="px-4 py-2">Special Instructions</th>
+                <th v-if="editMode" class="px-4 py-2 text-left">✔</th>
+                <th class="px-4 py-2 text-left">No.</th>
+                <th class="px-4 py-2 text-left">Service Name</th>
+                <th class="px-4 py-2 text-left">Category</th>
+                <th class="px-4 py-2 text-left">Amount</th>
+                <th class="px-4 py-2 text-left">Special Instructions</th>
               </tr>
             </thead>
             <tbody>
@@ -84,9 +84,9 @@
                 v-for="(service, idx) in filteredServices"
                 :key="service.id"
                 @click="toggleRowSelection(service.id)"
-                class="hover:bg-gray-50 cursor-pointer transition"
+                class="hover:bg-gray-50 cursor-pointer transition text-left"
               >
-                <td v-if="editMode" class="px-4 py-2">
+                <td v-if="editMode" class="px-4 py-2 text-left">
                   <input
                     type="checkbox"
                     :value="service.id"
@@ -94,14 +94,14 @@
                     @click.stop
                   />
                 </td>
-                <td class="px-4 py-2">{{ idx + 1 }}</td>
-                <td class="px-4 py-2 font-medium text-gray-800">{{ service.serviceName }}</td>
-                <td class="px-4 py-2">{{ service.category }}</td>
-                <td class="px-4 py-2 text-green-600 font-semibold">₱{{ service.amount || 0 }}</td>
-                <td class="px-4 py-2 text-gray-500">{{ service.specialInstructions || '—' }}</td>
+                <td class="px-4 py-2 text-left">{{ idx + 1 }}</td>
+                <td class="px-4 py-2 font-medium text-gray-800 text-left">{{ service.serviceName }}</td>
+                <td class="px-4 py-2 text-left">{{ service.category }}</td>
+                <td class="px-4 py-2 text-green-600 font-semibold text-left">₱{{ service.amount || 0 }}</td>
+                <td class="px-4 py-2 text-gray-500 text-left">{{ service.specialInstructions || '—' }}</td>
               </tr>
               <tr v-if="filteredServices.length === 0">
-                <td :colspan="editMode ? 6 : 5" class="px-4 py-6 text-center text-gray-500">
+                <td :colspan="editMode ? 6 : 5" class="px-4 py-6 text-gray-500 text-left">
                   No services found.
                 </td>
               </tr>
@@ -117,8 +117,8 @@
         v-if="showModal"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
       >
-        <div class="bg-white/95 w-full max-w-lg p-6 rounded-2xl border border-gray-200 shadow-xl relative animate-fadeIn">
-          <h2 class="text-lg font-semibold mb-5 text-gray-800">
+        <div class="bg-white/95 w-full max-w-lg p-6 rounded-2xl border border-gray-200 shadow-xl relative animate-fadeIn text-left">
+          <h2 class="text-lg font-semibold mb-5 text-gray-800 text-left">
             {{ bulkStepMode
               ? `Editing Service ${currentBulkIndex + 1} of ${selectedIds.length}`
               : (isEditing ? 'Edit Service' : 'Add New Service') }}
@@ -134,11 +134,11 @@
             <input
               v-model="form.serviceName"
               placeholder="Service Name"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none text-left"
             />
             <select
               v-model="form.category"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none text-left"
             >
               <option value="" disabled>Select Category</option>
               <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
@@ -147,13 +147,13 @@
               v-model.number="form.amount"
               type="number"
               placeholder="Amount"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none text-left"
             />
             <textarea
               v-model="form.specialInstructions"
               placeholder="Special Instructions (optional)"
               rows="2"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:outline-none text-left"
             />
 
             <div class="flex justify-end gap-3 pt-2">
@@ -183,9 +183,9 @@
         v-if="showDeleteModal"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
       >
-        <div class="bg-white/95 w-full max-w-md p-6 rounded-2xl border border-gray-200 shadow-xl animate-fadeIn">
-          <h2 class="text-lg font-semibold text-gray-800 mb-2">Confirm Delete</h2>
-          <p class="text-gray-600 mb-6">
+        <div class="bg-white/95 w-full max-w-md p-6 rounded-2xl border border-gray-200 shadow-xl animate-fadeIn text-left">
+          <h2 class="text-lg font-semibold text-gray-800 mb-2 text-left">Confirm Delete</h2>
+          <p class="text-gray-600 mb-6 text-left">
             Are you sure you want to delete
             <span class="font-semibold">{{ selectedIds.length }}</span>
             selected service<span v-if="selectedIds.length > 1">s</span>?

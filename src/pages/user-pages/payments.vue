@@ -20,27 +20,33 @@
       <!-- Main Content -->
       <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
         <transition name="fade" mode="out-in">
+          <!-- Loading State -->
           <div v-if="loading" key="loading" class="flex justify-center items-center min-h-[300px]">
             <LoadingAnimation />
           </div>
 
+          <!-- Content -->
           <div v-else key="content" class="space-y-6 animate-fade-in">
             <div class="bg-white p-6 rounded-xl shadow border border-gray-200 space-y-4">
-              <h3 class="font-medium text-sm text-gray-700 mb-2">Select Unpaid Invoices:</h3>
+              <h3 class="font-medium text-sm text-gray-700 mb-2 text-left">Select Unpaid Invoices:</h3>
 
-              <!-- Invoice Table -->
+              <!-- Invoice Table (Desktop) -->
               <div class="hidden sm:block overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                <table class="min-w-full divide-y divide-gray-200 text-sm text-left">
                   <thead class="bg-gray-100 text-gray-600">
                     <tr>
-                      <th class="px-4 py-2 text-left">Select</th>
-                      <th class="px-4 py-2 text-left">Service(s)</th>
-                      <th class="px-4 py-2 text-left">Amount</th>
+                      <th class="px-4 py-2">Select</th>
+                      <th class="px-4 py-2">Service(s)</th>
+                      <th class="px-4 py-2">Amount</th>
                     </tr>
                   </thead>
                   <tbody class="bg-white divide-y divide-gray-100">
-                    <tr v-for="invoice in sortedInvoices" :key="invoice.id" class="hover:bg-gray-50 transition">
-                      <td class="px-4 py-2 text-left">
+                    <tr
+                      v-for="invoice in sortedInvoices"
+                      :key="invoice.id"
+                      class="hover:bg-gray-50 transition"
+                    >
+                      <td class="px-4 py-2">
                         <input
                           type="checkbox"
                           :value="invoice"
@@ -48,21 +54,22 @@
                           class="form-checkbox text-blue-600"
                         />
                       </td>
-                      <td class="px-4 py-2 text-left">
+                      <td class="px-4 py-2">
                         {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
                       </td>
-                      <td class="px-4 py-2 text-left text-green-600 font-medium">
+                      <td class="px-4 py-2 text-green-600 font-medium">
                         ₱{{ calculateInvoiceAmount(invoice).toFixed(2) }}
                       </td>
                     </tr>
+
                     <tr v-if="sortedInvoices.length === 0">
-                      <td colspan="3" class="text-center text-gray-500 py-4">No unpaid invoices found.</td>
+                      <td colspan="3" class="text-left text-gray-500 py-4">No unpaid invoices found.</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              <!-- Mobile Cards -->
+              <!-- Mobile Invoice Cards -->
               <div class="space-y-4 sm:hidden">
                 <div
                   v-for="invoice in sortedInvoices"
@@ -78,7 +85,8 @@
                     />
                     <span class="font-medium text-sm text-gray-700">Select</span>
                   </label>
-                  <div class="text-sm text-gray-600 space-y-1">
+
+                  <div class="text-sm text-gray-600 space-y-1 text-left">
                     <p>
                       <span class="font-semibold">Services:</span>
                       {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
@@ -93,7 +101,7 @@
                 </div>
               </div>
 
-              <!-- Submit -->
+              <!-- Submit Button -->
               <div class="text-right">
                 <button
                   @click="handleSubmitClick"
@@ -110,15 +118,24 @@
 
     <!-- Payment Method Modal -->
     <transition name="fade">
-      <div v-if="showPaymentMethodModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="bg-white w-80 p-5 rounded-lg shadow-xl space-y-5 animate-fade-in">
-          <h3 class="text-base font-bold text-gray-800 text-left">Select Payment Method</h3>
+      <div
+        v-if="showPaymentMethodModal"
+        class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
+      >
+        <div class="bg-white w-80 p-5 rounded-lg shadow-xl space-y-5 animate-fade-in text-left">
+          <h3 class="text-base font-bold text-gray-800">Select Payment Method</h3>
           <div class="grid grid-cols-2 gap-2 text-sm font-medium">
-            <button @click="submitPayments('Cash')" class="bg-gray-100 hover:bg-gray-200 py-1.5 rounded-md">Cash</button>
-            <button @click="submitPayments('GCash')" class="bg-blue-100 hover:bg-blue-200 py-1.5 rounded-md">GCash</button>
+            <button @click="submitPayments('Cash')" class="bg-gray-100 hover:bg-gray-200 py-1.5 rounded-md">
+              Cash
+            </button>
+            <button @click="submitPayments('GCash')" class="bg-blue-100 hover:bg-blue-200 py-1.5 rounded-md">
+              GCash
+            </button>
           </div>
           <div class="flex justify-end">
-            <button @click="showPaymentMethodModal = false" class="text-red-500 hover:underline text-xs">Cancel</button>
+            <button @click="showPaymentMethodModal = false" class="text-red-500 hover:underline text-xs">
+              Cancel
+            </button>
           </div>
         </div>
       </div>
@@ -126,33 +143,50 @@
 
     <!-- GCash Modal -->
     <transition name="fade">
-      <div v-if="showGCashModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="bg-white w-[400px] p-6 rounded-lg shadow-xl space-y-5 animate-fade-in text-gray-700">
-          <!-- ✅ GCash Logo -->
+      <div
+        v-if="showGCashModal"
+        class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
+      >
+        <div class="bg-white w-[400px] p-6 rounded-lg shadow-xl space-y-5 animate-fade-in text-gray-700 text-left">
           <div class="flex justify-center">
             <img src="/gcash_logo.jpg" alt="GCash Logo" class="w-16 h-16 rounded-full shadow border" />
           </div>
           <h3 class="text-lg font-bold text-blue-600 text-center">Pay with GCash</h3>
 
-          <div class="text-sm space-y-2 text-left">
+          <div class="text-sm space-y-2">
             <p><strong>Step 1:</strong> Scan the QR code below using your GCash app.</p>
             <p><strong>Step 2:</strong> Pay the total amount for your selected invoice(s).</p>
-            <p><strong>Step 3:</strong> Upload your GCash receipt & enter reference number.</p>
+            <p><strong>Step 3:</strong> Upload your GCash receipt & enter the reference number.</p>
           </div>
+
           <img src="/gcash-qr.jpg" alt="GCash QR" class="w-40 mx-auto rounded border shadow" />
+
           <div class="text-sm mt-4 space-y-3">
-            <label class="block text-left">
+            <label class="block">
               <span class="font-semibold">GCash Reference Number</span>
-              <input v-model="gcashReferenceNumber" type="text" class="w-full border rounded px-3 py-2 text-sm mt-1" />
+              <input
+                v-model="gcashReferenceNumber"
+                type="text"
+                class="w-full border rounded px-3 py-2 text-sm mt-1"
+              />
             </label>
-            <label class="block text-left">
+
+            <label class="block">
               <span class="font-semibold">Upload Receipt</span>
-              <input type="file" accept="image/*" @change="onFileChange" class="w-full mt-1 border border-dashed border-gray-400 rounded px-3 py-2 text-sm" />
+              <input
+                type="file"
+                accept="image/*"
+                @change="onFileChange"
+                class="w-full mt-1 border border-dashed border-gray-400 rounded px-3 py-2 text-sm"
+              />
             </label>
           </div>
+
           <div class="flex justify-end items-center pt-4 space-x-3 text-sm">
             <button @click="showGCashModal = false" class="text-red-500 hover:underline">Cancel</button>
-            <button @click="handleGCashSubmit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded">Submit</button>
+            <button @click="handleGCashSubmit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded">
+              Submit
+            </button>
           </div>
         </div>
       </div>
@@ -160,12 +194,20 @@
 
     <!-- Reminder Modal -->
     <transition name="fade">
-      <div v-if="showReminderModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+      <div
+        v-if="showReminderModal"
+        class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
+      >
         <div class="bg-white w-[320px] p-5 rounded-lg shadow-xl space-y-4 animate-fade-in text-left">
           <h3 class="text-lg font-bold text-yellow-600">No Service Selected</h3>
           <p class="text-sm text-gray-700">Please select at least one invoice before submitting.</p>
           <div class="flex justify-end">
-            <button @click="showReminderModal = false" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1.5 rounded-md text-sm">Okay</button>
+            <button
+              @click="showReminderModal = false"
+              class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1.5 rounded-md text-sm"
+            >
+              Okay
+            </button>
           </div>
         </div>
       </div>
@@ -173,14 +215,22 @@
 
     <!-- Success Modal -->
     <transition name="fade">
-      <div v-if="showSuccessModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+      <div
+        v-if="showSuccessModal"
+        class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
+      >
         <div class="bg-white w-[320px] p-5 rounded-lg shadow-xl space-y-4 animate-fade-in text-left">
           <h3 class="text-lg font-bold text-green-600">Payment Submitted!</h3>
           <p class="text-sm text-gray-700">
             {{ selectedInvoices.length }} invoice(s) have been submitted and are awaiting admin approval.
           </p>
           <div class="flex justify-end">
-            <button @click="showSuccessModal = false" class="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-md text-sm">Okay</button>
+            <button
+              @click="showSuccessModal = false"
+              class="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-md text-sm"
+            >
+              Okay
+            </button>
           </div>
         </div>
       </div>
@@ -188,12 +238,20 @@
 
     <!-- Error Modal -->
     <transition name="fade">
-      <div v-if="showErrorModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+      <div
+        v-if="showErrorModal"
+        class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
+      >
         <div class="bg-white w-[320px] p-5 rounded-lg shadow-xl space-y-4 animate-fade-in text-left">
           <h3 class="text-lg font-bold text-red-600">Error</h3>
           <p class="text-sm text-gray-700">{{ errorMessage }}</p>
           <div class="flex justify-end">
-            <button @click="showErrorModal = false" class="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm">Okay</button>
+            <button
+              @click="showErrorModal = false"
+              class="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm"
+            >
+              Okay
+            </button>
           </div>
         </div>
       </div>
@@ -203,7 +261,7 @@
 
 <script>
 import Sidebar from "@/components/Sidebar.vue";
-import Topbar from "@/components/topbar.vue";
+import Topbar from "@/components/Topbar.vue";
 import LoadingAnimation from "@/components/loading_animation.vue";
 import { db, storage } from "@/firebase";
 import {
@@ -228,7 +286,7 @@ export default {
   components: { Sidebar, Topbar, LoadingAnimation },
   data() {
     return {
-      isMobileSidebarOpen: false, // <-- added state for mobile sidebar
+      isMobileSidebarOpen: false,
       invoices: [],
       selectedInvoices: [],
       loading: true,
@@ -237,8 +295,8 @@ export default {
       showSuccessModal: false,
       showReminderModal: false,
       showErrorModal: false,
-      errorMessage: "",
       showGCashModal: false,
+      errorMessage: "",
       gcashReferenceNumber: "",
       gcashReceiptFile: null,
     };
@@ -260,9 +318,11 @@ export default {
       this.gcashReceiptFile = event.target.files[0] || null;
     },
     async uploadFileToStorage(file) {
-      const fileRef = storageRef(storage, `gcash-receipts/${Date.now()}-${file.name}`);
+      const path = `gcash-receipts/${Date.now()}-${file.name}`;
+      const fileRef = storageRef(storage, path);
       const snapshot = await uploadBytes(fileRef, file);
-      return await getDownloadURL(snapshot.ref);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      return { downloadURL, storagePath: path };
     },
     async fetchUnpaidInvoices() {
       if (!this.userEmail) return;
@@ -273,10 +333,10 @@ export default {
           where("status", "==", "not paid")
         );
         const snapshot = await getDocs(q);
-        this.invoices = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-          services: Array.isArray(doc.data().services) ? doc.data().services : [],
+        this.invoices = snapshot.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+          services: Array.isArray(d.data().services) ? d.data().services : [],
         }));
       } catch (err) {
         this.showError("Error fetching invoices.");
@@ -292,6 +352,7 @@ export default {
         return;
       }
       if (this.selectedInvoices.length === 0) return;
+
       try {
         const submittedAt = serverTimestamp();
         for (const invoice of this.selectedInvoices) {
@@ -325,7 +386,8 @@ export default {
       }
       try {
         const submittedAt = serverTimestamp();
-        const receiptURL = await this.uploadFileToStorage(this.gcashReceiptFile);
+        const { downloadURL, storagePath } = await this.uploadFileToStorage(this.gcashReceiptFile);
+
         for (const invoice of this.selectedInvoices) {
           await addDoc(collection(db, "payments"), {
             invoiceID: invoice.id,
@@ -334,14 +396,18 @@ export default {
             submittedAt,
             email: this.userEmail,
             referenceNumber: this.gcashReferenceNumber,
-            receiptURL,
+            receiptURL: downloadURL,
           });
+
           await updateDoc(doc(db, "invoices", invoice.id), {
             status: "Pending",
             paymentMethod: "GCash",
             submittedAt,
+            referenceNumber: this.gcashReferenceNumber,
+            receiptImage: storagePath,
           });
         }
+
         this.gcashReferenceNumber = "";
         this.gcashReceiptFile = null;
         this.selectedInvoices = [];
@@ -382,10 +448,3 @@ export default {
   },
 };
 </script>
-
-
-
-
-
-
-
