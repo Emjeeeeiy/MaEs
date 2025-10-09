@@ -5,7 +5,7 @@ import { doc, getDoc } from 'firebase/firestore';
 
 // Public pages
 import LandingPage from '../pages/LandingPage.vue';
-import Login from '@/pages/login.vue';
+import Login from '@/pages/Login.vue';
 import Register from '../pages/register.vue';
 import ResetPassword from '../pages/reset_password.vue';
 
