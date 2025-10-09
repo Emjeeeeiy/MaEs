@@ -28,7 +28,7 @@
         to="/"
         class="mt-8 inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-xl shadow hover:bg-blue-700 hover:shadow-lg transition-all duration-300"
       >
-        ⬅ Go Back to Dashboard
+        ⬅ Go Back to Main
       </router-link>
     </div>
   </div>
