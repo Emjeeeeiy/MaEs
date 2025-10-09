@@ -82,7 +82,7 @@ import {
 import { db } from '@/firebase'
 
 import AdminSidebar from '@/components/admin_sidebar.vue'
-import AdminTopbar from '@/components/AdminTopbar.vue'
+import AdminTopbar from '@/components/admintopbar.vue'
 
 const documents = ref([])
 const loading = ref(true)

@@ -160,7 +160,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/firebase'
 import AdminSidebar from '@/components/admin_sidebar.vue'
-import AdminTopbar from '@/components/AdminTopbar.vue'
+import AdminTopbar from '@/components/admintopbar.vue'
 
 const appointments = ref([])
 const filterStatus = ref('')

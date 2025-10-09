@@ -163,7 +163,7 @@ import Chart from 'chart.js/auto'
 import * as XLSX from 'xlsx'
 
 import AdminSidebar from '@/components/admin_sidebar.vue'
-import AdminTopbar from '@/components/AdminTopbar.vue'
+import AdminTopbar from '@/components/admintopbar.vue'
 import { ChartBarIcon, UsersIcon, CreditCardIcon, CurrencyDollarIcon } from '@heroicons/vue/24/solid'
 
 const db = getFirestore()

@@ -252,7 +252,7 @@ import { getDownloadURL, ref as storageRef } from 'firebase/storage'
 import { db, storage } from '@/firebase'
 
 import AdminSidebar from '@/components/admin_sidebar.vue'
-import AdminTopbar from '@/components/AdminTopbar.vue'
+import AdminTopbar from '@/components/admintopbar.vue'
 
 const users = ref([])
 const invoices = ref([])

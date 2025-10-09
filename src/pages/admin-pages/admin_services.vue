@@ -215,7 +215,7 @@ import { ref, computed, onMounted } from 'vue'
 import { db } from '@/firebase'
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore'
 import AdminSidebar from '@/components/admin_sidebar.vue'
-import AdminTopbar from '@/components/AdminTopbar.vue'
+import AdminTopbar from '@/components/admintopbar.vue'
 
 const services = ref([])
 const searchTerm = ref('')

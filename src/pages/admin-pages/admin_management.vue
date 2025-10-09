@@ -105,7 +105,7 @@ import { ref, onMounted } from "vue";
 import { auth, db } from "@/firebase";
 import { getDoc, doc, collection, updateDoc, deleteDoc, onSnapshot } from "firebase/firestore";
 import AdminSidebar from "@/components/admin_sidebar.vue";
-import AdminTopbar from "@/components/AdminTopbar.vue";
+import AdminTopbar from "@/components/admintopbar.vue";
 
 const users = ref([]);
 const errorMessage = ref("");
