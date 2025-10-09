@@ -30,7 +30,7 @@ import AdminAppointment from '../pages/admin-pages/admin_appointment.vue';
 import AdminResult from '../pages/admin-pages/admin_result.vue';
 
 // 404 Page
-import NotFound from '../pages/NotFound.vue';
+import NotFound from '../pages/notFound.vue';
 
 const routes = [
   // Default route (Landing Page)
