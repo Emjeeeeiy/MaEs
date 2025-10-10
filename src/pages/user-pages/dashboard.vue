@@ -128,7 +128,13 @@
                     </td>
                   </tr>
                   <tr v-if="invoices.length === 0">
-                    <td colspan="2" class="text-center py-4 text-gray-500">No invoices found.</td>
+                    <td colspan="2" class="text-center py-16">
+                      <div class="flex flex-col items-center justify-center">
+                        <div class="text-5xl mb-3">📄</div>
+                        <p class="text-gray-600 text-lg font-medium">No invoices found</p>
+                        <p class="text-gray-400 text-sm mt-1">Please check back later or create a new invoice</p>
+                      </div>
+                    </td>
                   </tr>
                 </tbody>
               </table>

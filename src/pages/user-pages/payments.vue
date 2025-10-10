@@ -33,45 +33,53 @@
               </h3>
 
               <!-- Invoice Table (Desktop) -->
-              <div class="hidden sm:block overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 text-sm text-left">
-                  <thead class="bg-gray-100 text-gray-600">
-                    <tr>
-                      <th class="px-4 py-2">Select</th>
-                      <th class="px-4 py-2">Service(s)</th>
-                      <th class="px-4 py-2">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody class="bg-white divide-y divide-gray-100">
-                    <tr
-                      v-for="invoice in sortedInvoices"
-                      :key="invoice.id"
-                      class="hover:bg-gray-50 transition"
-                    >
-                      <td class="px-4 py-2">
-                        <input
-                          type="checkbox"
-                          :value="invoice"
-                          v-model="selectedInvoices"
-                          class="form-checkbox text-blue-600"
-                        />
-                      </td>
-                      <td class="px-4 py-2">
-                        {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
-                      </td>
-                      <td class="px-4 py-2 text-green-600 font-medium">
-                        ₱{{ calculateInvoiceAmount(invoice).toFixed(2) }}
-                      </td>
-                    </tr>
+             <div class="hidden sm:block overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200 text-sm text-left rounded-xl overflow-hidden shadow">
+                <thead class="bg-gray-100 text-gray-600">
+                  <tr>
+                    <th class="px-4 py-2">Select</th>
+                    <th class="px-4 py-2">Service(s)</th>
+                    <th class="px-4 py-2">Amount</th>
+                  </tr>
+                </thead>
 
-                    <tr v-if="sortedInvoices.length === 0">
-                      <td colspan="3" class="text-left text-gray-500 py-4">
-                        No unpaid invoices found.
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+                <tbody class="bg-white divide-y divide-gray-100">
+                  <tr
+                    v-for="invoice in sortedInvoices"
+                    :key="invoice.id"
+                    class="hover:bg-gray-50 transition"
+                  >
+                    <td class="px-4 py-2">
+                      <input
+                        type="checkbox"
+                        :value="invoice"
+                        v-model="selectedInvoices"
+                        class="form-checkbox text-blue-600"
+                      />
+                    </td>
+                    <td class="px-4 py-2">
+                      {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
+                    </td>
+                    <td class="px-4 py-2 text-green-600 font-medium">
+                      ₱{{ calculateInvoiceAmount(invoice).toFixed(2) }}
+                    </td>
+                  </tr>
+
+                  <!-- 🧾 Empty State -->
+                  <tr v-if="sortedInvoices.length === 0">
+                    <td colspan="3" class="py-20 text-center">
+                      <div class="flex flex-col items-center justify-center">
+                        <div class="text-6xl mb-3">📄</div>
+                        <p class="text-gray-700 text-lg font-semibold">No unpaid invoices found</p>
+                        <p class="text-gray-400 text-sm mt-1">
+                          You currently have no unpaid invoices at the moment
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
               <!-- Mobile Invoice Cards -->
               <div class="space-y-4 sm:hidden">

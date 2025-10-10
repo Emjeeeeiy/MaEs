@@ -24,8 +24,10 @@
 
       <!-- Page Content -->
       <div
-        :class="['flex flex-col flex-1 w-full text-sm overflow-y-auto px-4 py-6 space-y-6 animate-fade-in transition-all', 
-                 isMobileSidebarOpen ? 'blur-sm pointer-events-none select-none' : '']"
+        :class="[
+          'flex flex-col flex-1 w-full text-sm overflow-y-auto px-4 py-6 space-y-6 animate-fade-in transition-all',
+          isMobileSidebarOpen ? 'blur-sm pointer-events-none select-none' : ''
+        ]"
       >
         <!-- Filters -->
         <section
@@ -62,10 +64,14 @@
 
         <!-- No Results -->
         <div
-          v-else-if="filteredInvoices.length === 0"
-          class="text-center text-gray-500 text-sm py-16"
+          v-if="!loading && invoices.length === 0"
+          class="flex flex-col items-center justify-center flex-1 text-center py-32"
         >
-          No invoices found.
+          <div class="text-6xl mb-4">📄</div>
+          <p class="text-gray-700 text-lg font-semibold">No invoices found</p>
+          <p class="text-gray-400 text-sm mt-1">
+            Please check back later or create a new invoice
+          </p>
         </div>
 
         <!-- Desktop Table -->
