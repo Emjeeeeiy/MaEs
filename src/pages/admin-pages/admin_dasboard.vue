@@ -1,7 +1,11 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
+  <div
+    class="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden"
+  >
     <!-- ✅ Topbar -->
-    <div class="fixed top-0 left-0 right-0 z-30 shadow bg-white/90 backdrop-blur-md border-b border-gray-200">
+    <div
+      class="fixed top-0 left-0 right-0 z-30 shadow bg-white/90 backdrop-blur-md border-b border-gray-200"
+    >
       <AdminTopbar />
     </div>
 
@@ -18,27 +22,19 @@
         class="flex-1 p-6 lg:p-10 space-y-12 overflow-y-auto h-[calc(100vh-4rem)] custom-scrollbar"
       >
         <!-- Dashboard Summary Cards -->
-        <section
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fadeIn">
           <div
             v-for="(card, i) in dashboardCards"
             :key="i"
             class="bg-white/90 backdrop-blur-md border border-gray-200 rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
           >
             <div class="flex items-center gap-5">
-              <div
-                class="p-4 rounded-2xl bg-gradient-to-br from-green-100 to-green-200 text-green-700 shadow-inner"
-              >
+              <div class="p-4 rounded-2xl bg-gradient-to-br from-green-100 to-green-200 text-green-700 shadow-inner">
                 <component :is="card.icon" class="w-7 h-7" />
               </div>
               <div>
-                <p class="text-sm font-medium text-gray-500">
-                  {{ card.title }}
-                </p>
-                <p class="text-2xl font-bold text-gray-900 tracking-tight">
-                  {{ card.value }}
-                </p>
+                <p class="text-sm font-medium text-gray-500">{{ card.title }}</p>
+                <p class="text-2xl font-bold text-gray-900 tracking-tight">{{ card.value }}</p>
               </div>
             </div>
           </div>
@@ -55,43 +51,31 @@
         </div>
 
         <!-- Charts Section -->
-        <section class="space-y-12">
+        <section class="space-y-12 animate-fadeUp">
           <!-- Revenue Trend Chart -->
           <div
-            class="border border-gray-200 rounded-2xl p-6 bg-white/90 backdrop-blur-md shadow-md hover:shadow-xl transition-all duration-300"
+            class="border border-gray-200 rounded-2xl p-6 bg-white/90 backdrop-blur-md shadow-md hover:shadow-xl transition-all duration-300 chart-animate"
           >
-            <div
-              class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6"
-            >
-              <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                📈 Revenue Trend (Daily)
-              </h2>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">📈 Revenue Trend (Daily)</h2>
               <select
                 v-model="selectedWeek"
                 class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
               >
                 <option value="">All Weeks</option>
-                <option
-                  v-for="week in availableWeeks"
-                  :key="week.label"
-                  :value="week.label"
-                >
+                <option v-for="week in availableWeeks" :key="week.label" :value="week.label">
                   {{ week.label }}
                 </option>
               </select>
             </div>
-            <div class="h-72 sm:h-80">
+            <div class="h-72 sm:h-80 animate-chartEntry">
               <canvas ref="revenueChartRef" class="h-full w-full" />
             </div>
           </div>
 
           <!-- Service Trends -->
-          <div
-            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
-          >
-            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              📊 Service Trends
-            </h2>
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">📊 Service Trends</h2>
             <button
               @click="showServiceModal = true"
               class="px-5 py-2 rounded-xl text-sm bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md hover:shadow-lg active:scale-95 transition"
@@ -104,16 +88,11 @@
           <div
             v-for="(_, index) in serviceChartRefs"
             :key="index"
-            class="border border-gray-200 rounded-2xl p-6 bg-white/90 backdrop-blur-md shadow-md hover:shadow-xl transition-all duration-300"
+            class="border border-gray-200 rounded-2xl p-6 bg-white/90 backdrop-blur-md shadow-md hover:shadow-xl transition-all duration-300 chart-animate"
           >
-            <h3 class="text-base font-medium mb-4 text-gray-700 flex items-center gap-2">
-              📌 Batch {{ index + 1 }}
-            </h3>
-            <div class="h-72 sm:h-80">
-              <canvas
-                :ref="(el) => (serviceChartRefs[index] = el)"
-                class="h-full w-full"
-              />
+            <h3 class="text-base font-medium mb-4 text-gray-700 flex items-center gap-2">📌 Batch {{ index + 1 }}</h3>
+            <div class="h-72 sm:h-80 animate-chartEntry">
+              <canvas :ref="(el) => (serviceChartRefs[index] = el)" class="h-full w-full" />
             </div>
           </div>
         </section>
@@ -126,21 +105,15 @@
         v-if="showServiceModal"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
       >
-        <div
-          class="bg-white/95 w-full max-w-lg p-6 rounded-2xl border border-gray-200 shadow-2xl relative animate-fadeIn"
-        >
-          <h2 class="text-lg font-semibold mb-5 text-gray-800">
-            📋 Service Totals
-          </h2>
+        <div class="bg-white/95 w-full max-w-lg p-6 rounded-2xl border border-gray-200 shadow-2xl relative animate-fadeIn">
+          <h2 class="text-lg font-semibold mb-5 text-gray-800">📋 Service Totals</h2>
           <button
             @click="showServiceModal = false"
             class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-lg"
           >
             ✕
           </button>
-          <div
-            class="max-h-96 overflow-y-auto space-y-2 custom-scrollbar pr-1"
-          >
+          <div class="max-h-96 overflow-y-auto space-y-2 custom-scrollbar pr-1">
             <div
               v-for="(count, service) in sortedServiceTotals"
               :key="service"
@@ -161,57 +134,46 @@ import { ref, onMounted, nextTick, watch, computed } from 'vue'
 import { getFirestore, collection, getDocs } from 'firebase/firestore'
 import Chart from 'chart.js/auto'
 import * as XLSX from 'xlsx'
-
 import AdminSidebar from '@/components/admin_sidebar.vue'
 import AdminTopbar from '@/components/admintopbar.vue'
 import { ChartBarIcon, UsersIcon, CreditCardIcon, CurrencyDollarIcon } from '@heroicons/vue/24/solid'
 
 const db = getFirestore()
-
-/* Refs */
 const serviceChartRefs = ref([])
 const revenueChartRef = ref(null)
-
-/* Data */
 const dashboardCards = ref([])
 const serviceCounts = ref({})
 const revenueTrend = ref({})
-const selectedWeek = ref('') // ✅ default is All Weeks
+const selectedWeek = ref('')
 const availableWeeks = ref([])
+const showServiceModal = ref(false)
 
-/* Charts Instances */
 let serviceChartInstances = []
 let revenueChartInstance = null
 
-/* Modal State */
-const showServiceModal = ref(false)
-const openServiceModal = () => { showServiceModal.value = true }
+const sortedServiceTotals = computed(() =>
+  Object.fromEntries(Object.entries(serviceCounts.value).sort((a, b) => b[1] - a[1]))
+)
 
-const sortedServiceTotals = computed(() => {
-  return Object.fromEntries(
-    Object.entries(serviceCounts.value).sort((a, b) => b[1] - a[1])
-  )
-})
-
-/* Utils */
 const chunkServiceCounts = (obj, size = 64) => {
   const entries = Object.entries(obj)
   const chunks = []
-  for (let i = 0; i < entries.length; i += size) {
+  for (let i = 0; i < entries.length; i += size)
     chunks.push(Object.fromEntries(entries.slice(i, i + size)))
-  }
   return chunks
 }
 
 function getWeekRange(dateStr) {
   const d = new Date(dateStr)
   const day = d.getDay() || 7
-  const start = new Date(d); start.setDate(d.getDate() - day + 1)
-  const end = new Date(start); end.setDate(start.getDate() + 6)
+  const start = new Date(d)
+  start.setDate(d.getDate() - day + 1)
+  const end = new Date(start)
+  end.setDate(start.getDate() + 6)
   return {
     label: `${start.toISOString().split('T')[0]} to ${end.toISOString().split('T')[0]}`,
     from: start.toISOString().split('T')[0],
-    to: end.toISOString().split('T')[0]
+    to: end.toISOString().split('T')[0],
   }
 }
 
@@ -219,7 +181,6 @@ function prepareWeeks() {
   const dates = Object.keys(revenueTrend.value).sort()
   const seen = new Set()
   const weeks = []
-
   for (const dateStr of dates) {
     const { label } = getWeekRange(dateStr)
     if (!seen.has(label)) {
@@ -227,9 +188,8 @@ function prepareWeeks() {
       weeks.push({ label, ...getWeekRange(dateStr) })
     }
   }
-
   availableWeeks.value = weeks
-  selectedWeek.value = '' // ✅ force default to "All Weeks"
+  selectedWeek.value = ''
 }
 
 function getFilteredRevenueData() {
@@ -243,9 +203,11 @@ function getFilteredRevenueData() {
   return filtered
 }
 
-/* Fetch Dashboard Data */
 async function fetchDashboardData() {
-  let totalRevenue = 0, unpaidClaims = 0, totalPatients = 0, totalUnpaidAmount = 0
+  let totalRevenue = 0,
+    unpaidClaims = 0,
+    totalPatients = 0,
+    totalUnpaidAmount = 0
   serviceCounts.value = {}
   revenueTrend.value = {}
 
@@ -265,7 +227,7 @@ async function fetchDashboardData() {
         }
       }
 
-      if (['pending','not paid','unpaid','overdue'].includes(status)) unpaidClaims++
+      if (['pending', 'not paid', 'unpaid', 'overdue'].includes(status)) unpaidClaims++
       if (status === 'not paid') totalUnpaidAmount += amount
 
       for (const s of d.services || []) {
@@ -284,14 +246,13 @@ async function fetchDashboardData() {
       { title: 'Total Revenue', value: `₱${totalRevenue.toLocaleString()}`, icon: ChartBarIcon },
       { title: 'Unpaid Claims', value: unpaidClaims, icon: CreditCardIcon },
       { title: 'Total Patients', value: totalPatients, icon: UsersIcon },
-      { title: 'Total Unpaid Amount', value: `₱${totalUnpaidAmount.toLocaleString()}`, icon: CurrencyDollarIcon }
+      { title: 'Total Unpaid Amount', value: `₱${totalUnpaidAmount.toLocaleString()}`, icon: CurrencyDollarIcon },
     ]
   } catch (err) {
     console.error('Dashboard data error:', err)
   }
 }
 
-/* Draw Charts */
 function drawCharts() {
   serviceChartInstances.forEach((c) => c?.destroy())
   serviceChartInstances = []
@@ -308,8 +269,37 @@ function drawCharts() {
       const values = Object.values(chunk)
       const chart = new Chart(ctx, {
         type: 'line',
-        data: { labels, datasets: [{ data: values, label: 'Requests', borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.2)', borderWidth: 2, tension: 0.3, fill: true, pointRadius: 2 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.y} requests` } } }, scales: { x: { display: false }, y: { beginAtZero: true, ticks: { color: '#9ca3af' }, grid: { color: '#e5e7eb' } } } }
+        data: {
+          labels,
+          datasets: [
+            {
+              data: values,
+              label: 'Requests',
+              borderColor: '#22c55e',
+              backgroundColor: 'rgba(34,197,94,0.2)',
+              borderWidth: 2,
+              tension: 0.3,
+              fill: true,
+              pointRadius: 2,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: {
+            duration: 1200,
+            easing: 'easeOutQuart',
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.y} requests` } },
+          },
+          scales: {
+            x: { display: false },
+            y: { beginAtZero: true, ticks: { color: '#9ca3af' }, grid: { color: '#e5e7eb' } },
+          },
+        },
       })
       serviceChartInstances.push(chart)
     })
@@ -324,16 +314,49 @@ function drawCharts() {
     const values = labels.map((d) => filtered[d])
     revenueChartInstance = new Chart(ctx, {
       type: 'line',
-      data: { labels, datasets: [{ data: values, label: 'Revenue', borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.15)', borderWidth: 2, tension: 0.4, fill: true, pointRadius: 2 }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ₱${ctx.parsed.y.toLocaleString()}` } } }, scales: { x: { ticks: { color: '#9ca3af' }, grid: { color: '#e5e7eb' } }, y: { beginAtZero: true, ticks: { color: '#9ca3af' }, grid: { color: '#e5e7eb' } } } }
+      data: {
+        labels,
+        datasets: [
+          {
+            data: values,
+            label: 'Revenue',
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34,197,94,0.15)',
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 2,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 1300,
+          easing: 'easeInOutCubic',
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: (ctx) => ` ₱${ctx.parsed.y.toLocaleString()}` } },
+        },
+        scales: {
+          x: { ticks: { color: '#9ca3af' }, grid: { color: '#e5e7eb' } },
+          y: { beginAtZero: true, ticks: { color: '#9ca3af' }, grid: { color: '#e5e7eb' } },
+        },
+      },
     })
   })
 }
 
-/* Export Metrics */
 function exportToExcel() {
-  const metricsData = dashboardCards.value.map((c) => ({ Metric: c.title, Value: c.value }))
-  const revenueData = Object.entries(getFilteredRevenueData()).sort(([a],[b]) => a.localeCompare(b)).map(([date, amount]) => ({ Date: date, Revenue: `₱${amount.toLocaleString()}` }))
+  const metricsData = dashboardCards.value.map((c) => ({
+    Metric: c.title,
+    Value: c.value,
+  }))
+  const revenueData = Object.entries(getFilteredRevenueData())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, amount]) => ({ Date: date, Revenue: `₱${amount.toLocaleString()}` }))
   const metricsSheet = XLSX.utils.json_to_sheet(metricsData)
   const revenueSheet = XLSX.utils.json_to_sheet(revenueData)
   const workbook = XLSX.utils.book_new()
@@ -342,7 +365,6 @@ function exportToExcel() {
   XLSX.writeFile(workbook, 'MaEsPayTrack_Admin_Dashboard.xlsx')
 }
 
-/* Mount */
 onMounted(async () => {
   await fetchDashboardData()
   prepareWeeks()
@@ -352,3 +374,46 @@ onMounted(async () => {
 
 watch(selectedWeek, drawCharts)
 </script>
+
+<style scoped>
+.chart-animate {
+  animation: fadeUp 0.8s ease-in-out;
+}
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-fadeIn {
+  animation: fadeIn 1s ease;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fadeUp {
+  animation: fadeUp 0.9s ease-in-out;
+}
+.animate-chartEntry {
+  animation: scaleIn 1s ease-out;
+}
+@keyframes scaleIn {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+</style>

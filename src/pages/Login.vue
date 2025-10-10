@@ -1,29 +1,23 @@
 <template>
-  <div
-    class="min-h-screen flex items-center justify-center relative px-4 py-8"
-  >
-    <!-- Background Image -->
+  <div class="min-h-screen flex items-center justify-center relative px-4 py-8">
+    <!-- ✅ Background Image -->
     <div
       class="absolute inset-0 bg-cover bg-center"
       style="background-image: url('/MaEs_bg.png');"
     ></div>
 
-    <!-- Overlay para di masyadong matingkad yung bg -->
+    <!-- ✅ Overlay -->
     <div class="absolute inset-0 bg-black/40"></div>
 
-    <!-- Login Container -->
+    <!-- ✅ Glass Container -->
     <div
       class="relative w-full max-w-5xl bg-white/20 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
     >
-      <!-- Left Info Section -->
-      <div
-        class="md:w-1/2 bg-white text-green-700 p-10 flex flex-col justify-center"
-      >
+      <!-- ✅ Left Info Section -->
+      <div class="md:w-1/2 bg-white text-green-700 p-10 flex flex-col justify-center">
         <div class="mb-6">
           <img src="/MaEs_logo2.png" alt="Logo" class="h-14 w-14 mb-4" />
-          <h2 class="text-2xl font-bold">
-            Maria Estrella General Hospital, Inc.
-          </h2>
+          <h2 class="text-2xl font-bold">Maria Estrella General Hospital, Inc.</h2>
           <p class="mt-2 text-sm text-gray-600">
             A secure hospital management and billing system designed to improve
             patient care and streamline operations.
@@ -45,28 +39,73 @@
         </ul>
       </div>
 
-      <!-- Right Login Card (More Transparent) -->
-      <div class="md:w-1/2 p-8 bg-white/30 backdrop-blur-xl">
+      <!-- ✅ Right Login Section -->
+      <div class="md:w-1/2 p-8 bg-white/30 backdrop-blur-xl relative">
+        <!-- ✅ Popup (Top Right Corner) -->
+        <transition
+          enter-active-class="transition-all duration-500 ease-out"
+          enter-from-class="opacity-0 translate-x-10 -translate-y-10"
+          enter-to-class="opacity-100 translate-x-0 translate-y-0"
+          leave-active-class="transition-all duration-500 ease-in"
+          leave-from-class="opacity-100 translate-x-0"
+          leave-to-class="opacity-0 translate-x-10"
+        >
+          <div
+            v-if="showPopup"
+            class="absolute top-4 right-4 flex items-center gap-3 bg-white/90 backdrop-blur-md border border-green-200 shadow-lg rounded-xl px-4 py-2 z-50 animate-bounceIn"
+          >
+            <svg
+              v-if="!loginSuccess"
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-6 h-6 text-green-600 animate-spin-slow"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M4 12a8 8 0 018-8v2a6 6 0 100 12v2a8 8 0 01-8-8z"
+              />
+            </svg>
+
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-6 h-6 text-green-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+
+            <span class="text-green-700 font-medium text-sm">
+              {{ loginSuccess ? "Login Successful" : "Logging in..." }}
+            </span>
+          </div>
+        </transition>
+
         <!-- Title -->
         <h2 class="text-2xl font-bold text-center text-green-700 mb-6">
           Log in
         </h2>
 
-        <!-- Error -->
-        <p
-          v-if="errorMessage"
-          class="text-sm text-red-600 text-center mb-4"
-        >
+        <!-- Error Message -->
+        <p v-if="errorMessage" class="text-sm text-red-600 text-center mb-4">
           {{ errorMessage }}
         </p>
 
-        <!-- Email / Password form -->
+        <!-- Login Form -->
         <form @submit.prevent="loginUser" class="space-y-4">
           <div>
-            <label
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Email</label
-            >
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
               v-model="email"
               type="email"
@@ -76,10 +115,7 @@
           </div>
 
           <div>
-            <label
-              class="block text-sm font-medium text-gray-700 mb-1"
-              >Password</label
-            >
+            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <div class="relative">
               <input
                 v-model="password"
@@ -105,12 +141,12 @@
                     stroke-linejoin="round"
                     stroke-width="2"
                     d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 
-                       0-10-4.477-10-10 0-1.905.532-3.688 
-                       1.458-5.211m3.163-2.354A10.05 10.05 
-                       0 0112 3c5.523 0 10 4.477 10 
-                       10 0 1.905-.532 3.688-1.458 
-                       5.211m-3.163 2.354A9.965 9.965 
-                       0 0112 21a9.965 9.965 0 01-6.379-2.144"
+                    0-10-4.477-10-10 0-1.905.532-3.688 
+                    1.458-5.211m3.163-2.354A10.05 10.05 
+                    0 0112 3c5.523 0 10 4.477 10 
+                    10 0 1.905-.532 3.688-1.458 
+                    5.211m-3.163 2.354A9.965 9.965 
+                    0 0112 21a9.965 9.965 0 01-6.379-2.144"
                   />
                 </svg>
                 <svg
@@ -126,21 +162,20 @@
                     stroke-linejoin="round"
                     stroke-width="2"
                     d="M15 12a3 3 0 
-                       11-6 0 3 3 0 016 0zm4.243 
-                       4.243A10.05 10.05 0 0021 12c0-5.523-4.477-10-10-10a10.05 
-                       10.05 0 00-7.071 2.929M3 3l18 18"
+                    11-6 0 3 3 0 016 0zm4.243 
+                    4.243A10.05 10.05 0 0021 12c0-5.523-4.477-10-10-10a10.05 
+                    10.05 0 00-7.071 2.929M3 3l18 18"
                   />
                 </svg>
               </button>
             </div>
-            <!-- Forgot Password Link -->
+
             <div class="text-right mt-1">
               <router-link
                 to="/reset_password"
                 class="text-sm text-green-700 hover:underline"
+                >Forgot Password?</router-link
               >
-                Forgot Password?
-              </router-link>
             </div>
           </div>
 
@@ -174,7 +209,7 @@
           >
         </button>
 
-        <!-- Register link -->
+        <!-- Register Link -->
         <p class="mt-6 text-center text-sm text-gray-700">
           Don’t have an account?
           <router-link
@@ -184,7 +219,7 @@
           >
         </p>
 
-        <!-- Back to Landing Page -->
+        <!-- Back to Home -->
         <div class="mt-4 text-center">
           <router-link
             to="/"
@@ -199,76 +234,96 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 import {
   getAuth,
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
-} from 'firebase/auth'
-import { db } from '@/firebase'
-import { doc, getDoc } from 'firebase/firestore'
+} from "firebase/auth";
+import { db } from "@/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
-const email = ref('')
-const password = ref('')
-const errorMessage = ref('')
-const showPassword = ref(false)
+const email = ref("");
+const password = ref("");
+const errorMessage = ref("");
+const showPassword = ref(false);
+const showPopup = ref(false);
+const loginSuccess = ref(false);
 
-const auth = getAuth()
-const router = useRouter()
+const auth = getAuth();
+const router = useRouter();
 
 const toggleShowPassword = () => {
-  showPassword.value = !showPassword.value
-}
+  showPassword.value = !showPassword.value;
+};
 
 const loginUser = async () => {
-  errorMessage.value = ''
+  errorMessage.value = "";
+  showPopup.value = true;
+  loginSuccess.value = false;
+
   try {
-    const { user } = await signInWithEmailAndPassword(auth, email.value, password.value)
+    const { user } = await signInWithEmailAndPassword(auth, email.value, password.value);
 
     if (!user.emailVerified) {
-      errorMessage.value = 'Please verify your email.'
-      await signOut(auth)
-      return
+      errorMessage.value = "Please verify your email.";
+      await signOut(auth);
+      showPopup.value = false;
+      return;
     }
 
-    await routeByRole(user.uid)
+    await routeByRole(user.uid);
   } catch (err) {
-    errorMessage.value = 'Invalid email or password.'
+    errorMessage.value = "Invalid email or password.";
+    showPopup.value = false;
   }
-}
+};
 
 const signInWithGoogle = async () => {
-  errorMessage.value = ''
+  errorMessage.value = "";
+  showPopup.value = true;
+  loginSuccess.value = false;
+
   try {
-    const provider = new GoogleAuthProvider()
-    const { user } = await signInWithPopup(auth, provider)
-    await routeByRole(user.uid)
+    const provider = new GoogleAuthProvider();
+    const { user } = await signInWithPopup(auth, provider);
+    await routeByRole(user.uid);
   } catch (err) {
-    console.error(err)
-    errorMessage.value = 'Google sign-in failed.'
+    console.error(err);
+    errorMessage.value = "Google sign-in failed.";
+    showPopup.value = false;
   }
-}
+};
 
 const routeByRole = async (uid) => {
-  const userRef = doc(db, 'users', uid)
-  const snap = await getDoc(userRef)
+  const userRef = doc(db, "users", uid);
+  const snap = await getDoc(userRef);
   if (!snap.exists()) {
-    errorMessage.value = 'User data not found.'
-    return
+    errorMessage.value = "User data not found.";
+    showPopup.value = false;
+    return;
   }
 
-  const data = snap.data()
-  if (data.status === 'deactivated') {
-    errorMessage.value = 'Account deactivated.'
-    await signOut(auth)
-    return
+  const data = snap.data();
+  if (data.status === "deactivated") {
+    errorMessage.value = "Account deactivated.";
+    await signOut(auth);
+    showPopup.value = false;
+    return;
   }
 
-  router.push(data.role === 'admin' ? '/admin-dashboard' : '/dashboard')
-}
+  // ✅ Show success state
+  loginSuccess.value = true;
+
+  // ✅ Delay for smooth transition
+  setTimeout(() => {
+    showPopup.value = false;
+    router.push(data.role === "admin" ? "/admin-dashboard" : "/dashboard");
+  }, 1500);
+};
 </script>
 
 <style scoped>
@@ -279,5 +334,35 @@ a {
 button:hover,
 a:hover {
   transform: translateY(-2px);
+}
+
+/* ✅ Animation */
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.8) translateY(-10px);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05) translateY(5px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+.animate-bounceIn {
+  animation: bounceIn 0.6s ease-out;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 2s linear infinite;
 }
 </style>

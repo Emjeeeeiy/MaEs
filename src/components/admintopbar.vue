@@ -1,8 +1,12 @@
 <template>
-  <header class="bg-[#1a1a1a] border-b border-gray-700 px-6 py-4 flex justify-between items-center shadow">
+  <header
+    class="bg-[#1a1a1a] border-b border-gray-700 px-6 py-4 flex justify-between items-center shadow"
+  >
+    <!-- ✅ Page Title -->
     <h1 class="text-xl font-bold text-green-400">{{ pageTitle }}</h1>
 
     <div class="flex items-center gap-6">
+      <!-- ✅ Notifications -->
       <div class="relative" ref="notifRef">
         <button @click="toggleNotifDropdown" class="relative" title="Notifications">
           <BellIcon class="w-6 h-6 text-yellow-400 hover:rotate-12 transition duration-200" />
@@ -23,9 +27,9 @@
               v-if="notifications.length"
               class="flex justify-between items-center px-4 py-2 border-b border-gray-700 text-xs text-gray-400 bg-[#1e1e1e]"
             >
-              <span>Notifications (today)</span>
+              <span>Notifications (today)</span>
               <button @click="clearAllNotifications" class="hover:text-red-400 transition">
-                🗑️ Clear All
+                🗑️ Clear All
               </button>
             </div>
 
@@ -45,6 +49,22 @@
           </div>
         </transition>
       </div>
+
+      <!-- ✅ Logout Button -->
+      <button
+        @click="logout"
+        class="flex items-center gap-2 bg-[#2a2a2a] hover:bg-red-600 text-gray-200 hover:text-white px-4 py-2 rounded-md transition duration-200 border border-gray-700 hover:shadow-md"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v1"
+          />
+        </svg>
+        <span class="text-sm font-medium">Logout</span>
+      </button>
     </div>
   </header>
 </template>
@@ -54,7 +74,20 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { BellIcon } from '@heroicons/vue/24/solid'
 import { db } from '@/firebase'
+import { auth } from '@/firebase'
+import { signOut } from 'firebase/auth'
 import { collection, query, where, orderBy, onSnapshot, Timestamp } from 'firebase/firestore'
+
+// 🔒 Logout Function
+const router = useRouter()
+const logout = async () => {
+  try {
+    await signOut(auth)
+    router.push('/login')
+  } catch (err) {
+    console.error('Logout error:', err)
+  }
+}
 
 // LocalStorage for read tracking
 const READ_KEY = 'readNotifIds'
@@ -68,16 +101,13 @@ const tsEnd = Timestamp.fromDate(new Date(now.getFullYear(), now.getMonth(), now
 
 // State
 const route = useRoute()
-const router = useRouter()
 const notifDropdownOpen = ref(false)
 const notifications = ref([])
 const notifRef = ref(null)
-
-// Invoice cache to track changes
 const invoiceStatus = new Map()
 
 // UI actions
-const toggleNotifDropdown = () => notifDropdownOpen.value = !notifDropdownOpen.value
+const toggleNotifDropdown = () => (notifDropdownOpen.value = !notifDropdownOpen.value)
 const handleClickOutside = (e) => {
   if (notifRef.value && !notifRef.value.contains(e.target)) notifDropdownOpen.value = false
 }
@@ -88,17 +118,16 @@ const handleNotifClick = (notif, index) => {
   router.push(notif.link)
 }
 const clearAllNotifications = () => {
-  notifications.value.forEach(n => readIds.value.add(n.id))
+  notifications.value.forEach((n) => readIds.value.add(n.id))
   saveReadIds()
   notifications.value = []
 }
 const formatDate = (s) => (s ? new Date(s * 1000).toLocaleString() : '')
 
-// Merge new notifications (exclude duplicates)
 const updateNotifList = (incoming) => {
-  const fresh = incoming.filter(n => !readIds.value.has(n.id))
+  const fresh = incoming.filter((n) => !readIds.value.has(n.id))
   const merged = [
-    ...notifications.value.filter(o => !fresh.some(n => n.id === o.id)),
+    ...notifications.value.filter((o) => !fresh.some((n) => n.id === o.id)),
     ...fresh
   ]
   notifications.value = merged.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
@@ -115,9 +144,9 @@ onMounted(() => {
     where('createdAt', '<=', tsEnd),
     orderBy('createdAt', 'desc')
   )
-  const unsubInv = onSnapshot(invQ, snap => {
+  const unsubInv = onSnapshot(invQ, (snap) => {
     const list = []
-    snap.docChanges().forEach(change => {
+    snap.docChanges().forEach((change) => {
       const d = change.doc.data()
       const id = change.doc.id
       const prev = invoiceStatus.get(id)
@@ -156,8 +185,8 @@ onMounted(() => {
     where('createdAt', '<=', tsEnd),
     orderBy('createdAt', 'desc')
   )
-  const unsubUser = onSnapshot(userQ, snap => {
-    const items = snap.docs.map(doc => ({
+  const unsubUser = onSnapshot(userQ, (snap) => {
+    const items = snap.docs.map((doc) => ({
       id: `${doc.id}_user`,
       text: `New account: ${doc.data().email || 'Unknown'}`,
       createdAt: doc.data().createdAt,
@@ -173,8 +202,8 @@ onMounted(() => {
     where('createdAt', '<=', tsEnd),
     orderBy('createdAt', 'desc')
   )
-  const unsubAppt = onSnapshot(apptQ, snap => {
-    const items = snap.docs.map(doc => ({
+  const unsubAppt = onSnapshot(apptQ, (snap) => {
+    const items = snap.docs.map((doc) => ({
       id: `${doc.id}_appointment`,
       text: `New appointment – ${doc.data().department || 'Dept.'}`,
       createdAt: doc.data().createdAt,
@@ -183,7 +212,6 @@ onMounted(() => {
     updateNotifList(items)
   })
 
-  // Cleanup
   onBeforeUnmount(() => {
     document.removeEventListener('click', handleClickOutside)
     unsubInv()
@@ -192,26 +220,36 @@ onMounted(() => {
   })
 })
 
-// Dynamic Page Title
+// Page Title
 const pageTitle = computed(() => {
   switch (route.path) {
-    case '/admin-dashboard': return 'Admin Dashboard'
-    case '/admin-invoices': return 'Invoice Management'
-    case '/admin-management': return 'User Management'
-    case '/admin-services': return 'Service Management'
-    case '/admin-rfa': return 'Request for Assistance'
-    case '/admin-appointment': return 'Appointments'
-    case '/admin-result': return 'Results'
-    default: return 'Admin Panel'
+    case '/admin-dashboard':
+      return 'Admin Dashboard'
+    case '/admin-invoices':
+      return 'Invoice Management'
+    case '/admin-management':
+      return 'User Management'
+    case '/admin-services':
+      return 'Service Management'
+    case '/admin-rfa':
+      return 'Request for Assistance'
+    case '/admin-appointment':
+      return 'Appointments'
+    case '/admin-result':
+      return 'Results'
+    default:
+      return 'Admin Panel'
   }
 })
 </script>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.15s ease;
 }
-.fade-enter-from, .fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 </style>
