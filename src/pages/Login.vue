@@ -79,11 +79,7 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M5 13l4 4L19 7"
-              />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
 
             <span class="text-green-700 font-medium text-sm">
@@ -93,9 +89,7 @@
         </transition>
 
         <!-- Title -->
-        <h2 class="text-2xl font-bold text-center text-green-700 mb-6">
-          Log in
-        </h2>
+        <h2 class="text-2xl font-bold text-center text-green-700 mb-6">Log in</h2>
 
         <!-- Error Message -->
         <p v-if="errorMessage" class="text-sm text-red-600 text-center mb-4">
@@ -114,6 +108,7 @@
             />
           </div>
 
+          <!-- ✅ Password Input with Eye Icon -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <div class="relative">
@@ -126,29 +121,33 @@
               <button
                 type="button"
                 @click="toggleShowPassword"
-                class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+                class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-green-700 transition"
               >
+                <!-- 👁 Show Icon -->
                 <svg
-                  v-if="showPassword"
+                  v-if="!showPassword"
                   xmlns="http://www.w3.org/2000/svg"
                   class="h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
+                  stroke-width="2"
                 >
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 
-                    0-10-4.477-10-10 0-1.905.532-3.688 
-                    1.458-5.211m3.163-2.354A10.05 10.05 
-                    0 0112 3c5.523 0 10 4.477 10 
-                    10 0 1.905-.532 3.688-1.458 
-                    5.211m-3.163 2.354A9.965 9.965 
-                    0 0112 21a9.965 9.965 0 01-6.379-2.144"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 
+                    2.943 9.542 7-1.274 4.057-5.065 7-9.542 
+                    7-4.477 0-8.268-2.943-9.542-7z"
                   />
                 </svg>
+
+                <!-- 🙈 Hide Icon -->
                 <svg
                   v-else
                   xmlns="http://www.w3.org/2000/svg"
@@ -156,15 +155,19 @@
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
+                  stroke-width="2"
                 >
                   <path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15 12a3 3 0 
-                    11-6 0 3 3 0 016 0zm4.243 
-                    4.243A10.05 10.05 0 0021 12c0-5.523-4.477-10-10-10a10.05 
-                    10.05 0 00-7.071 2.929M3 3l18 18"
+                    d="M13.875 18.825A10.05 10.05 0 
+                    0112 19c-5.523 0-10-4.477-10-10 
+                    0-1.905.532-3.688 1.458-5.211m3.163-2.354A10.05 
+                    10.05 0 0112 3c5.523 0 10 4.477 10 
+                    10 0 1.905-.532 3.688-1.458 
+                    5.211m-3.163 2.354A9.965 9.965 
+                    0 0112 21a9.965 9.965 
+                    0 01-6.379-2.144M3 3l18 18"
                   />
                 </svg>
               </button>
@@ -204,9 +207,7 @@
             alt="Google"
             class="h-5 w-5"
           />
-          <span class="text-sm font-medium text-gray-700"
-            >Continue with Google</span
-          >
+          <span class="text-sm font-medium text-gray-700">Continue with Google</span>
         </button>
 
         <!-- Register Link -->
@@ -315,10 +316,8 @@ const routeByRole = async (uid) => {
     return;
   }
 
-  // ✅ Show success state
   loginSuccess.value = true;
 
-  // ✅ Delay for smooth transition
   setTimeout(() => {
     showPopup.value = false;
     router.push(data.role === "admin" ? "/admin-dashboard" : "/dashboard");

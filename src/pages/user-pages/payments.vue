@@ -32,57 +32,56 @@
                 Select Unpaid Invoices:
               </h3>
 
+              <!-- 🧾 Empty State (Visible on all screen sizes) -->
+              <div
+                v-if="sortedInvoices.length === 0"
+                class="flex flex-col items-center justify-center py-24 text-center text-gray-700"
+              >
+                <div class="text-6xl mb-3">📄</div>
+                <p class="text-lg font-semibold">No unpaid invoices found</p>
+                <p class="text-gray-400 text-sm mt-1">
+                  You currently have no unpaid invoices at the moment
+                </p>
+              </div>
+
               <!-- Invoice Table (Desktop) -->
-             <div class="hidden sm:block overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-200 text-sm text-left rounded-xl overflow-hidden shadow">
-                <thead class="bg-gray-100 text-gray-600">
-                  <tr>
-                    <th class="px-4 py-2">Select</th>
-                    <th class="px-4 py-2">Service(s)</th>
-                    <th class="px-4 py-2">Amount</th>
-                  </tr>
-                </thead>
+              <div v-else class="hidden sm:block overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 text-sm text-left rounded-xl overflow-hidden shadow">
+                  <thead class="bg-gray-100 text-gray-600">
+                    <tr>
+                      <th class="px-4 py-2">Select</th>
+                      <th class="px-4 py-2">Service(s)</th>
+                      <th class="px-4 py-2">Amount</th>
+                    </tr>
+                  </thead>
 
-                <tbody class="bg-white divide-y divide-gray-100">
-                  <tr
-                    v-for="invoice in sortedInvoices"
-                    :key="invoice.id"
-                    class="hover:bg-gray-50 transition"
-                  >
-                    <td class="px-4 py-2">
-                      <input
-                        type="checkbox"
-                        :value="invoice"
-                        v-model="selectedInvoices"
-                        class="form-checkbox text-blue-600"
-                      />
-                    </td>
-                    <td class="px-4 py-2">
-                      {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
-                    </td>
-                    <td class="px-4 py-2 text-green-600 font-medium">
-                      ₱{{ calculateInvoiceAmount(invoice).toFixed(2) }}
-                    </td>
-                  </tr>
-
-                  <!-- 🧾 Empty State -->
-                  <tr v-if="sortedInvoices.length === 0">
-                    <td colspan="3" class="py-20 text-center">
-                      <div class="flex flex-col items-center justify-center">
-                        <div class="text-6xl mb-3">📄</div>
-                        <p class="text-gray-700 text-lg font-semibold">No unpaid invoices found</p>
-                        <p class="text-gray-400 text-sm mt-1">
-                          You currently have no unpaid invoices at the moment
-                        </p>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+                  <tbody class="bg-white divide-y divide-gray-100">
+                    <tr
+                      v-for="invoice in sortedInvoices"
+                      :key="invoice.id"
+                      class="hover:bg-gray-50 transition"
+                    >
+                      <td class="px-4 py-2">
+                        <input
+                          type="checkbox"
+                          :value="invoice"
+                          v-model="selectedInvoices"
+                          class="form-checkbox text-blue-600"
+                        />
+                      </td>
+                      <td class="px-4 py-2">
+                        {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
+                      </td>
+                      <td class="px-4 py-2 text-green-600 font-medium">
+                        ₱{{ calculateInvoiceAmount(invoice).toFixed(2) }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
 
               <!-- Mobile Invoice Cards -->
-              <div class="space-y-4 sm:hidden">
+              <div v-else class="space-y-4 sm:hidden">
                 <div
                   v-for="invoice in sortedInvoices"
                   :key="invoice.id"
@@ -114,7 +113,7 @@
               </div>
 
               <!-- Centered Submit Button -->
-              <div class="flex justify-center pt-4">
+              <div v-if="sortedInvoices.length > 0" class="flex justify-center pt-4">
                 <button
                   @click="handleSubmitClick"
                   class="bg-blue-600 text-white text-sm font-semibold px-6 py-3 rounded-lg shadow hover:bg-blue-700 transition"
@@ -206,8 +205,29 @@
       </div>
     </transition>
 
-    <!-- Reminder, Success, and Error Modals (unchanged) -->
-    <!-- same code as before -->
+    <!-- Error Modal -->
+    <transition name="fade">
+      <div
+        v-if="showErrorModal"
+        class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
+      >
+        <div
+          class="bg-white w-[320px] p-5 rounded-lg shadow-xl space-y-4 animate-fade-in text-left"
+        >
+          <h3 class="text-lg font-bold text-red-600">Error</h3>
+          <p class="text-sm text-gray-700">{{ errorMessage }}</p>
+
+          <div class="flex justify-end">
+            <button
+              @click="showErrorModal = false"
+              class="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md text-sm transition-colors"
+            >
+              Okay
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 

@@ -114,7 +114,7 @@
                     </td>
                     <td class="px-4 py-3 text-left">
                       <span
-                        :class="[
+                        :class="[ 
                           'inline-block px-3 py-1 rounded-full text-xs font-semibold',
                           invoice.status?.toLowerCase() === 'paid'
                             ? 'bg-green-100 text-green-700'
@@ -127,19 +127,23 @@
                       </span>
                     </td>
                   </tr>
+
+                  <!-- 🧾 Empty State for Desktop -->
                   <tr v-if="invoices.length === 0">
                     <td colspan="2" class="text-center py-16">
                       <div class="flex flex-col items-center justify-center">
                         <div class="text-5xl mb-3">📄</div>
                         <p class="text-gray-600 text-lg font-medium">No invoices found</p>
-                        <p class="text-gray-400 text-sm mt-1">Please check back later or create a new invoice</p>
+                        <p class="text-gray-400 text-sm mt-1">
+                          Please check back later or create a new invoice
+                        </p>
                       </div>
                     </td>
                   </tr>
                 </tbody>
               </table>
 
-              <!-- Mobile Cards -->
+              <!-- 📱 Mobile Cards -->
               <div class="space-y-4 sm:hidden">
                 <div
                   v-for="invoice in invoices"
@@ -156,7 +160,7 @@
                   <div>
                     <p class="text-xs text-gray-500">Status</p>
                     <span
-                      :class="[
+                      :class="[ 
                         'inline-block px-3 py-1 rounded-full text-xs font-semibold',
                         invoice.status?.toLowerCase() === 'paid'
                           ? 'bg-green-100 text-green-700'
@@ -170,8 +174,13 @@
                   </div>
                 </div>
 
-                <div v-if="invoices.length === 0" class="text-center text-gray-500 py-4">
-                  No invoices found.
+                <!-- 🧾 Empty State for Mobile -->
+                <div v-if="invoices.length === 0" class="py-16 flex flex-col items-center justify-center">
+                  <div class="text-5xl mb-3">📄</div>
+                  <p class="text-gray-600 text-lg font-medium">No invoices found</p>
+                  <p class="text-gray-400 text-sm mt-1">
+                    Please check back later or create a new invoice
+                  </p>
                 </div>
               </div>
             </div>

@@ -41,27 +41,45 @@
       </div>
 
       <!-- Password -->
-      <div class="mb-4">
+      <div class="mb-4 relative">
         <label class="block text-sm font-medium text-gray-800 mb-1">Password</label>
         <input
-          type="password"
+          :type="showPassword ? 'text' : 'password'"
           v-model="password"
           required
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
           placeholder="Create a password"
         />
+        <!-- 👁 Toggle Icon -->
+        <button
+          type="button"
+          @click="showPassword = !showPassword"
+          class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 mt-6"
+        >
+          <i v-if="!showPassword" class="fas fa-eye"></i>
+          <i v-else class="fas fa-eye-slash"></i>
+        </button>
       </div>
 
       <!-- Confirm Password -->
-      <div class="mb-5">
+      <div class="mb-5 relative">
         <label class="block text-sm font-medium text-gray-800 mb-1">Confirm Password</label>
         <input
-          type="password"
+          :type="showConfirmPassword ? 'text' : 'password'"
           v-model="confirmPassword"
           required
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 pr-10"
           placeholder="Confirm your password"
         />
+        <!-- 👁 Toggle Icon -->
+        <button
+          type="button"
+          @click="showConfirmPassword = !showConfirmPassword"
+          class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 mt-6"
+        >
+          <i v-if="!showConfirmPassword" class="fas fa-eye"></i>
+          <i v-else class="fas fa-eye-slash"></i>
+        </button>
       </div>
 
       <!-- Register Button -->
@@ -130,6 +148,8 @@ const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
 const errorMessage = ref("");
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 const router = useRouter();
 const auth = getAuth();
 
@@ -202,3 +222,9 @@ a:hover {
   transform: translateY(-2px);
 }
 </style>
+
+<!-- Include Font Awesome for eye icons -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+>

@@ -30,9 +30,7 @@
         ]"
       >
         <!-- Filters -->
-        <section
-          class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-4 items-end"
-        >
+        <section class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-4 items-end">
           <div class="flex flex-col">
             <label class="text-xs text-gray-600 mb-1">Status</label>
             <select
@@ -64,7 +62,7 @@
 
         <!-- No Results -->
         <div
-          v-if="!loading && invoices.length === 0"
+          v-else-if="filteredInvoices.length === 0"
           class="flex flex-col items-center justify-center flex-1 text-center py-32"
         >
           <div class="text-6xl mb-4">📄</div>
@@ -131,7 +129,7 @@
         </section>
 
         <!-- Mobile Cards -->
-        <section class="sm:hidden space-y-4">
+        <section v-if="filteredInvoices.length > 0" class="sm:hidden space-y-4">
           <div
             v-for="invoice in filteredInvoices"
             :key="invoice.id"
