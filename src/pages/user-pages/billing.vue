@@ -45,7 +45,7 @@
           >
             <!-- Search & Filters -->
             <div
-              class="bg-white border border-gray-200 rounded-2xl shadow p-5 sm:p-6 flex flex-col flex-1 min-h-0"
+              class="bg-white border border-gray-200 rounded-2xl shadow p-5 sm:p-6 flex flex-col flex-1"
             >
               <h2
                 class="text-lg font-semibold text-blue-600 text-center sm:text-left"
@@ -93,10 +93,8 @@
                 </div>
               </div>
 
-              <!-- Scrollable Service List -->
-              <div
-                class="flex-1 mt-5 overflow-y-auto pr-1 sm:pr-2 space-y-4 max-h-[60vh] sm:max-h-[70vh]"
-              >
+              <!-- Service List (NO SCROLL) -->
+              <div class="flex-1 mt-5 space-y-4">
                 <div
                   v-for="category in orderedCategories"
                   :key="category"
@@ -104,7 +102,7 @@
                 >
                   <div v-if="groupedFilteredServices[category]">
                     <h3
-                      class="flex items-center gap-2 text-sm font-semibold text-green-600 mt-2 mb-1 sticky top-0 bg-white py-2 border-b"
+                      class="flex items-center gap-2 text-sm font-semibold text-green-600 mt-2 mb-1 py-2 border-b"
                     >
                       <span class="w-2 h-2 bg-green-500 rounded-full"></span>
                       {{ category }}
@@ -149,11 +147,11 @@
                 </p>
               </div>
 
-              <!-- Generate Button -->
-              <div class="pt-4 text-right">
+              <!-- Generate Button (Centered) -->
+              <div class="pt-6 flex justify-center">
                 <button
                   @click="generateInvoice"
-                  class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-6 py-3 rounded-lg shadow-md transition"
+                  class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-8 py-3 rounded-lg shadow-md transition text-center"
                 >
                   Generate Invoice
                 </button>
@@ -343,7 +341,7 @@ export default {
   }
 }
 
-/* Mobile-specific improvements */
+/* Mobile optimization */
 @media (max-width: 640px) {
   .grid-cols-3 {
     grid-template-columns: 1fr;
@@ -355,6 +353,9 @@ export default {
   select,
   button {
     font-size: 15px;
+  }
+  button {
+    width: 100%;
   }
 }
 </style>
