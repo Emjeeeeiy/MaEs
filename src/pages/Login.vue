@@ -190,7 +190,7 @@
         <!-- Divider -->
         <div class="my-6 flex items-center justify-between">
           <hr class="w-full border-gray-300" />
-          <span class="text-sm text-gray-400 px-2">or</span>
+          <span class="text-sm text-black px-2">or</span>
           <hr class="w-full border-gray-300" />
         </div>
 

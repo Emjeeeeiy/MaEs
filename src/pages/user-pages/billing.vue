@@ -1,5 +1,7 @@
 <template>
-  <div class="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 overflow-hidden">
+  <div
+    class="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 overflow-hidden"
+  >
     <!-- Fixed Topbar -->
     <div class="flex-shrink-0 z-10 border-b border-gray-200 bg-white shadow-sm">
       <Topbar @toggle-sidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
@@ -15,12 +17,16 @@
     <!-- Desktop Sidebar + Main Content -->
     <div class="flex flex-1 min-h-0 overflow-hidden">
       <!-- Sidebar (desktop) -->
-      <aside class="w-64 flex-shrink-0 hidden sm:block border-r bg-white shadow-sm">
+      <aside
+        class="w-64 flex-shrink-0 hidden sm:block border-r bg-white shadow-sm"
+      >
         <Sidebar :is-mobile-sidebar-open="true" />
       </aside>
 
       <!-- Main -->
-      <main class="flex-1 p-6 sm:p-10 space-y-8 overflow-hidden">
+      <main
+        class="flex-1 p-4 sm:p-8 space-y-6 overflow-y-auto h-full scroll-smooth"
+      >
         <transition name="fade" mode="out-in">
           <!-- Loading State -->
           <div
@@ -32,35 +38,55 @@
           </div>
 
           <!-- Main Content -->
-          <div v-else key="content" class="space-y-8 animate-fade-in h-full flex flex-col">
+          <div
+            v-else
+            key="content"
+            class="space-y-6 animate-fade-in h-full flex flex-col"
+          >
             <!-- Search & Filters -->
-            <div class="bg-white border border-gray-200 rounded-2xl shadow p-6 flex flex-col flex-1 min-h-0">
-              <h2 class="text-lg font-semibold text-blue-600">Generate Invoice</h2>
+            <div
+              class="bg-white border border-gray-200 rounded-2xl shadow p-5 sm:p-6 flex flex-col flex-1 min-h-0"
+            >
+              <h2
+                class="text-lg font-semibold text-blue-600 text-center sm:text-left"
+              >
+                Generate Invoice
+              </h2>
 
-              <div class="flex flex-col sm:flex-row sm:items-end gap-4 mt-4">
+              <div
+                class="flex flex-col sm:flex-row sm:items-end gap-4 mt-4 w-full"
+              >
                 <!-- Search -->
-                <div class="flex-1">
-                  <label class="block text-sm font-medium text-gray-700 mb-1 text-left">
+                <div class="w-full sm:flex-1">
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1 text-left"
+                  >
                     Search Service or Category:
                   </label>
                   <input
                     v-model="searchQuery"
                     type="text"
                     placeholder="Search services..."
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm"
                   />
                 </div>
                 <!-- Category Filter -->
-                <div class="sm:w-60">
-                  <label class="block text-sm font-medium text-gray-700 mb-1 text-left">
+                <div class="w-full sm:w-60">
+                  <label
+                    class="block text-sm font-medium text-gray-700 mb-1 text-left"
+                  >
                     Filter by Category:
                   </label>
                   <select
                     v-model="selectedCategory"
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">All Categories</option>
-                    <option v-for="cat in availableCategories" :key="cat" :value="cat">
+                    <option
+                      v-for="cat in availableCategories"
+                      :key="cat"
+                      :value="cat"
+                    >
                       {{ cat }}
                     </option>
                   </select>
@@ -68,16 +94,24 @@
               </div>
 
               <!-- Scrollable Service List -->
-              <div class="flex-1 min-h-0 mt-4 overflow-y-auto pr-2">
-                <div v-for="category in orderedCategories" :key="category">
+              <div
+                class="flex-1 mt-5 overflow-y-auto pr-1 sm:pr-2 space-y-4 max-h-[60vh] sm:max-h-[70vh]"
+              >
+                <div
+                  v-for="category in orderedCategories"
+                  :key="category"
+                  class="space-y-2"
+                >
                   <div v-if="groupedFilteredServices[category]">
                     <h3
-                      class="flex items-center gap-2 text-sm font-semibold text-green-600 mt-6 mb-2 first:mt-0"
+                      class="flex items-center gap-2 text-sm font-semibold text-green-600 mt-2 mb-1 sticky top-0 bg-white py-2 border-b"
                     >
                       <span class="w-2 h-2 bg-green-500 rounded-full"></span>
                       {{ category }}
                     </h3>
-                    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+                    <div
+                      class="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+                    >
                       <label
                         v-for="service in groupedFilteredServices[category]"
                         :key="service.id"
@@ -90,11 +124,15 @@
                             v-model="selectedServices"
                             class="form-checkbox text-blue-600 h-4 w-4"
                           />
-                          <span class="text-sm text-gray-800 text-left">
+                          <span
+                            class="text-sm text-gray-800 text-left leading-tight"
+                          >
                             {{ service.serviceName }}
                           </span>
                         </div>
-                        <span class="text-sm font-medium text-gray-700 whitespace-nowrap">
+                        <span
+                          class="text-sm font-semibold text-gray-700 whitespace-nowrap"
+                        >
                           ₱{{ service.amount }}
                         </span>
                       </label>
@@ -115,7 +153,7 @@
               <div class="pt-4 text-right">
                 <button
                   @click="generateInvoice"
-                  class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg shadow-md transition"
+                  class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-6 py-3 rounded-lg shadow-md transition"
                 >
                   Generate Invoice
                 </button>
@@ -132,7 +170,7 @@
       class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/30 px-4"
     >
       <div
-        class="bg-white p-6 rounded-xl shadow-lg max-w-sm w-full text-center space-y-4 animate-fade-in"
+        class="bg-white p-6 sm:p-8 rounded-xl shadow-lg max-w-sm w-full text-center space-y-4 animate-fade-in"
       >
         <h2 class="text-xl font-semibold text-green-600 text-left">
           Invoice Generated
@@ -278,3 +316,45 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 640px) {
+  .grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+  main {
+    padding-bottom: 6rem;
+  }
+  input,
+  select,
+  button {
+    font-size: 15px;
+  }
+}
+</style>

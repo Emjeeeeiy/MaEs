@@ -9,6 +9,35 @@
       <AdminTopbar />
     </div>
 
+    <!-- ✅ Welcome Popup (Top Right) -->
+    <transition name="fade-slide">
+      <div
+        v-if="showWelcomePopup"
+        class="fixed top-5 right-5 z-50 bg-white/90 backdrop-blur-md border border-green-200 rounded-2xl shadow-lg px-5 py-4 flex items-center gap-3 animate-popupEntry"
+      >
+        <div class="p-2 bg-green-100 text-green-600 rounded-full shadow-inner">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-6 h-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 12c2.28 0 4-1.72 4-4s-1.72-4-4-4-4 1.72-4 4 1.72 4 4 4zM4 20v-1c0-2.28 3.58-4 8-4s8 1.72 8 4v1"
+            />
+          </svg>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500 font-medium">👋 Welcome back,</p>
+          <p class="text-base font-semibold text-green-700 tracking-tight">Admin!</p>
+        </div>
+      </div>
+    </transition>
+
     <div class="flex pt-16">
       <!-- ✅ Sidebar -->
       <aside
@@ -57,7 +86,9 @@
             class="border border-gray-200 rounded-2xl p-6 bg-white/90 backdrop-blur-md shadow-md hover:shadow-xl transition-all duration-300 chart-animate"
           >
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">📈 Revenue Trend (Daily)</h2>
+              <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                📈 Revenue Trend (Daily)
+              </h2>
               <select
                 v-model="selectedWeek"
                 class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
@@ -75,7 +106,9 @@
 
           <!-- Service Trends -->
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">📊 Service Trends</h2>
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+              📊 Service Trends
+            </h2>
             <button
               @click="showServiceModal = true"
               class="px-5 py-2 rounded-xl text-sm bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md hover:shadow-lg active:scale-95 transition"
@@ -90,7 +123,9 @@
             :key="index"
             class="border border-gray-200 rounded-2xl p-6 bg-white/90 backdrop-blur-md shadow-md hover:shadow-xl transition-all duration-300 chart-animate"
           >
-            <h3 class="text-base font-medium mb-4 text-gray-700 flex items-center gap-2">📌 Batch {{ index + 1 }}</h3>
+            <h3 class="text-base font-medium mb-4 text-gray-700 flex items-center gap-2">
+              📌 Batch {{ index + 1 }}
+            </h3>
             <div class="h-72 sm:h-80 animate-chartEntry">
               <canvas :ref="(el) => (serviceChartRefs[index] = el)" class="h-full w-full" />
             </div>
@@ -105,7 +140,9 @@
         v-if="showServiceModal"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
       >
-        <div class="bg-white/95 w-full max-w-lg p-6 rounded-2xl border border-gray-200 shadow-2xl relative animate-fadeIn">
+        <div
+          class="bg-white/95 w-full max-w-lg p-6 rounded-2xl border border-gray-200 shadow-2xl relative animate-fadeIn"
+        >
           <h2 class="text-lg font-semibold mb-5 text-gray-800">📋 Service Totals</h2>
           <button
             @click="showServiceModal = false"
@@ -147,6 +184,7 @@ const revenueTrend = ref({})
 const selectedWeek = ref('')
 const availableWeeks = ref([])
 const showServiceModal = ref(false)
+const showWelcomePopup = ref(false)
 
 let serviceChartInstances = []
 let revenueChartInstance = null
@@ -366,6 +404,10 @@ function exportToExcel() {
 }
 
 onMounted(async () => {
+  showWelcomePopup.value = true
+  setTimeout(() => {
+    showWelcomePopup.value = false
+  }, 4000)
   await fetchDashboardData()
   prepareWeeks()
   await nextTick()
@@ -414,6 +456,30 @@ watch(selectedWeek, drawCharts)
   100% {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+/* ✅ Popup animation */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.5s ease;
+}
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.97);
+}
+.animate-popupEntry {
+  animation: popupFadeIn 0.7s ease-in-out;
+}
+@keyframes popupFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-15px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 </style>

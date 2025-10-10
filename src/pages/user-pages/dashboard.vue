@@ -1,5 +1,19 @@
 <template>
-  <div class="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 overflow-hidden">
+  <div class="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 overflow-hidden relative">
+    <!-- 🔔 Popup Notification -->
+    <transition name="slide-fade">
+      <div
+        v-if="showWelcomePopup"
+        class="fixed top-6 right-6 bg-white border border-green-200 shadow-lg rounded-2xl px-5 py-4 flex items-center gap-3 z-50 animate-fadeIn"
+      >
+        <CheckCircle class="w-6 h-6 text-green-500" />
+        <div>
+          <p class="text-sm font-medium text-gray-800">Welcome back!</p>
+          <p class="text-xs text-gray-500">You are now logged in 🎉</p>
+        </div>
+      </div>
+    </transition>
+
     <!-- Topbar -->
     <div class="flex-shrink-0 border-b border-gray-200 bg-white shadow-sm">
       <Topbar @toggleSidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
@@ -171,7 +185,7 @@ import { useRouter } from "vue-router";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "@/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { FileText, AlertTriangle, Clock, Wallet } from "lucide-vue-next";
+import { FileText, AlertTriangle, Clock, Wallet, CheckCircle } from "lucide-vue-next";
 
 const invoices = ref([]);
 const paidClaims = ref(0);
@@ -180,6 +194,7 @@ const overdueCount = ref(0);
 const unpaidTotalAmount = ref(0);
 const loadingInvoices = ref(true);
 const isMobileSidebarOpen = ref(false);
+const showWelcomePopup = ref(false);
 
 const router = useRouter();
 const auth = getAuth();
@@ -242,6 +257,10 @@ const goToInvoices = () => {
 onAuthStateChanged(auth, (user) => {
   if (user?.email) {
     fetchInvoicesByEmail(user.email);
+    showWelcomePopup.value = true;
+    setTimeout(() => {
+      showWelcomePopup.value = false;
+    }, 3000); // auto hide after 3 seconds
   } else {
     invoices.value = [];
     paidClaims.value = 0;
@@ -252,4 +271,17 @@ onAuthStateChanged(auth, (user) => {
 });
 </script>
 
-
+<style scoped>
+/* Animation for popup */
+.slide-fade-enter-active {
+  transition: all 0.4s ease;
+}
+.slide-fade-leave-active {
+  transition: all 0.4s ease;
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+</style>
