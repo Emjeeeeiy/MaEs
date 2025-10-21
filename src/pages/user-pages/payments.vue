@@ -172,7 +172,7 @@
             <p><strong>Step 3:</strong> Upload your GCash receipt & enter the reference number.</p>
           </div>
 
-          <img src="/gcash-qr.jpg" alt="GCash QR" class="w-40 mx-auto rounded border shadow" />
+          <img src="/gcash-qr2.jpeg" alt="GCash QR" class="w-40 mx-auto rounded border shadow" />
 
           <div class="text-sm mt-4 space-y-3">
             <label class="block">
