@@ -139,7 +139,7 @@
             <p><strong>Step 2:</strong> Pay the total amount for your selected invoice(s).</p>
             <p><strong>Step 3:</strong> Upload your GCash receipt & enter reference number.</p>
           </div>
-          <img src="/gcash-qr.jpg" alt="GCash QR" class="w-40 mx-auto rounded border shadow" />
+          <img src="/gcash-qr2.jpeg" alt="GCash QR" class="w-40 mx-auto rounded border shadow" />
           <div class="text-sm mt-4 space-y-3">
             <label class="block text-left">
               <span class="font-semibold">GCash Reference Number</span>
