@@ -78,38 +78,32 @@
       </div>
     </aside>
 
-    <!-- ✅ Bottom Navigation (Mobile) -->
+    <!-- ✅ Simplified Bottom Navigation (Mobile) -->
     <nav
       class="sm:hidden fixed bottom-0 left-0 right-0 bg-gray-100 border-t border-gray-300 flex justify-around items-center h-16 z-50"
     >
       <router-link to="/dashboard" :class="mobileLinkClass('/dashboard')">
-        <HomeIcon class="w-6 h-6" />
-        <span class="text-xs">Dashboard</span>
+        <HomeIcon class="w-7 h-7" />
       </router-link>
 
       <router-link to="/billing" :class="mobileLinkClass('/billing')">
-        <ClipboardDocumentCheckIcon class="w-6 h-6" />
-        <span class="text-xs">Billing</span>
+        <ClipboardDocumentCheckIcon class="w-7 h-7" />
       </router-link>
 
       <router-link to="/payments" :class="mobileLinkClass('/payments')">
-        <CreditCardIcon class="w-6 h-6" />
-        <span class="text-xs">Payments</span>
+        <CreditCardIcon class="w-7 h-7" />
       </router-link>
 
       <router-link to="/invoices" :class="mobileLinkClass('/invoices')">
-        <DocumentTextIcon class="w-6 h-6" />
-        <span class="text-xs">Invoices</span>
+        <DocumentTextIcon class="w-7 h-7" />
       </router-link>
 
       <router-link to="/appointment" :class="mobileLinkClass('/appointment')">
-        <CalendarIcon class="w-6 h-6" />
-        <span class="text-xs">Appointment</span>
+        <CalendarIcon class="w-7 h-7" />
       </router-link>
 
       <router-link to="/result" :class="mobileLinkClass('/result')">
-        <ChartBarIcon class="w-6 h-6" />
-        <span class="text-xs">Result</span>
+        <ChartBarIcon class="w-7 h-7" />
       </router-link>
 
       <router-link to="/profile" :class="mobileLinkClass('/profile')">
@@ -117,15 +111,14 @@
           v-if="profileImageUrl"
           :src="profileImageUrl"
           alt="Profile"
-          class="w-6 h-6 rounded-full object-cover"
+          class="w-7 h-7 rounded-full object-cover transition-transform duration-300"
         />
         <div
           v-else
-          class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-semibold"
+          class="w-7 h-7 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-semibold transition-transform duration-300"
         >
           {{ username.charAt(0).toUpperCase() }}
         </div>
-        <span class="text-xs">Profile</span>
       </router-link>
     </nav>
   </div>
@@ -161,10 +154,13 @@ function linkClass(path) {
   ]
 }
 
+// ✅ Simplified mobile version — icons only, scale up if active
 function mobileLinkClass(path) {
   return [
-    'flex flex-col items-center justify-center text-gray-600 hover:text-green-600 transition',
-    route.path === path ? 'text-green-600 font-semibold' : ''
+    'flex flex-col items-center justify-center text-gray-600 transition-transform duration-300',
+    route.path === path
+      ? 'text-green-600 transform scale-125'
+      : 'hover:text-green-600'
   ]
 }
 
