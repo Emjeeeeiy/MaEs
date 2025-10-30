@@ -42,16 +42,18 @@ const setTawkPositionRight = () => {
     if (iframe) {
       const isMobile = window.innerWidth <= 768;
 
-      // ✅ Desktop & Mobile position (bottom-right)
+      // ✅ Desktop & Mobile position (flush right)
       iframe.style.position = "fixed";
-      iframe.style.bottom = isMobile ? "50px" : "20px"; // ⬆️ itaas sa mobile para di matakpan
-      iframe.style.right = "20px"; // ➡️ lipat sa kanan
+      iframe.style.bottom = isMobile ? "55px" : "20px"; // ⬆️ taas ng konti sa mobile
+      iframe.style.right = "0"; // ⬅️ sagad sa right edge
       iframe.style.left = "auto";
+      iframe.style.marginRight = "0"; // siguraduhing walang spacing
       iframe.style.transition = "all 0.3s ease";
-      iframe.style.zIndex = "999999"; // siguradong nasa ibabaw
-      iframe.style.transform = "scale(0.85)"; // 🔹 adjust 0.5–1.0 depende sa gusto mong laki
+      iframe.style.zIndex = "999999"; // nasa ibabaw ng lahat
+      iframe.style.transformOrigin = "bottom right"; // para scale mag-adjust mula sa corner
+      iframe.style.transform = "scale(0.85)"; // 🔹 adjust size (0.5–1.0)
 
-      console.log("✅ Tawk widget moved to bottom-right successfully");
+      console.log("✅ Tawk widget moved to fully right side successfully");
     } else {
       // ⏳ retry kung di pa loaded ang iframe
       setTimeout(moveTawkWidget, 500);
@@ -63,6 +65,12 @@ const setTawkPositionRight = () => {
   // 🔁 Reposition on window resize
   window.addEventListener("resize", moveTawkWidget);
 };
+
+// 🔥 Run automatically after page load
+window.addEventListener("load", () => {
+  setTimeout(setTawkPositionRight, 2000); // wait 2s para sure loaded na si Tawk iframe
+});
+
 
 // 🔥 Run automatically after page load
 window.addEventListener("load", () => {
