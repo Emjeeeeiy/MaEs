@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- Desktop Sidebar -->
+    <!-- ✅ Desktop Sidebar -->
     <aside
       class="hidden sm:flex sm:flex-col w-64 h-screen bg-gray-200 text-gray-800 shadow-md"
     >
@@ -23,7 +23,9 @@
               {{ username.charAt(0).toUpperCase() }}
             </div>
           </div>
-          <h3 class="mt-3 text-base font-semibold text-gray-800 hover:underline">{{ username }}</h3>
+          <h3 class="mt-3 text-base font-semibold text-gray-800 hover:underline">
+            {{ username }}
+          </h3>
           <p class="text-sm text-gray-500">{{ role }}</p>
         </router-link>
 
@@ -98,6 +100,16 @@
       <router-link to="/invoices" :class="mobileLinkClass('/invoices')">
         <DocumentTextIcon class="w-6 h-6" />
         <span class="text-xs">Invoices</span>
+      </router-link>
+
+      <router-link to="/appointment" :class="mobileLinkClass('/appointment')">
+        <CalendarIcon class="w-6 h-6" />
+        <span class="text-xs">Appointment</span>
+      </router-link>
+
+      <router-link to="/result" :class="mobileLinkClass('/result')">
+        <ChartBarIcon class="w-6 h-6" />
+        <span class="text-xs">Result</span>
       </router-link>
 
       <router-link to="/profile" :class="mobileLinkClass('/profile')">

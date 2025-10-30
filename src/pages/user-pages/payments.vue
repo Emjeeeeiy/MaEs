@@ -8,11 +8,6 @@
     </div>
 
     <div class="flex flex-1 overflow-hidden">
-      <!-- Desktop Sidebar -->
-      <Sidebar
-        class="w-64 flex-shrink-0 border-r border-gray-200 bg-white hidden sm:block"
-      />
-
       <!-- Mobile Sidebar -->
       <Sidebar
         :isMobileSidebarOpen="isMobileSidebarOpen"
