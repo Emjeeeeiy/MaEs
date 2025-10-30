@@ -44,7 +44,7 @@ const setTawkPositionRight = () => {
 
       // ✅ Desktop & Mobile position (flush right)
       iframe.style.position = "fixed";
-      iframe.style.bottom = isMobile ? "55px" : "20px"; // ⬆️ taas ng konti sa mobile
+      iframe.style.bottom = isMobile ? "60px" : "20px"; // ⬆️ taas ng konti sa mobile
       iframe.style.right = "0"; // ⬅️ sagad sa right edge
       iframe.style.left = "auto";
       iframe.style.marginRight = "0"; // siguraduhing walang spacing
