@@ -1,18 +1,8 @@
 <template>
   <div>
-    <!-- Mobile overlay -->
-    <div
-      v-if="isMobileSidebarOpen"
-      class="fixed inset-0 z-40 backdrop-blur-sm bg-black/20 sm:hidden"
-      @click="$emit('close-sidebar')"
-    ></div>
-
-    <!-- Sidebar -->
+    <!-- Desktop Sidebar -->
     <aside
-      :class="[
-        'fixed sm:static top-0 left-0 h-screen w-64 bg-gray-200 text-gray-800 z-50 flex flex-col shadow-md transition-transform duration-300',
-        isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full sm:translate-x-0'
-      ]"
+      class="hidden sm:flex sm:flex-col w-64 h-screen bg-gray-200 text-gray-800 shadow-md"
     >
       <!-- Profile -->
       <div class="flex-1 overflow-y-auto">
@@ -85,6 +75,47 @@
         </nav>
       </div>
     </aside>
+
+    <!-- ✅ Bottom Navigation (Mobile) -->
+    <nav
+      class="sm:hidden fixed bottom-0 left-0 right-0 bg-gray-100 border-t border-gray-300 flex justify-around items-center h-16 z-50"
+    >
+      <router-link to="/dashboard" :class="mobileLinkClass('/dashboard')">
+        <HomeIcon class="w-6 h-6" />
+        <span class="text-xs">Dashboard</span>
+      </router-link>
+
+      <router-link to="/billing" :class="mobileLinkClass('/billing')">
+        <ClipboardDocumentCheckIcon class="w-6 h-6" />
+        <span class="text-xs">Billing</span>
+      </router-link>
+
+      <router-link to="/payments" :class="mobileLinkClass('/payments')">
+        <CreditCardIcon class="w-6 h-6" />
+        <span class="text-xs">Payments</span>
+      </router-link>
+
+      <router-link to="/invoices" :class="mobileLinkClass('/invoices')">
+        <DocumentTextIcon class="w-6 h-6" />
+        <span class="text-xs">Invoices</span>
+      </router-link>
+
+      <router-link to="/profile" :class="mobileLinkClass('/profile')">
+        <img
+          v-if="profileImageUrl"
+          :src="profileImageUrl"
+          alt="Profile"
+          class="w-6 h-6 rounded-full object-cover"
+        />
+        <div
+          v-else
+          class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-semibold"
+        >
+          {{ username.charAt(0).toUpperCase() }}
+        </div>
+        <span class="text-xs">Profile</span>
+      </router-link>
+    </nav>
   </div>
 </template>
 
@@ -104,12 +135,6 @@ import {
   ChartBarIcon,
 } from '@heroicons/vue/24/solid'
 
-const props = defineProps({
-  isMobileSidebarOpen: Boolean
-})
-
-const emit = defineEmits(['close-sidebar'])
-
 const username = ref('User')
 const role = ref('Viewer')
 const profileImageUrl = ref('')
@@ -121,6 +146,13 @@ function linkClass(path) {
     route.path === path
       ? 'bg-green-100 text-green-600'
       : 'text-gray-700 hover:bg-gray-300 hover:text-gray-900'
+  ]
+}
+
+function mobileLinkClass(path) {
+  return [
+    'flex flex-col items-center justify-center text-gray-600 hover:text-green-600 transition',
+    route.path === path ? 'text-green-600 font-semibold' : ''
   ]
 }
 
