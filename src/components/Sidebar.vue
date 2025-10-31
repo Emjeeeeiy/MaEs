@@ -61,7 +61,6 @@
               Invoices
             </router-link>
           </div>
-
           <!-- OTHER -->
           <div>
             <p class="px-2 mb-2 text-xs text-gray-500 uppercase tracking-wide">Other</p>
@@ -98,36 +97,113 @@
         <DocumentTextIcon class="w-7 h-7" />
       </router-link>
 
-      <router-link to="/appointment" :class="mobileLinkClass('/appointment')">
-        <CalendarIcon class="w-7 h-7" />
-      </router-link>
-
-      <router-link to="/result" :class="mobileLinkClass('/result')">
-        <ChartBarIcon class="w-7 h-7" />
-      </router-link>
-
-      <router-link to="/profile" :class="mobileLinkClass('/profile')">
-        <img
-          v-if="profileImageUrl"
-          :src="profileImageUrl"
-          alt="Profile"
-          class="w-7 h-7 rounded-full object-cover transition-transform duration-300"
-        />
-        <div
-          v-else
-          class="w-7 h-7 rounded-full bg-green-500 text-white flex items-center justify-center text-xs font-semibold transition-transform duration-300"
+      <!-- 🍔 Hamburger Button -->
+      <button
+        @click="showMenu = true"
+        class="text-gray-700 hover:text-green-600 transition"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-7 h-7"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
         >
-          {{ username.charAt(0).toUpperCase() }}
-        </div>
-      </router-link>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"
+          />
+        </svg>
+      </button>
     </nav>
+
+    <!-- ✅ Slide-in Sidebar Menu (Mobile) -->
+    <transition name="fade">
+      <div
+        v-if="showMenu"
+        class="fixed inset-0 bg-black bg-opacity-40 flex justify-end z-[60]"
+      >
+        <div
+          class="bg-white w-4/5 h-full shadow-xl flex flex-col py-8 px-6 text-gray-800 animate-slideLeft relative"
+        >
+          <!-- Close Button -->
+          <button
+            @click="showMenu = false"
+            class="absolute top-4 right-4 text-gray-600 hover:text-red-500 text-2xl"
+          >
+            ✕
+          </button>
+
+          <!-- Profile Section -->
+          <div class="flex items-center gap-4 mb-10 mt-8 border-b pb-4">
+            <div
+              class="w-14 h-14 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center"
+            >
+              <img
+                v-if="profileImageUrl"
+                :src="profileImageUrl"
+                alt="Profile"
+                class="w-full h-full object-cover"
+              />
+              <div v-else class="text-lg font-bold text-green-600">
+                {{ username.charAt(0).toUpperCase() }}
+              </div>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-800">{{ username }}</h3>
+              <p class="text-sm text-gray-500">{{ role }}</p>
+            </div>
+          </div>
+
+          <!-- Menu Links -->
+          <div class="flex flex-col gap-6 text-lg font-medium">
+            <router-link
+              to="/appointment"
+              class="flex items-center gap-3 hover:text-green-600 transition"
+              @click="closeMenu"
+            >
+              <CalendarIcon class="w-6 h-6 text-gray-600" /> Appointments
+            </router-link>
+
+            <router-link
+              to="/result"
+              class="flex items-center gap-3 hover:text-green-600 transition"
+              @click="closeMenu"
+            >
+              <ChartBarIcon class="w-6 h-6 text-gray-600" /> Results
+            </router-link>
+
+            <router-link
+              to="/profile"
+              class="flex items-center gap-3 hover:text-green-600 transition"
+              @click="closeMenu"
+            >
+              <UserCircleIcon class="w-6 h-6 text-gray-600" /> Profile
+            </router-link>
+          </div>
+
+          <!-- Logout Button -->
+          <div class="mt-auto pt-8 border-t">
+            <button
+              @click="logout"
+              class="flex items-center justify-center gap-3 w-full py-3 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition"
+            >
+              <ArrowLeftOnRectangleIcon class="w-6 h-6" />
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute } from 'vue-router'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { useRoute, useRouter } from 'vue-router'
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '@/firebase'
 
@@ -138,12 +214,16 @@ import {
   ClipboardDocumentCheckIcon,
   CalendarIcon,
   ChartBarIcon,
+  UserCircleIcon,
+  ArrowLeftOnRectangleIcon,
 } from '@heroicons/vue/24/solid'
 
 const username = ref('User')
 const role = ref('Viewer')
 const profileImageUrl = ref('')
 const route = useRoute()
+const router = useRouter()
+const showMenu = ref(false)
 
 function linkClass(path) {
   return [
@@ -154,7 +234,6 @@ function linkClass(path) {
   ]
 }
 
-// ✅ Simplified mobile version — icons only, scale up if active
 function mobileLinkClass(path) {
   return [
     'flex flex-col items-center justify-center text-gray-600 transition-transform duration-300',
@@ -162,6 +241,16 @@ function mobileLinkClass(path) {
       ? 'text-green-600 transform scale-125'
       : 'hover:text-green-600'
   ]
+}
+
+const closeMenu = () => {
+  showMenu.value = false
+}
+
+const logout = async () => {
+  const auth = getAuth()
+  await signOut(auth)
+  router.push('/login')
 }
 
 let unsubscribeUserDoc = null
@@ -188,3 +277,27 @@ onBeforeUnmount(() => {
   if (unsubscribeUserDoc) unsubscribeUserDoc()
 })
 </script>
+
+<style>
+/* ✅ Animations for modal */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+@keyframes slideLeft {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.animate-slideLeft {
+  animation: slideLeft 0.3s ease-out;
+}
+</style>

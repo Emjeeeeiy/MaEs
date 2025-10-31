@@ -14,7 +14,6 @@ import Dashboard from '../pages/user-pages/dashboard.vue';
 import Payments from '../pages/user-pages/payments.vue';
 import Billing from '../pages/user-pages/billing.vue';
 import Invoices from '../pages/user-pages/invoices.vue';
-import Settings from '../pages/user-pages/settings.vue';
 import Profile from '../pages/user-pages/profile.vue';
 import EditProfile from '../pages/user-pages/edit_profile.vue';
 import Appointment from '../pages/user-pages/appointment.vue';
@@ -90,7 +89,6 @@ const routes = [
   { path: '/payments', name: 'Payments', component: Payments, meta: { requiresAuth: true } },
   { path: '/billing', name: 'Billing', component: Billing, meta: { requiresAuth: true } },
   { path: '/invoices', name: 'Invoices', component: Invoices, meta: { requiresAuth: true } },
-  { path: '/settings', name: 'Settings', component: Settings, meta: { requiresAuth: true } },
   { path: '/profile', name: 'Profile', component: Profile, meta: { requiresAuth: true } },
   { path: '/edit_profile', name: 'EditProfile', component: EditProfile, meta: { requiresAuth: true } },
   { path: '/appointment', name: 'Appointment', component: Appointment, meta: { requiresAuth: true } },

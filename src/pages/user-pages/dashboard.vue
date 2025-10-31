@@ -8,7 +8,7 @@
       >
         <CheckCircle class="w-6 h-6 text-green-500" />
         <div>
-          <p class="text-sm font-medium text-gray-800">Welcome back!</p>
+          <p class="text-sm font-medium text-gray-800">Welcome</p>
           <p class="text-xs text-gray-500">You are now logged in 🎉</p>
         </div>
       </div>

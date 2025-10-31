@@ -56,33 +56,6 @@
               </div>
             </transition>
           </div>
-
-          <!-- Profile -->
-          <div class="relative" ref="profileDropdownRef">
-            <button @click="toggleDropdown" title="Profile">
-              <UserIcon class="w-6 h-6 text-white hover:scale-110 transition" />
-            </button>
-
-            <transition name="fade">
-              <div
-                v-if="dropdownOpen"
-                class="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50"
-              >
-                <router-link to="/profile" class="block px-4 py-2 text-gray-700 hover:bg-green-100" @click="closeDropdown">
-                  Profile
-                </router-link>
-                <router-link to="/settings" class="block px-4 py-2 text-gray-700 hover:bg-green-100" @click="closeDropdown">
-                  Settings
-                </router-link>
-                <button
-                  @click="handleLogout"
-                  class="w-full text-left px-4 py-2 text-gray-700 hover:bg-green-100"
-                >
-                  Logout
-                </button>
-              </div>
-            </transition>
-          </div>
         </nav>
       </div>
     </div>
@@ -140,14 +113,13 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import {
-  UserIcon,
   ChatBubbleBottomCenterTextIcon,
   BellIcon,
   DocumentArrowUpIcon
 } from '@heroicons/vue/24/outline'
-import { getAuth, signOut } from 'firebase/auth'
+import { getAuth } from 'firebase/auth'
 import { db, storage } from '@/firebase'
 import {
   addDoc,
@@ -167,15 +139,12 @@ import {
 } from 'firebase/storage'
 
 const auth = getAuth()
-const router = useRouter()
 const route = useRoute()
 const user = auth.currentUser
 const userEmail = user?.email || ''
 
-// Dropdowns + state
-const dropdownOpen = ref(false)
+// Dropdown + modal states
 const notifDropdownOpen = ref(false)
-const profileDropdownRef = ref(null)
 const notifRef = ref(null)
 
 const showModal = ref(false)
@@ -192,8 +161,6 @@ const docDescription = ref('')
 const uploading = ref(false)
 const fileInput = ref(null)
 
-const toggleDropdown = () => dropdownOpen.value = !dropdownOpen.value
-const closeDropdown = () => dropdownOpen.value = false
 const toggleNotifDropdown = () => notifDropdownOpen.value = !notifDropdownOpen.value
 
 const pageTitle = computed(() => {
@@ -212,22 +179,8 @@ const pageTitle = computed(() => {
   return routeMap[route.path] || 'Page'
 })
 
-// Logout
-const handleLogout = async () => {
-  try {
-    await signOut(auth)
-    closeDropdown()
-    router.push('/login')
-  } catch (err) {
-    console.error('Logout error:', err)
-  }
-}
-
-// Click outside
+// Click outside dropdowns
 const handleClickOutside = (e) => {
-  if (profileDropdownRef.value && !profileDropdownRef.value.contains(e.target)) {
-    dropdownOpen.value = false
-  }
   if (notifRef.value && !notifRef.value.contains(e.target)) {
     notifDropdownOpen.value = false
   }
