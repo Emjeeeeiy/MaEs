@@ -31,7 +31,7 @@
         class="flex-1 overflow-y-auto p-4 sm:p-6 transition-all duration-300"
         :class="{ 'blur-sm': isMobileSidebarOpen }"
       >
-        <div class="bg-white rounded-lg shadow p-4 sm:p-6 border border-black max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow p-4 sm:p-6 border border-gray-300 max-w-4xl mx-auto">
           <!-- Loading -->
           <div v-if="loading" class="flex justify-center py-16">
             <LoadingAnimation />
@@ -56,8 +56,8 @@
               <p class="text-sm text-gray-500">Manage your account information</p>
             </div>
 
-            <!-- Profile Details -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-gray-700 text-sm">
+            <!-- Profile Details (Left-aligned) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-gray-700 text-sm text-left">
               <div><span class="font-semibold">Username:</span> {{ username || "Not provided" }}</div>
               <div><span class="font-semibold">Email:</span> {{ email || "Not provided" }}</div>
               <div><span class="font-semibold">Full Name:</span> {{ completeName || "Not provided" }}</div>
@@ -84,6 +84,14 @@
               >
                 Edit Profile
               </router-link>
+
+              <!-- Logout Button -->
+              <button
+                @click="logout"
+                class="w-full sm:w-auto text-center px-5 py-2.5 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition"
+              >
+                Logout
+              </button>
             </div>
 
             <!-- Error Message -->
@@ -101,10 +109,13 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { auth, db } from "@/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import Sidebar from "@/components/Sidebar.vue";
 import Topbar from "@/components/topbar.vue";
 import LoadingAnimation from "@/components/loading_animation.vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const username = ref("");
 const email = ref("");
@@ -128,6 +139,20 @@ const updateStatusInDB = async (userId, newStatus) => {
     await updateDoc(userRef, { status: newStatus });
   } catch (error) {
     console.error(`Failed to update status to ${newStatus}:`, error);
+  }
+};
+
+const logout = async () => {
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      await updateStatusInDB(user.uid, "inactive");
+    }
+    await signOut(auth);
+    router.push("/login");
+  } catch (error) {
+    console.error("Logout failed:", error);
+    errorMessage.value = "Failed to logout. Please try again.";
   }
 };
 

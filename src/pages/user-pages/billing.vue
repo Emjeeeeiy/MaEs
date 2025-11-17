@@ -25,14 +25,14 @@
 
       <!-- Main -->
       <main
-        class="flex-1 p-4 sm:p-8 space-y-6 overflow-y-auto h-full scroll-smooth"
+        class="flex-1 px-3 sm:px-6 py-3 sm:py-6 space-y-4 sm:space-y-6 overflow-y-auto h-full scroll-smooth"
       >
         <transition name="fade" mode="out-in">
           <!-- Loading State -->
           <div
             v-if="loading"
             key="loading"
-            class="flex justify-center items-center min-h-[300px]"
+            class="flex justify-center items-center min-h-[250px]"
           >
             <LoadingAnimation />
           </div>
@@ -41,121 +41,95 @@
           <div
             v-else
             key="content"
-            class="space-y-6 animate-fade-in h-full flex flex-col"
+            class="space-y-4 sm:space-y-6 animate-fade-in flex flex-col"
           >
             <!-- Search & Filters -->
-            <div
-              class="bg-white border border-gray-200 rounded-2xl shadow p-5 sm:p-6 flex flex-col flex-1"
-            >
-              <h2
-                class="text-lg font-semibold text-blue-600 text-center sm:text-left"
-              >
-                Generate Invoice
-              </h2>
-
-              <div
-                class="flex flex-col sm:flex-row sm:items-end gap-4 mt-4 w-full"
-              >
-                <!-- Search -->
-                <div class="w-full sm:flex-1">
-                  <label
-                    class="block text-sm font-medium text-gray-700 mb-1 text-left"
-                  >
-                    Search Service or Category:
-                  </label>
-                  <input
-                    v-model="searchQuery"
-                    type="text"
-                    placeholder="Search services..."
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm"
-                  />
-                </div>
-                <!-- Category Filter -->
-                <div class="w-full sm:w-60">
-                  <label
-                    class="block text-sm font-medium text-gray-700 mb-1 text-left"
-                  >
-                    Filter by Category:
-                  </label>
-                  <select
-                    v-model="selectedCategory"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">All Categories</option>
-                    <option
-                      v-for="cat in availableCategories"
-                      :key="cat"
-                      :value="cat"
-                    >
-                      {{ cat }}
-                    </option>
-                  </select>
-                </div>
+            <div class="flex flex-col sm:flex-row sm:items-end gap-3 w-full">
+              <!-- Search -->
+              <div class="w-full sm:flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-1 text-left">
+                  Search Service or Category:
+                </label>
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  placeholder="Search services..."
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm shadow-sm"
+                />
               </div>
 
-              <!-- Service List (NO SCROLL) -->
-              <div class="flex-1 mt-5 space-y-4">
-                <div
-                  v-for="category in orderedCategories"
-                  :key="category"
-                  class="space-y-2"
+              <!-- Category Filter -->
+              <div class="w-full sm:w-60">
+                <label class="block text-sm font-medium text-gray-700 mb-1 text-left">
+                  Filter by Category:
+                </label>
+                <select
+                  v-model="selectedCategory"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <div v-if="groupedFilteredServices[category]">
-                    <h3
-                      class="flex items-center gap-2 text-sm font-semibold text-green-600 mt-2 mb-1 py-2 border-b"
+                  <option value="">All Categories</option>
+                  <option
+                    v-for="cat in availableCategories"
+                    :key="cat"
+                    :value="cat"
+                  >
+                    {{ cat }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Service List -->
+            <div class="flex-1 space-y-3">
+              <div
+                v-for="category in orderedCategories"
+                :key="category"
+                class="space-y-1"
+              >
+                <div v-if="groupedFilteredServices[category]">
+                  <h3 class="flex items-center gap-2 text-sm font-semibold text-green-600 mt-1 mb-1 py-1 border-b">
+                    <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                    {{ category }}
+                  </h3>
+                  <div class="grid gap-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+                    <label
+                      v-for="service in groupedFilteredServices[category]"
+                      :key="service.id"
+                      class="flex items-center justify-between p-2 border border-gray-200 rounded-md bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
                     >
-                      <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                      {{ category }}
-                    </h3>
-                    <div
-                      class="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
-                    >
-                      <label
-                        v-for="service in groupedFilteredServices[category]"
-                        :key="service.id"
-                        class="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
-                      >
-                        <div class="flex items-center gap-2">
-                          <input
-                            type="checkbox"
-                            :value="service"
-                            v-model="selectedServices"
-                            class="form-checkbox text-blue-600 h-4 w-4"
-                          />
-                          <span
-                            class="text-sm text-gray-800 text-left leading-tight"
-                          >
-                            {{ service.serviceName }}
-                          </span>
-                        </div>
-                        <span
-                          class="text-sm font-semibold text-gray-700 whitespace-nowrap"
-                        >
-                          ₱{{ service.amount }}
+                      <div class="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          :value="service"
+                          v-model="selectedServices"
+                          class="form-checkbox text-blue-600 h-4 w-4"
+                        />
+                        <span class="text-sm text-gray-800 text-left leading-tight">
+                          {{ service.serviceName }}
                         </span>
-                      </label>
-                    </div>
+                      </div>
+                      <span class="text-sm font-semibold text-gray-700 whitespace-nowrap">
+                        ₱{{ service.amount }}
+                      </span>
+                    </label>
                   </div>
                 </div>
-
-                <!-- No Results -->
-                <p
-                  v-if="Object.keys(groupedFilteredServices).length === 0"
-                  class="text-sm text-gray-500 text-center py-6"
-                >
-                  No services found.
-                </p>
               </div>
 
-              <!-- Generate Button (Centered) -->
-              <div class="pt-6 flex justify-center">
-                <button
-                  @click="generateInvoice"
-                  class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-8 py-3 rounded-lg shadow-md transition text-center"
-                >
-                  Generate Invoice
-                </button>
-              </div>
+              <!-- No Results -->
+              <p v-if="Object.keys(groupedFilteredServices).length === 0" class="text-sm text-gray-500 text-center py-4">
+                No services found.
+              </p>
+            </div>
+
+            <!-- Generate Button -->
+            <div class="pt-3 flex justify-center">
+              <button
+                @click="generateInvoice"
+                class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-6 py-2 rounded-md shadow-md transition text-center"
+              >
+                Generate Invoice
+              </button>
             </div>
           </div>
         </transition>
@@ -168,19 +142,19 @@
       class="fixed inset-0 flex items-center justify-center z-50 backdrop-blur-sm bg-black/30 px-4"
     >
       <div
-        class="bg-white p-6 sm:p-8 rounded-xl shadow-lg max-w-sm w-full text-center space-y-4 animate-fade-in"
+        class="bg-white p-5 sm:p-6 rounded-xl shadow-lg max-w-sm w-full text-left space-y-3 animate-fade-in"
       >
-        <h2 class="text-xl font-semibold text-green-600 text-left">
+        <h2 class="text-lg font-semibold text-green-600">
           Invoice Generated
         </h2>
-        <p class="text-gray-700 text-sm text-left">
+        <p class="text-gray-700 text-sm">
           Invoice <strong>{{ generatedShortId }}</strong> successfully generated
           for <strong>{{ userEmail }}</strong>.
         </p>
         <div class="text-right">
           <button
             @click="showSuccessModal = false"
-            class="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition w-full sm:w-auto"
+            class="mt-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition w-full sm:w-auto"
           >
             Close
           </button>
@@ -323,17 +297,17 @@ export default {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-  transform: translateY(10px);
+  transform: translateY(8px);
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.4s ease-in-out;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -343,16 +317,16 @@ export default {
 
 /* Mobile optimization */
 @media (max-width: 640px) {
+  main {
+    padding-bottom: 6rem; /* space for bottom bar */
+  }
   .grid-cols-3 {
     grid-template-columns: 1fr;
-  }
-  main {
-    padding-bottom: 6rem;
   }
   input,
   select,
   button {
-    font-size: 15px;
+    font-size: 14px;
   }
   button {
     width: 100%;

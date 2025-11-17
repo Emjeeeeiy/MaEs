@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center relative px-4 py-8">
+  <div class="min-h-screen flex items-center justify-center relative px-2 py-4 md:px-4 md:py-8">
     <!-- ✅ Background Image -->
     <div
       class="absolute inset-0 bg-cover bg-center"
@@ -11,19 +11,18 @@
 
     <!-- ✅ Glass Container -->
     <div
-      class="relative w-full max-w-5xl bg-white/20 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
+      class="relative w-full max-w-4xl bg-white/20 backdrop-blur-xl rounded-xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
     >
       <!-- ✅ Left Info Section -->
-      <div class="md:w-1/2 bg-white text-green-700 p-10 flex flex-col justify-center">
-        <div class="mb-6">
-          <img src="/MaEs_logo2.png" alt="Logo" class="h-14 w-14 mb-4" />
-          <h2 class="text-2xl font-bold">Maria Estrella General Hospital, Inc.</h2>
-          <p class="mt-2 text-sm text-gray-600">
-            A secure hospital management and billing system designed to improve
-            patient care and streamline operations.
+      <div class="md:w-1/2 bg-white text-green-700 p-6 md:p-10 flex flex-col justify-center text-left">
+        <div class="mb-4 md:mb-6">
+          <img src="/MaEs_logo2.png" alt="Logo" class="h-14 w-14 mb-2 md:mb-4" />
+          <h2 class="text-xl md:text-2xl font-bold">Maria Estrella General Hospital, Inc.</h2>
+          <p class="mt-1 md:mt-2 text-sm md:text-base text-gray-600">
+            A secure hospital management and billing system designed to improve patient care and streamline operations.
           </p>
         </div>
-        <ul class="space-y-3 text-sm">
+        <ul class="space-y-2 text-sm md:text-base">
           <li class="flex items-center gap-2">
             <span class="bg-green-600 rounded-full h-2 w-2"></span>
             Fast & secure access for staff and patients
@@ -40,7 +39,7 @@
       </div>
 
       <!-- ✅ Right Login Section -->
-      <div class="md:w-1/2 p-8 bg-white/30 backdrop-blur-xl relative">
+      <div class="md:w-1/2 p-4 md:p-8 bg-white/30 backdrop-blur-xl relative">
         <!-- ✅ Popup (Top Right Corner) -->
         <transition
           enter-active-class="transition-all duration-500 ease-out"
@@ -52,28 +51,24 @@
         >
           <div
             v-if="showPopup"
-            class="absolute top-4 right-4 flex items-center gap-3 bg-white/90 backdrop-blur-md border border-green-200 shadow-lg rounded-xl px-4 py-2 z-50 animate-bounceIn"
+            class="absolute top-2 md:top-4 right-2 md:right-4 flex items-center gap-2 md:gap-3 bg-white/90 backdrop-blur-md border border-green-200 shadow-lg rounded-lg md:rounded-xl px-3 py-1 md:px-4 md:py-2 z-50 animate-bounceIn"
           >
             <svg
               v-if="!loginSuccess"
               xmlns="http://www.w3.org/2000/svg"
-              class="w-6 h-6 text-green-600 animate-spin-slow"
+              class="w-5 h-5 md:w-6 md:h-6 text-green-600 animate-spin-slow"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
               stroke-width="2"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M4 12a8 8 0 018-8v2a6 6 0 100 12v2a8 8 0 01-8-8z"
-              />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 12a8 8 0 018-8v2a6 6 0 100 12v2a8 8 0 01-8-8z" />
             </svg>
 
             <svg
               v-else
               xmlns="http://www.w3.org/2000/svg"
-              class="w-6 h-6 text-green-600"
+              class="w-5 h-5 md:w-6 md:h-6 text-green-600"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -82,149 +77,122 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
 
-            <span class="text-green-700 font-medium text-sm">
+            <span class="text-green-700 font-medium text-sm md:text-base">
               {{ loginSuccess ? "Login Successful" : "Logging in..." }}
             </span>
           </div>
         </transition>
 
         <!-- Title -->
-        <h2 class="text-2xl font-bold text-center text-green-700 mb-6">Log in</h2>
+        <h2 class="text-xl md:text-2xl font-bold text-green-700 mb-4 md:mb-6 text-center md:text-left">Log in</h2>
 
         <!-- Error Message -->
-        <p v-if="errorMessage" class="text-sm text-red-600 text-center mb-4">
+        <p v-if="errorMessage" class="text-sm md:text-base text-red-600 text-center md:text-left mb-2 md:mb-4">
           {{ errorMessage }}
         </p>
 
         <!-- Login Form -->
-        <form @submit.prevent="loginUser" class="space-y-4">
+        <form @submit.prevent="loginUser" class="space-y-4 md:space-y-5">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label class="block text-sm md:text-base font-medium text-gray-700 mb-1">Email</label>
             <input
               v-model="email"
               type="email"
               placeholder="Enter your email"
-              class="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500"
+              class="w-full border border-gray-300 rounded-lg px-4 py-2 md:px-5 md:py-3 text-sm md:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500"
             />
           </div>
 
           <!-- ✅ Password Input with Eye Icon -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label class="block text-sm md:text-base font-medium text-gray-700 mb-1">Password</label>
             <div class="relative">
               <input
                 v-model="password"
                 :type="showPassword ? 'text' : 'password'"
                 placeholder="Enter your password"
-                class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500"
+                class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 md:px-5 md:py-3 text-sm md:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500"
               />
               <button
                 type="button"
                 @click="toggleShowPassword"
-                class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-green-700 transition"
+                class="absolute inset-y-0 right-3 md:right-4 flex items-center text-gray-500 hover:text-green-700 transition"
               >
                 <!-- 👁 Show Icon -->
                 <svg
                   v-if="!showPassword"
                   xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5"
+                  class="h-5 w-5 md:h-6 md:w-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   stroke-width="2"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 
-                    2.943 9.542 7-1.274 4.057-5.065 7-9.542 
-                    7-4.477 0-8.268-2.943-9.542-7z"
-                  />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
 
                 <!-- 🙈 Hide Icon -->
                 <svg
                   v-else
                   xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5"
+                  class="h-5 w-5 md:h-6 md:w-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   stroke-width="2"
                 >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    d="M13.875 18.825A10.05 10.05 0 
-                    0112 19c-5.523 0-10-4.477-10-10 
-                    0-1.905.532-3.688 1.458-5.211m3.163-2.354A10.05 
-                    10.05 0 0112 3c5.523 0 10 4.477 10 
-                    10 0 1.905-.532 3.688-1.458 
-                    5.211m-3.163 2.354A9.965 9.965 
-                    0 0112 21a9.965 9.965 
-                    0 01-6.379-2.144M3 3l18 18"
-                  />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.905.532-3.688 1.458-5.211m3.163-2.354A10.05 10.05 0 0112 3c5.523 0 10 4.477 10 10 0 1.905-.532 3.688-1.458 5.211m-3.163 2.354A9.965 9.965 0 0112 21a9.965 9.965 0 01-6.379-2.144M3 3l18 18" />
                 </svg>
               </button>
             </div>
 
             <div class="text-right mt-1">
-              <router-link
-                to="/reset_password"
-                class="text-sm text-green-700 hover:underline"
-                >Forgot Password?</router-link
-              >
+              <router-link to="/reset_password" class="text-sm md:text-base text-green-700 hover:underline">
+                Forgot Password?
+              </router-link>
             </div>
           </div>
 
           <button
             type="submit"
-            class="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2.5 rounded-lg transition duration-150"
+            class="w-full bg-green-600 hover:bg-green-700 text-white text-sm md:text-base font-semibold py-3 md:py-3.5 rounded-lg transition duration-150"
           >
             Login
           </button>
         </form>
 
         <!-- Divider -->
-        <div class="my-6 flex items-center justify-between">
+        <div class="my-4 md:my-6 flex items-center justify-between">
           <hr class="w-full border-gray-300" />
-          <span class="text-sm text-black px-2">or</span>
+          <span class="text-sm md:text-base text-black px-2">or</span>
           <hr class="w-full border-gray-300" />
         </div>
 
         <!-- Google Sign-In -->
         <button
           @click="signInWithGoogle"
-          class="w-full border border-gray-300 py-2.5 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100 transition"
+          class="w-full border border-gray-300 py-3 md:py-3.5 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100 transition"
         >
           <img
             src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
             alt="Google"
-            class="h-5 w-5"
+            class="h-5 w-5 md:h-6 md:w-6"
           />
-          <span class="text-sm font-medium text-gray-700">Continue with Google</span>
+          <span class="text-sm md:text-base font-medium text-gray-700">Continue with Google</span>
         </button>
 
         <!-- Register Link -->
-        <p class="mt-6 text-center text-sm text-gray-700">
+        <p class="mt-4 md:mt-6 text-center md:text-left text-sm md:text-base text-gray-700">
           Don’t have an account?
-          <router-link
-            to="/register"
-            class="text-green-700 font-semibold hover:underline"
-            >Register</router-link
-          >
+          <router-link to="/register" class="text-green-700 font-semibold hover:underline">Register</router-link>
         </p>
 
         <!-- Back to Home -->
-        <div class="mt-4 text-center">
+        <div class="mt-2 md:mt-4 text-center md:text-left">
           <router-link
             to="/"
-            class="inline-block text-sm text-gray-600 hover:text-green-700 font-medium hover:underline"
+            class="inline-block text-sm md:text-base text-gray-600 hover:text-green-700 font-medium hover:underline"
           >
             ← Back to Home
           </router-link>
@@ -332,7 +300,7 @@ a {
 }
 button:hover,
 a:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
 }
 
 /* ✅ Animation */
