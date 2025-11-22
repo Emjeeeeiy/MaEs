@@ -32,7 +32,6 @@
         <!-- Filters -->
         <section class="bg-white p-2 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-2 items-end">
           <div class="flex flex-col">
-            <label class="text-[10px] text-gray-600 mb-1">Status</label>
             <select
               v-model="filterStatus"
               class="px-2 py-1 border border-gray-300 rounded-md text-xs bg-white text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -45,11 +44,10 @@
           </div>
 
           <div class="flex flex-col flex-grow min-w-[120px]">
-            <label class="text-[10px] text-gray-600 mb-1">Search</label>
             <input
               v-model="searchQuery"
               type="text"
-              placeholder="Search by ID, service..."
+              placeholder="Search..."
               class="px-2 py-1 border border-gray-300 rounded-md text-xs bg-white text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
