@@ -31,11 +31,9 @@
       >
         <!-- Filters -->
         <section class="bg-white p-2 rounded-xl border border-gray-200 shadow-sm flex flex-wrap gap-2 items-end">
+          <!-- Status Filter -->
           <div class="flex flex-col">
-<<<<<<< HEAD
-=======
             <label class="text-[10px] text-gray-600 mb-1">Status</label>
->>>>>>> d29eb79ee2c1dc2ea2353e731215d3b9729cc506
             <select
               v-model="filterStatus"
               class="px-2 py-1 border border-gray-300 rounded-md text-xs bg-white text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -47,19 +45,13 @@
             </select>
           </div>
 
+          <!-- Search Input -->
           <div class="flex flex-col flex-grow min-w-[120px]">
-<<<<<<< HEAD
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search..."
-=======
             <label class="text-[10px] text-gray-600 mb-1">Search</label>
             <input
               v-model="searchQuery"
               type="text"
               placeholder="Search by ID, service..."
->>>>>>> d29eb79ee2c1dc2ea2353e731215d3b9729cc506
               class="px-2 py-1 border border-gray-300 rounded-md text-xs bg-white text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
@@ -164,7 +156,7 @@ export default {
   computed: {
     filteredInvoices() {
       const statusFilter = this.filterStatus.trim().toLowerCase();
-      const q = this.searchQuery.toLowerCase();
+      const searchQuery = this.searchQuery.toLowerCase();
 
       return this.invoices
         .slice()
@@ -173,22 +165,19 @@ export default {
           const dB = b.createdAt?.toDate?.() || new Date(0);
           return dB - dA;
         })
-        .filter((inv) => {
-          const status = (inv.status || "").toLowerCase();
+        .filter((invoice) => {
+          const status = (invoice.status || "").toLowerCase();
           const statusMatches = !statusFilter || status === statusFilter;
 
-          const servicesText = inv.services
-            .map((s) => s.serviceName)
-            .join(" ")
-            .toLowerCase();
+          const servicesText = invoice.services?.map((s) => s.serviceName).join(" ").toLowerCase() || "";
           const combined = [
-            (inv.shortId || "").toLowerCase(),
+            (invoice.shortId || "").toLowerCase(),
             servicesText,
-            this.formattedDate(inv.createdAt).toLowerCase(),
-            status,
+            this.formattedDate(invoice.createdAt).toLowerCase(),
+            status
           ].join(" ");
 
-          const searchMatches = !q || combined.includes(q);
+          const searchMatches = !searchQuery || combined.includes(searchQuery);
           return statusMatches && searchMatches;
         });
     },
@@ -221,24 +210,22 @@ export default {
         this.loading = false;
       }
     },
-    formattedDate(ts) {
-      if (!ts || !ts.toDate) return "N/A";
-      return ts.toDate().toISOString().split("T")[0];
+    formattedDate(timestamp) {
+      if (!timestamp?.toDate) return "N/A";
+      return timestamp.toDate().toISOString().split("T")[0];
     },
     calculateInvoiceTotal(invoice) {
-      return (
-        invoice.services?.reduce((sum, s) => sum + (s.amount || 0), 0) || 0
-      );
+      return invoice.services?.reduce((sum, s) => sum + (s.amount || 0), 0) || 0;
     },
   },
-  async mounted() {
-    await this.getCurrentUser();
+  mounted() {
+    this.getCurrentUser();
   },
 };
 </script>
 
-<style>
-/* Fade animation */
+<style scoped>
+/* Fade animation for content */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
