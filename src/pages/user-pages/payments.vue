@@ -38,7 +38,7 @@
                 <input
                   type="text"
                   v-model="searchQuery"
-                  placeholder="Search by service or date (YYYY-MM-DD)"
+                  placeholder="Search..."
                   class="w-full px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring focus:border-blue-400"
                 />
               </div>
