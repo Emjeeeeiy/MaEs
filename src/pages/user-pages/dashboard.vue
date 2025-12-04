@@ -1,21 +1,9 @@
 <template>
-  <div class="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-800 overflow-hidden relative">
-    <!-- 🔔 Popup Notification -->
-    <transition name="slide-fade">
-      <div
-        v-if="showWelcomePopup"
-        class="fixed top-4 right-4 bg-white border border-green-200 shadow-lg rounded-2xl px-3 py-2 flex items-center gap-2 z-50 animate-fadeIn text-xs sm:text-sm"
-      >
-        <CheckCircle class="w-4 h-4 text-green-500" />
-        <div>
-          <p class="font-medium text-gray-800">Welcome</p>
-          <p class="text-gray-500">You are now logged in 🎉</p>
-        </div>
-      </div>
-    </transition>
-
+  <div class="flex flex-col h-screen bg-gray-50 text-gray-800 overflow-hidden">
     <!-- Topbar -->
-    <div class="flex-shrink-0 border-b border-gray-200 bg-white shadow-sm">
+    <div
+      class="flex-shrink-0 z-20 transition-all duration-200 bg-white border-b border-gray-200"
+    >
       <Topbar @toggleSidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
     </div>
 
@@ -26,265 +14,324 @@
         @closeSidebar="isMobileSidebarOpen = false"
       />
 
-      <!-- Main Content -->
-      <div class="flex-1 overflow-y-auto p-3 sm:p-5 space-y-6 sm:space-y-8 pb-24 sm:pb-6">
-        <!-- Loading -->
-        <div v-if="loadingInvoices" class="flex justify-center items-center h-40 sm:h-60">
-          <LoadingAnimation />
-        </div>
+      <!-- Mobile overlay -->
+      <div
+        v-if="isMobileSidebarOpen"
+        class="fixed inset-0 bg-black/25 z-20 sm:hidden"
+        @click="isMobileSidebarOpen = false"
+      ></div>
 
-        <!-- Dashboard -->
-        <div v-else class="space-y-6 sm:space-y-8 animate-fadeIn">
-          <!-- Section: Overview -->
-          <section>
-            <h2 class="text-sm sm:text-base font-semibold text-gray-700 mb-2 sm:mb-4">Overview</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
-              <!-- Total Not Paid -->
-              <div
-                class="bg-red-50 border border-red-200 rounded-2xl p-3 sm:p-4 shadow hover:shadow-md transition transform hover:scale-[1.02] flex items-center gap-2 sm:gap-3"
-              >
-                <AlertTriangle class="w-6 h-6 sm:w-8 sm:h-8 text-red-600 flex-shrink-0" />
-                <div class="flex-1">
-                  <h3 class="text-[10px] sm:text-xs font-semibold text-red-700 mb-0.5">Total Not Paid</h3>
-                  <p class="text-xl sm:text-2xl font-bold text-red-800">
-                    ₱{{ unpaidTotalAmount.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- Unpaid Claims -->
-              <div
-                class="bg-yellow-50 border border-yellow-200 rounded-2xl p-3 sm:p-4 shadow hover:shadow-md transition transform hover:scale-[1.02] flex items-center gap-2 sm:gap-3"
-              >
-                <Clock class="w-6 h-6 sm:w-8 sm:h-8 text-yellow-500 flex-shrink-0" />
-                <div class="flex-1">
-                  <h3 class="text-[10px] sm:text-xs font-semibold text-yellow-600 mb-0.5">Unpaid Claims</h3>
-                  <p class="text-xl sm:text-2xl font-bold text-yellow-700">{{ unpaidClaims }}</p>
-                </div>
-              </div>
-
-              <!-- Paid Claims -->
-              <div
-                class="bg-green-50 border border-green-200 rounded-2xl p-3 sm:p-4 shadow hover:shadow-md transition transform hover:scale-[1.02] flex items-center gap-2 sm:gap-3"
-              >
-                <Wallet class="w-6 h-6 sm:w-8 sm:h-8 text-green-600 flex-shrink-0" />
-                <div class="flex-1">
-                  <h3 class="text-[10px] sm:text-xs font-semibold text-green-600 mb-0.5">Paid Claims</h3>
-                  <p class="text-xl sm:text-2xl font-bold text-green-700">{{ paidClaims }}</p>
-                </div>
-              </div>
+      <!-- Main -->
+      <main
+        class="flex-1 overflow-y-auto px-3 py-3 pb-28 sm:pb-20"
+        :class="{ 'blur-sm': isMobileSidebarOpen }"
+      >
+        <!-- Top compact header (counts + totals) -->
+        <div class="mb-3">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <h1 class="text-sm font-semibold text-gray-700">Dashboard</h1>
             </div>
-          </section>
 
-          <!-- Section: Recent Invoices -->
-          <section class="space-y-2 sm:space-y-4">
-            <div class="flex justify-between items-center">
-              <div class="flex items-center gap-1 sm:gap-2 text-sm sm:text-base font-semibold text-gray-700">
-                <FileText class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-                <span>Recent Invoices</span>
-              </div>
+            <div class="flex items-center gap-2">
               <button
-                class="text-xs sm:text-sm px-3 sm:px-4 py-1 sm:py-1.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition"
                 @click="goToInvoices"
+                class="text-xs px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
               >
-                View All
+                View All Invoices
               </button>
             </div>
+          </div>
+        </div>
 
-            <!-- Desktop Cards -->
-            <div class="hidden sm:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
-              <div
-                v-for="invoice in invoices"
-                :key="invoice.id"
-                class="bg-white border border-gray-200 rounded-xl p-3 sm:p-4 shadow hover:shadow-md cursor-pointer transition transform hover:scale-[1.01]"
+        <!-- Overview (compact cards) -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+          <!-- Not paid -->
+          <div class="flex items-center gap-3 bg-white border border-gray-200 p-2 rounded-lg shadow-sm">
+            <div class="flex items-center justify-center w-10 h-10 rounded-md bg-red-50">
+              <AlertTriangle class="w-5 h-5 text-red-600" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-[10px] text-red-700 font-semibold">Not Paid</div>
+                  <div class="text-base font-bold text-red-800">₱{{ unpaidTotalAmount.toLocaleString('en-US',{minimumFractionDigits:2}) }}</div>
+                </div>
+                <div class="text-right text-[11px] text-gray-500">{{ unpaidClaims }} open</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unpaid claims count -->
+          <div class="flex items-center gap-3 bg-white border border-gray-200 p-2 rounded-lg shadow-sm">
+            <div class="flex items-center justify-center w-10 h-10 rounded-md bg-yellow-50">
+              <Clock class="w-5 h-5 text-yellow-600" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-[10px] text-yellow-700 font-semibold">Pending</div>
+                  <div class="text-base font-bold text-yellow-700">{{ unpaidClaims }}</div>
+                </div>
+                <div class="text-right text-[11px] text-gray-500">{{ overdueCount }} overdue</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Paid claims -->
+          <div class="flex items-center gap-3 bg-white border border-gray-200 p-2 rounded-lg shadow-sm">
+            <div class="flex items-center justify-center w-10 h-10 rounded-md bg-green-50">
+              <Wallet class="w-5 h-5 text-green-600" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-[10px] text-green-700 font-semibold">Paid</div>
+                  <div class="text-base font-bold text-green-700">{{ paidClaims }}</div>
+                </div>
+                <div class="text-right text-[11px] text-gray-500">recent</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Compact controls row -->
+        <div class="mt-3 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <label class="text-xs text-gray-600">Status</label>
+            <select v-model="filterStatus" class="text-xs px-2 py-1 border rounded bg-white">
+              <option value="">All</option>
+              <option value="Pending">Pending</option>
+              <option value="Paid">Paid</option>
+              <option value="Not Paid">Not Paid</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="Search id / service..."
+              class="text-xs px-2 py-1 border rounded w-48 bg-white"
+            />
+            <button @click="refresh" class="text-xs px-2 py-1 bg-gray-100 border rounded">Refresh</button>
+          </div>
+        </div>
+
+        <!-- Invoices grid / list (compact) -->
+        <section class="mt-3">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            <template v-if="filteredInvoices.length">
+              <article
+                v-for="inv in filteredInvoices"
+                :key="inv.id"
+                class="bg-white border border-gray-200 p-2 rounded-lg shadow-sm hover:shadow-md cursor-pointer flex flex-col justify-between"
                 @click="goToInvoices"
               >
-                <div class="flex justify-between items-start">
-                  <div class="flex items-center gap-2">
-                    <FileText class="w-4 h-4 text-blue-500" />
-                    <span class="text-xs sm:text-sm font-medium text-gray-700 truncate">
-                      {{ invoice.services?.map(s => s.serviceName).join(', ') || 'N/A' }}
-                    </span>
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <div class="text-[11px] font-semibold text-gray-800 truncate">
+                      {{ inv.shortId || '—' }}
+                    </div>
+                    <div class="text-[11px] text-gray-600 truncate">
+                      {{ inv.services?.map(s => s.serviceName).join(', ') || 'No services' }}
+                    </div>
                   </div>
-                  <span
-                    :class="[ 
-                      'inline-block px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold',
-                      invoice.status?.toLowerCase() === 'paid'
-                        ? 'bg-green-100 text-green-700'
-                        : invoice.status?.toLowerCase() === 'not paid'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-yellow-100 text-yellow-700'
-                    ]"
-                  >
-                    {{ invoice.status }}
-                  </span>
+
+                  <div class="text-right flex-shrink-0">
+                    <div class="text-[11px] font-semibold text-green-700">{{ formatCurrency(calculateInvoiceTotal(inv)) }}</div>
+                    <div>
+                      <span
+                        :class="badgeClass(inv.status)"
+                        class="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                      >
+                        {{ inv.status }}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
 
-              <!-- Empty State -->
-              <div v-if="invoices.length === 0" class="col-span-full flex flex-col items-center justify-center py-8">
-                <div class="text-3xl mb-2">📄</div>
-                <p class="text-gray-600 font-medium text-sm">No invoices found</p>
-                <p class="text-gray-400 text-xs mt-1">Please check back later or create a new invoice</p>
-              </div>
-            </div>
-
-            <!-- Mobile List -->
-            <div class="sm:hidden space-y-2">
-              <div
-                v-for="(invoice, index) in invoices"
-                :key="invoice.id"
-                class="bg-white border border-gray-200 rounded-xl p-2 shadow-sm cursor-pointer hover:shadow-md transition"
-                @click="goToInvoices"
-              >
-                <div class="flex justify-between items-start">
-                  <ul class="list-disc list-inside text-gray-700 text-xs sm:text-sm flex-1">
-                    <li v-for="service in invoice.services" :key="service.serviceName" class="truncate">
-                      {{ service.serviceName }}
-                    </li>
-                  </ul>
-                  <span
-                    :class="[ 
-                      'inline-block px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold',
-                      invoice.status?.toLowerCase() === 'paid'
-                        ? 'bg-green-100 text-green-700'
-                        : invoice.status?.toLowerCase() === 'not paid'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-yellow-100 text-yellow-700'
-                    ]"
-                  >
-                    {{ invoice.status }}
-                  </span>
+                <div class="mt-2 flex items-center justify-between text-[11px] text-gray-500">
+                  <div>{{ formattedDate(inv.createdAt) }}</div>
+                  <div class="text-right">{{ inv.email ? maskEmail(inv.email) : '' }}</div>
                 </div>
-                <div v-if="index !== invoices.length - 1" class="border-t border-gray-200 mt-1"></div>
-              </div>
+              </article>
+            </template>
 
-              <!-- Empty State -->
-              <div v-if="invoices.length === 0" class="py-6 flex flex-col items-start">
-                <div class="text-3xl mb-1">📄</div>
-                <p class="text-gray-600 font-medium text-sm">No invoices found</p>
-                <p class="text-gray-400 text-xs mt-1">Please check back later or create a new invoice</p>
-              </div>
+            <!-- empty -->
+            <div v-if="filteredInvoices.length === 0" class="col-span-full bg-white border border-dashed border-gray-200 p-3 rounded-lg text-center text-sm text-gray-500">
+              No invoices found
             </div>
-          </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- small welcome toast (compact) -->
+    <transition name="fade">
+      <div
+        v-if="showWelcomePopup"
+        class="fixed top-4 right-4 z-50 bg-white border border-gray-200 px-3 py-2 rounded-md text-xs flex items-center gap-2 shadow"
+      >
+        <CheckCircle class="w-4 h-4 text-green-600" />
+        <div>
+          <div class="font-medium text-gray-800">Welcome</div>
+          <div class="text-[11px] text-gray-500">You're logged in</div>
         </div>
       </div>
-    </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import Topbar from "@/components/topbar.vue";
-import Sidebar from "@/components/Sidebar.vue";
-import LoadingAnimation from "@/components/loading_animation.vue";
-import { ref } from "vue";
+/* Compact dashboard — Option B */
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { db } from "@/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { FileText, AlertTriangle, Clock, Wallet, CheckCircle } from "lucide-vue-next";
+import { db } from "@/firebase";
+import LoadingAnimation from "@/components/loading_animation.vue";
+import Topbar from "@/components/topbar.vue";
+import Sidebar from "@/components/Sidebar.vue";
 
-const invoices = ref([]);
-const paidClaims = ref(0);
-const unpaidClaims = ref(0);
-const overdueCount = ref(0);
-const unpaidTotalAmount = ref(0);
-const loadingInvoices = ref(true);
-const isMobileSidebarOpen = ref(false);
-const showWelcomePopup = ref(false);
+import {
+  FileText,
+  AlertTriangle,
+  Clock,
+  Wallet,
+  CheckCircle,
+} from "lucide-vue-next";
 
 const router = useRouter();
 const auth = getAuth();
 
+const invoices = ref([]);
+const loading = ref(true);
+const unpaidTotalAmount = ref(0);
+const unpaidClaims = ref(0);
+const paidClaims = ref(0);
+const overdueCount = ref(0);
+const isMobileSidebarOpen = ref(false);
+const showWelcomePopup = ref(false);
+
+const filterStatus = ref("");
+const searchQuery = ref("");
+
+/* Fetch invoices for current user */
 const fetchInvoicesByEmail = async (email) => {
-  loadingInvoices.value = true;
+  loading.value = true;
   try {
     const q = query(collection(db, "invoices"), where("email", "==", email));
-    const snapshot = await getDocs(q);
-    const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const snap = await getDocs(q);
+    const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
+    // compact sort: newest first by createdAt or fallback to id
     docs.sort((a, b) => {
-      const order = (status) => {
-        if (!status) return 3;
-        const s = status.toLowerCase();
-        if (s === "not paid") return 0;
-        if (s === "pending") return 1;
-        if (s === "paid") return 2;
-        return 3;
-      };
-      return order(a.status) - order(b.status);
+      const ta = a.createdAt?.seconds || a.createdAt?._seconds || 0;
+      const tb = b.createdAt?.seconds || b.createdAt?._seconds || 0;
+      return tb - ta;
     });
 
     invoices.value = docs;
 
-    paidClaims.value = 0;
-    unpaidClaims.value = 0;
-    overdueCount.value = 0;
+    // compute small metrics
     unpaidTotalAmount.value = 0;
+    unpaidClaims.value = 0;
+    paidClaims.value = 0;
+    overdueCount.value = 0;
 
-    const today = new Date();
-    for (const invoice of docs) {
-      const status = (invoice.status || "").toLowerCase();
-      const amount = Number(invoice.totalAmount) || 0;
-      const rawDate = invoice.date;
-      const dueDate =
-        rawDate?.toDate?.() || (typeof rawDate === "string" ? new Date(rawDate) : null);
-
-      if (status === "paid") {
-        paidClaims.value += 1;
-      } else {
-        unpaidClaims.value += 1;
-        unpaidTotalAmount.value += amount;
-        if (dueDate && dueDate < today) {
-          overdueCount.value += 1;
-        }
+    const now = new Date();
+    for (const inv of docs) {
+      const status = (inv.status || "").toLowerCase();
+      const amt = Number(inv.totalAmount || inv.services?.reduce((s, it) => s + (it.amount || 0), 0) || 0);
+      if (status === "paid") paidClaims.value++;
+      else {
+        unpaidClaims.value++;
+        unpaidTotalAmount.value += amt;
       }
+      const raw = inv.date;
+      const due = raw?.toDate?.() || (typeof raw === "string" ? new Date(raw) : null);
+      if (due && due < now && status !== "paid") overdueCount.value++;
     }
   } catch (err) {
-    console.error("❌ Error fetching invoices:", err);
+    console.error("Error fetching invoices", err);
   } finally {
-    loadingInvoices.value = false;
+    loading.value = false;
   }
 };
 
-const goToInvoices = () => {
-  router.push("/invoices");
+onMounted(() => {
+  onAuthStateChanged(auth, async (user) => {
+    if (user?.email) {
+      await fetchInvoicesByEmail(user.email);
+      showWelcomePopup.value = true;
+      setTimeout(() => (showWelcomePopup.value = false), 2000);
+    } else {
+      invoices.value = [];
+      loading.value = false;
+    }
+  });
+});
+
+/* Utilities */
+const calculateInvoiceTotal = (inv) => {
+  return inv.services?.reduce((s, it) => s + (Number(it.amount) || 0), 0) || Number(inv.totalAmount || 0);
 };
 
-onAuthStateChanged(auth, (user) => {
+const formattedDate = (ts) => {
+  if (!ts) return "-";
+  if (ts?.toDate) return ts.toDate().toISOString().split("T")[0];
+  if (typeof ts === "string") return new Date(ts).toISOString().split("T")[0];
+  return new Date(ts.seconds ? ts.seconds * 1000 : ts).toISOString().split("T")[0];
+};
+
+const formatCurrency = (n) => {
+  const v = Number(n || 0);
+  return v.toLocaleString("en-US", { minimumFractionDigits: 2 });
+};
+
+const maskEmail = (e) => {
+  if (!e) return "";
+  const [name, domain] = e.split("@");
+  const short = name.length > 2 ? name.slice(0, 2) + "…" : name;
+  return `${short}@${domain}`;
+};
+
+const badgeClass = (status) => {
+  const s = (status || "").toLowerCase();
+  if (s === "paid") return "bg-green-100 text-green-700";
+  if (s === "not paid") return "bg-red-100 text-red-700";
+  return "bg-yellow-100 text-yellow-700";
+};
+
+const goToInvoices = () => router.push("/invoices");
+const refresh = async () => {
+  const user = auth.currentUser;
   if (user?.email) {
-    fetchInvoicesByEmail(user.email);
-    showWelcomePopup.value = true;
-    setTimeout(() => {
-      showWelcomePopup.value = false;
-    }, 3000);
-  } else {
-    invoices.value = [];
-    paidClaims.value = 0;
-    unpaidClaims.value = 0;
-    overdueCount.value = 0;
-    unpaidTotalAmount.value = 0;
+    await fetchInvoicesByEmail(user.email);
   }
+};
+
+const filteredInvoices = computed(() => {
+  const qs = searchQuery.value.toLowerCase().trim();
+  const status = filterStatus.value.toLowerCase().trim();
+  return invoices.value.filter((inv) => {
+    if (status && (inv.status || "").toLowerCase() !== status) return false;
+    if (!qs) return true;
+    const svc = (inv.services || []).map((s) => s.serviceName).join(" ").toLowerCase();
+    return (inv.shortId || "").toLowerCase().includes(qs) || svc.includes(qs) || (inv.email || "").toLowerCase().includes(qs);
+  });
 });
 </script>
 
 <style scoped>
-/* Animation for popup */
-.slide-fade-enter-active {
-  transition: all 0.3s ease;
+/* compact styles */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.18s ease;
 }
-.slide-fade-leave-active {
-  transition: all 0.3s ease;
-}
-.slide-fade-enter-from,
-.slide-fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
-  transform: translateY(-6px);
 }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fadeIn { animation: fadeIn 0.3s ease-out; }
 </style>

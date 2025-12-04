@@ -14,10 +14,7 @@
 
       <!-- Email Input -->
       <div class="mb-5">
-        <label
-          for="email"
-          class="block text-sm font-medium text-gray-800 mb-1"
-        >
+        <label for="email" class="block text-sm font-medium text-gray-800 mb-1">
           Email Address
         </label>
         <input
@@ -63,16 +60,14 @@
 import { ref } from "vue";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 
-// Reactive state
 const email = ref("");
 const message = ref("");
 const errorMessage = ref("");
 
-// Reset password function
+// Reset password
 const resetPassword = async () => {
   const auth = getAuth();
 
-  // --- Safety check ---
   if (!email.value) {
     errorMessage.value = "Please enter your email.";
     message.value = "";
@@ -80,10 +75,8 @@ const resetPassword = async () => {
   }
 
   try {
-    await sendPasswordResetEmail(auth, email.value, {
-      url: "https://yourdomain.web.app/login", // 🔥 IMPORTANT: replace with your hosted domain or localhost URL
-      handleCodeInApp: true,
-    });
+    // FIXED — remove action settings
+    await sendPasswordResetEmail(auth, email.value);
 
     message.value =
       "✅ Password reset link sent! Please check your email inbox or spam folder.";

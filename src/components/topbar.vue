@@ -1,32 +1,32 @@
 <template>
   <header class="bg-gradient-to-r from-green-400 via-green-500 to-green-600 shadow-md relative z-10">
     <div class="w-full px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
+      <div class="flex justify-between items-center h-12 sm:h-14 md:h-16">
 
         <!-- Page Title -->
-        <div class="font-bold text-white text-lg sm:text-xl md:text-2xl capitalize drop-shadow">
+        <div class="font-bold text-white text-base sm:text-lg md:text-xl capitalize drop-shadow truncate">
           {{ pageTitle }}
         </div>
 
         <!-- Topbar Icons -->
-        <nav class="flex gap-6 text-white relative items-center">
+        <nav class="flex gap-4 sm:gap-5 text-white relative items-center">
           <!-- Feedback -->
           <button @click="showModal = true" title="Feedback">
-            <ChatBubbleBottomCenterTextIcon class="w-6 h-6 text-white hover:scale-110 transition" />
+            <ChatBubbleBottomCenterTextIcon class="w-5 h-5 sm:w-6 sm:h-6 text-white hover:scale-110 transition" />
           </button>
 
           <!-- Upload File -->
           <button @click="showDocumentModal = true" title="Upload File">
-            <DocumentArrowUpIcon class="w-6 h-6 text-white hover:scale-110 transition" />
+            <DocumentArrowUpIcon class="w-5 h-5 sm:w-6 sm:h-6 text-white hover:scale-110 transition" />
           </button>
 
           <!-- Notifications -->
           <div class="relative z-50" ref="notifRef">
             <button @click="toggleNotifDropdown" title="Notifications">
-              <BellIcon class="w-6 h-6 text-white hover:rotate-12 transition" />
+              <BellIcon class="w-5 h-5 sm:w-6 sm:h-6 text-white hover:rotate-12 transition" />
               <span
                 v-if="notifications.length"
-                class="absolute -top-1 -right-1 bg-red-600 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center"
+                class="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] sm:text-xs w-3 h-3 sm:w-4 sm:h-4 rounded-full flex items-center justify-center"
               >
                 {{ notifications.length }}
               </span>
@@ -37,7 +37,7 @@
             <transition name="fade">
               <div
                 v-if="notifDropdownOpen"
-                class="absolute right-0 mt-2 w-64 max-h-80 overflow-y-auto border border-gray-200 rounded-md shadow-lg z-50 bg-white"
+                class="absolute right-0 mt-2 w-60 sm:w-64 max-h-72 sm:max-h-80 overflow-y-auto border border-gray-200 rounded-md shadow-lg z-50 bg-white"
               >
                 <div v-if="!notifications.length" class="text-gray-600 text-sm p-3">No new notifications.</div>
                 <div
@@ -62,26 +62,26 @@
 
     <!-- Feedback Modal -->
     <div v-if="showModal" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
-      <div class="bg-white text-gray-800 rounded-lg w-full max-w-lg shadow-lg p-6">
-        <h2 class="text-xl font-bold mb-4">Send Feedback</h2>
-        <form @submit.prevent="sendFeedback" class="space-y-4">
+      <div class="bg-white text-gray-800 rounded-lg w-full max-w-md sm:max-w-lg shadow-lg p-4 sm:p-6">
+        <h2 class="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Send Feedback</h2>
+        <form @submit.prevent="sendFeedback" class="space-y-3 sm:space-y-4">
           <textarea
             v-model="newMessage"
             rows="3"
             placeholder="Your message..."
-            class="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-800 bg-white"
+            class="w-full border rounded px-2 sm:px-3 py-1 sm:py-2 focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-800 bg-white text-sm sm:text-base"
           ></textarea>
-          <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 sm:gap-3">
             <input ref="imageInput" type="file" accept="image/*" class="hidden" @change="handleImageUpload" />
-            <button type="button" @click="imageInput.click()" class="text-green-600 hover:underline">Upload Image</button>
-            <span v-if="imageFile?.name" class="text-sm text-gray-500">{{ imageFile.name }}</span>
+            <button type="button" @click="imageInput.click()" class="text-green-600 hover:underline text-sm sm:text-base">Upload Image</button>
+            <span v-if="imageFile?.name" class="text-xs sm:text-sm text-gray-500 truncate">{{ imageFile.name }}</span>
           </div>
-          <div class="flex justify-end gap-3">
-            <button type="button" @click="showModal = false" class="text-gray-600 hover:underline">Cancel</button>
+          <div class="flex justify-end gap-2 sm:gap-3">
+            <button type="button" @click="showModal = false" class="text-gray-600 hover:underline text-sm sm:text-base">Cancel</button>
             <button
               type="submit"
               :disabled="loading || (!newMessage && !imageFile)"
-              class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+              class="bg-green-600 text-white px-3 py-1 sm:px-4 sm:py-2 rounded hover:bg-green-700 disabled:opacity-50 text-sm sm:text-base"
             >
               <span v-if="loading">Sending...</span>
               <span v-else>Send</span>
@@ -93,14 +93,14 @@
 
     <!-- Document Upload Modal -->
     <div v-if="showDocumentModal" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
-      <div class="bg-white text-gray-800 rounded-lg w-full max-w-lg shadow-lg p-6">
-        <h2 class="text-xl font-bold mb-4">Upload Financial Document</h2>
-        <form @submit.prevent="uploadDocument" class="space-y-4">
-          <input ref="fileInput" type="file" class="w-full border rounded px-3 py-2 text-sm" @change="handleFileSelect" />
-          <textarea v-model="docDescription" placeholder="Optional description..." class="w-full border rounded px-3 py-2 text-sm"></textarea>
-          <div class="flex justify-end gap-3">
-            <button type="button" @click="showDocumentModal = false" class="text-gray-600 hover:underline">Cancel</button>
-            <button type="submit" :disabled="!selectedFile || uploading" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 disabled:opacity-50">
+      <div class="bg-white text-gray-800 rounded-lg w-full max-w-md sm:max-w-lg shadow-lg p-4 sm:p-6">
+        <h2 class="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Upload Financial Document</h2>
+        <form @submit.prevent="uploadDocument" class="space-y-3 sm:space-y-4">
+          <input ref="fileInput" type="file" class="w-full border rounded px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base" @change="handleFileSelect" />
+          <textarea v-model="docDescription" placeholder="Optional description..." class="w-full border rounded px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base"></textarea>
+          <div class="flex justify-end gap-2 sm:gap-3">
+            <button type="button" @click="showDocumentModal = false" class="text-gray-600 hover:underline text-sm sm:text-base">Cancel</button>
+            <button type="submit" :disabled="!selectedFile || uploading" class="bg-purple-600 text-white px-3 py-1 sm:px-4 sm:py-2 rounded hover:bg-purple-700 disabled:opacity-50 text-sm sm:text-base">
               <span v-if="uploading">Uploading...</span>
               <span v-else>Upload</span>
             </button>
@@ -132,30 +132,22 @@ import {
   getDocs,
   deleteDoc
 } from 'firebase/firestore'
-import {
-  ref as sRef,
-  uploadBytes,
-  getDownloadURL
-} from 'firebase/storage'
+import { ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 
 const auth = getAuth()
 const route = useRoute()
 const user = auth.currentUser
 const userEmail = user?.email || ''
 
-// Dropdown + modal states
 const notifDropdownOpen = ref(false)
 const notifRef = ref(null)
-
 const showModal = ref(false)
 const showDocumentModal = ref(false)
-
 const newMessage = ref('')
 const imageFile = ref(null)
 const imageInput = ref(null)
 const loading = ref(false)
 const notifications = ref([])
-
 const selectedFile = ref(null)
 const docDescription = ref('')
 const uploading = ref(false)
@@ -179,11 +171,8 @@ const pageTitle = computed(() => {
   return routeMap[route.path] || 'Page'
 })
 
-// Click outside dropdowns
 const handleClickOutside = (e) => {
-  if (notifRef.value && !notifRef.value.contains(e.target)) {
-    notifDropdownOpen.value = false
-  }
+  if (notifRef.value && !notifRef.value.contains(e.target)) notifDropdownOpen.value = false
 }
 
 onMounted(() => {
@@ -208,9 +197,7 @@ onBeforeUnmount(() => {
 // Feedback
 const handleImageUpload = (e) => {
   const file = e.target.files[0]
-  if (file && file.type.startsWith('image/')) {
-    imageFile.value = file
-  }
+  if (file && file.type.startsWith('image/')) imageFile.value = file
 }
 
 const sendFeedback = async () => {
@@ -247,9 +234,7 @@ const sendFeedback = async () => {
 }
 
 // Document Upload
-const handleFileSelect = (e) => {
-  selectedFile.value = e.target.files[0] || null
-}
+const handleFileSelect = (e) => selectedFile.value = e.target.files[0] || null
 
 const uploadDocument = async () => {
   if (!selectedFile.value) return
@@ -268,7 +253,6 @@ const uploadDocument = async () => {
       createdAt: serverTimestamp()
     })
 
-    // Reset form
     selectedFile.value = null
     docDescription.value = ''
     if (fileInput.value) fileInput.value.value = ''

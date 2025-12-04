@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen w-full bg-gray-50 overflow-hidden">
+  <div class="h-screen w-full bg-gray-50 overflow-hidden flex flex-col">
     <!-- Fixed Topbar -->
     <div
       class="fixed top-0 left-0 right-0 z-30 transition-all duration-300"
@@ -11,8 +11,7 @@
       <Topbar @toggle-sidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
     </div>
 
-    <!-- Body -->
-    <div class="flex pt-16 h-full relative">
+    <div class="flex flex-1 pt-16 h-full relative">
       <!-- Sidebar -->
       <Sidebar
         :isMobileSidebarOpen="isMobileSidebarOpen"
@@ -31,7 +30,7 @@
         class="flex-1 overflow-y-auto p-4 sm:p-6 transition-all duration-300"
         :class="{ 'blur-sm': isMobileSidebarOpen }"
       >
-        <div class="bg-white rounded-lg shadow p-4 sm:p-6 border border-gray-300 max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow p-4 sm:p-6 border border-gray-300 max-w-4xl mx-auto animate-fade-in">
           <!-- Loading -->
           <div v-if="loading" class="flex justify-center py-16">
             <LoadingAnimation />
@@ -40,7 +39,7 @@
           <!-- Profile Content -->
           <template v-else>
             <!-- Profile Header -->
-            <div class="flex flex-col items-center mb-6 text-center">
+            <div class="flex flex-col items-center mb-6 text-center gap-2">
               <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center border border-gray-300">
                 <img
                   v-if="profileImageUrl"
@@ -52,25 +51,48 @@
                   {{ username.charAt(0).toUpperCase() }}
                 </div>
               </div>
-              <h2 class="text-2xl font-bold text-gray-800 mt-3">My Profile</h2>
+              <h2 class="text-2xl font-bold text-gray-800">My Profile</h2>
               <p class="text-sm text-gray-500">Manage your account information</p>
             </div>
 
-            <!-- Profile Details (Left-aligned) -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-gray-700 text-sm text-left">
-              <div><span class="font-semibold">Username:</span> {{ username || "Not provided" }}</div>
-              <div><span class="font-semibold">Email:</span> {{ email || "Not provided" }}</div>
-              <div><span class="font-semibold">Full Name:</span> {{ completeName || "Not provided" }}</div>
-              <div><span class="font-semibold">Age:</span> {{ age || "Not provided" }}</div>
-              <div><span class="font-semibold">Birthday:</span> {{ birthday || "Not provided" }}</div>
-              <div><span class="font-semibold">Phone:</span> {{ cellphone || "Not provided" }}</div>
-              <div><span class="font-semibold">Gender:</span> {{ gender || "Not provided" }}</div>
-              <div><span class="font-semibold">Address:</span> {{ address || "Not provided" }}</div>
-              <div class="sm:col-span-2">
+            <!-- Profile Details -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-gray-700 text-sm">
+              <div class="flex items-center gap-2">
+                <User class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <span class="font-semibold">Username:</span> {{ username || "Not provided" }}
+              </div>
+              <div class="flex items-center gap-2">
+                <Mail class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <span class="font-semibold">Email:</span> {{ email || "Not provided" }}
+              </div>
+              <div class="flex items-center gap-2">
+                <UserCheck class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <span class="font-semibold">Full Name:</span> {{ completeName || "Not provided" }}
+              </div>
+              <div class="flex items-center gap-2">
+                <Calendar class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <span class="font-semibold">Birthday:</span> {{ birthday || "Not provided" }}
+              </div>
+              <div class="flex items-center gap-2">
+                <Smartphone class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <span class="font-semibold">Phone:</span> {{ cellphone || "Not provided" }}
+              </div>
+              <div class="flex items-center gap-2">
+                <User class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <span class="font-semibold">Age:</span> {{ age || "Not provided" }}
+              </div>
+              <div class="flex items-center gap-2">
+                <Users class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <span class="font-semibold">Gender:</span> {{ gender || "Not provided" }}
+              </div>
+              <div class="flex items-center gap-2">
+                <MapPin class="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <span class="font-semibold">Address:</span> {{ address || "Not provided" }}
+              </div>
+              <div class="sm:col-span-2 flex items-center gap-2">
+                <Circle class="w-3 h-3" :class="status === 'active' ? 'text-green-600' : 'text-red-600'" />
                 <span class="font-semibold">Status:</span>
-                <span
-                  :class="status === 'active' ? 'text-green-600 font-medium' : 'text-red-600 font-medium'"
-                >
+                <span :class="status === 'active' ? 'text-green-600 font-medium' : 'text-red-600 font-medium'">
                   {{ status }}
                 </span>
               </div>
@@ -80,17 +102,16 @@
             <div class="mt-6 flex flex-col sm:flex-row justify-center items-center gap-3">
               <router-link
                 to="/edit_profile"
-                class="w-full sm:w-auto text-center px-5 py-2.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition"
+                class="w-full sm:w-auto text-center px-5 py-2.5 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2"
               >
-                Edit Profile
+                <Edit3 class="w-4 h-4" /> Edit Profile
               </router-link>
 
-              <!-- Logout Button -->
               <button
                 @click="logout"
-                class="w-full sm:w-auto text-center px-5 py-2.5 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition"
+                class="w-full sm:w-auto text-center px-5 py-2.5 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition flex items-center justify-center gap-2"
               >
-                Logout
+                <LogOut class="w-4 h-4" /> Logout
               </button>
             </div>
 
@@ -114,6 +135,18 @@ import Sidebar from "@/components/Sidebar.vue";
 import Topbar from "@/components/topbar.vue";
 import LoadingAnimation from "@/components/loading_animation.vue";
 import { useRouter } from "vue-router";
+import {
+  User,
+  Mail,
+  UserCheck,
+  Calendar,
+  Smartphone,
+  Users,
+  MapPin,
+  Circle,
+  Edit3,
+  LogOut,
+} from "lucide-vue-next";
 
 const router = useRouter();
 
@@ -199,10 +232,9 @@ onUnmounted(() => {
 });
 </script>
 
-<style>
-/* optional fade-in animation for main content */
+<style scoped>
 .animate-fade-in {
-  animation: fadeIn 0.4s ease-out;
+  animation: fadeIn 0.35s ease-out;
 }
 @keyframes fadeIn {
   from {
