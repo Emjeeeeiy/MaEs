@@ -47,53 +47,56 @@
         <!-- Overview (compact cards) -->
         <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
           <!-- Not paid -->
-          <div class="flex items-center gap-3 bg-white border border-gray-200 p-2 rounded-lg shadow-sm">
-            <div class="flex items-center justify-center w-10 h-10 rounded-md bg-red-50">
-              <AlertTriangle class="w-5 h-5 text-red-600" />
+          <div
+            class="flex items-center gap-3 bg-white border border-gray-200 p-2 md:p-4 rounded-lg shadow-sm"
+          >
+            <div class="flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-md bg-red-50">
+              <AlertTriangle class="w-5 h-5 md:w-7 md:h-7 text-red-600" />
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between">
                 <div>
-                  <div class="text-[10px] text-red-700 font-semibold">Not Paid</div>
-                  <div class="text-base font-bold text-red-800">₱{{ unpaidTotalAmount.toLocaleString('en-US',{minimumFractionDigits:2}) }}</div>
+                  <div class="text-[10px] md:text-sm text-red-700 font-semibold">Not Paid</div>
+                  <div class="text-base md:text-lg font-bold text-red-800">₱{{ unpaidTotalAmount.toLocaleString('en-US',{minimumFractionDigits:2}) }}</div>
                 </div>
-                <div class="text-right text-[11px] text-gray-500">{{ unpaidClaims }} open</div>
+                <div class="text-right text-[11px] md:text-sm text-gray-500">{{ unpaidClaims }} open</div>
               </div>
             </div>
           </div>
 
-          <!-- Unpaid claims count -->
-          <div class="flex items-center gap-3 bg-white border border-gray-200 p-2 rounded-lg shadow-sm">
-            <div class="flex items-center justify-center w-10 h-10 rounded-md bg-yellow-50">
-              <Clock class="w-5 h-5 text-yellow-600" />
+          <!-- Pending -->
+          <div class="flex items-center gap-3 bg-white border border-gray-200 p-2 md:p-4 rounded-lg shadow-sm">
+            <div class="flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-md bg-yellow-50">
+              <Clock class="w-5 h-5 md:w-7 md:h-7 text-yellow-600" />
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between">
                 <div>
-                  <div class="text-[10px] text-yellow-700 font-semibold">Pending</div>
-                  <div class="text-base font-bold text-yellow-700">{{ unpaidClaims }}</div>
+                  <div class="text-[10px] md:text-sm text-yellow-700 font-semibold">Pending</div>
+                  <div class="text-base md:text-lg font-bold text-yellow-700">{{ unpaidClaims }}</div>
                 </div>
-                <div class="text-right text-[11px] text-gray-500">{{ overdueCount }} overdue</div>
+                <div class="text-right text-[11px] md:text-sm text-gray-500">{{ overdueCount }} overdue</div>
               </div>
             </div>
           </div>
 
-          <!-- Paid claims -->
-          <div class="flex items-center gap-3 bg-white border border-gray-200 p-2 rounded-lg shadow-sm">
-            <div class="flex items-center justify-center w-10 h-10 rounded-md bg-green-50">
-              <Wallet class="w-5 h-5 text-green-600" />
+          <!-- Paid -->
+          <div class="flex items-center gap-3 bg-white border border-gray-200 p-2 md:p-4 rounded-lg shadow-sm">
+            <div class="flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-md bg-green-50">
+              <Wallet class="w-5 h-5 md:w-7 md:h-7 text-green-600" />
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between">
                 <div>
-                  <div class="text-[10px] text-green-700 font-semibold">Paid</div>
-                  <div class="text-base font-bold text-green-700">{{ paidClaims }}</div>
+                  <div class="text-[10px] md:text-sm text-green-700 font-semibold">Paid</div>
+                  <div class="text-base md:text-lg font-bold text-green-700">{{ paidClaims }}</div>
                 </div>
-                <div class="text-right text-[11px] text-gray-500">recent</div>
+                <div class="text-right text-[11px] md:text-sm text-gray-500">recent</div>
               </div>
             </div>
           </div>
         </section>
+
 
         <!-- Compact controls row -->
         <div class="mt-3 flex items-center justify-between gap-3">

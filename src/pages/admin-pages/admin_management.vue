@@ -1,76 +1,86 @@
 <template>
   <div class="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
-    <!-- ✅ Topbar -->
-    <div class="fixed top-0 left-0 right-0 z-30 shadow bg-white/90 backdrop-blur-md border-b border-gray-200">
+    <!-- Topbar -->
+    <div class="fixed top-0 left-0 right-0 z-30">
       <AdminTopbar />
     </div>
 
-    <div class="flex pt-16">
-      <!-- ✅ Sidebar -->
-      <aside class="hidden md:block w-64 flex-shrink-0 border-r border-gray-200 bg-white/90 backdrop-blur-md h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar shadow-sm">
+    <div class="flex pt-14">
+      <!-- Sidebar -->
+      <aside>
         <AdminSidebar />
       </aside>
 
-      <!-- ✅ Main Content -->
-      <main class="flex-1 overflow-y-auto p-6 space-y-6 h-[calc(100vh-4rem)] custom-scrollbar">
+      <!-- Main Content -->
+      <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 h-[calc(100vh-3.5rem)] custom-scrollbar">
         <!-- Error Message -->
-        <div v-if="errorMessage" class="border border-red-400 bg-red-100 text-red-800 p-3 rounded">
+        <div v-if="errorMessage" class="border border-red-400 bg-red-100 text-red-800 p-2 rounded text-sm">
           {{ errorMessage }}
         </div>
 
-        <!-- User Table -->
-        <div v-if="users.length" class="border border-gray-300 bg-white rounded-lg overflow-hidden shadow-sm">
+        <!-- Users Table -->
+        <div v-if="users.length" class="border border-gray-300 bg-white rounded-lg shadow-sm overflow-hidden">
           <table class="w-full text-sm border-collapse">
-            <thead class="bg-gray-200 text-gray-800 text-xs font-bold uppercase">
+            <thead class="bg-gray-200 text-gray-800 text-xs font-semibold uppercase">
               <tr>
-                <th class="px-4 py-2 text-left border-b border-gray-300">Username</th>
-                <th class="px-4 py-2 text-left border-b border-gray-300">Email</th>
-                <th class="px-4 py-2 text-left border-b border-gray-300">Role</th>
-                <th class="px-4 py-2 text-left border-b border-gray-300">Status</th>
-                <th class="px-4 py-2 text-left border-b border-gray-300">Last Active</th>
-                <th class="px-4 py-2 text-left border-b border-gray-300">Actions</th>
+                <th class="px-3 py-2 text-left border-b border-gray-300">Username</th>
+                <th class="px-3 py-2 text-left border-b border-gray-300">Email</th>
+                <th class="px-3 py-2 text-left border-b border-gray-300">Role</th>
+                <th class="px-3 py-2 text-left border-b border-gray-300">Status</th>
+                <th class="px-3 py-2 text-left border-b border-gray-300">Last Active</th>
+                <th class="px-3 py-2 text-left border-b border-gray-300">Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="user in users" :key="user.id" class="border-b border-gray-200 hover:bg-gray-50 transition">
-                <td class="px-4 py-2">{{ user.username || "Unknown" }}</td>
-                <td class="px-4 py-2">{{ user.email }}</td>
-                <td class="px-4 py-2">
+              <tr
+                v-for="user in users"
+                :key="user.id"
+                class="border-b border-gray-200 hover:bg-gray-50 transition"
+              >
+                <td class="px-3 py-2 flex items-center gap-2">
+                  <User2Icon class="w-4 h-4 text-gray-500" />
+                  <span>{{ user.username || "Unknown" }}</span>
+                </td>
+                <td class="px-3 py-2">{{ user.email }}</td>
+                <td class="px-3 py-2">
                   <select
                     v-model="user.role"
                     @change="updateUserRole(user)"
-                    class="border border-gray-400 text-sm px-2 py-1 rounded"
+                    class="border border-gray-300 text-xs px-2 py-1 rounded"
                   >
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
                   </select>
                 </td>
-                <td class="px-4 py-2">
-                  <span :class="user.status === 'deactivated' ? 'text-red-600' : 'text-green-600'">
+                <td class="px-3 py-2">
+                  <span
+                    :class="user.status === 'deactivated' ? 'text-red-600' : 'text-green-600'"
+                    class="font-medium text-xs"
+                  >
                     {{ user.status === 'deactivated' ? 'Deactivated' : 'Active' }}
                   </span>
                 </td>
-                <td class="px-4 py-2">{{ formatLastActive(user.lastActive) }}</td>
-                <td class="px-4 py-2 space-x-2">
+                <td class="px-3 py-2 text-xs">{{ formatLastActive(user.lastActive) }}</td>
+                <td class="px-3 py-2 flex gap-1">
                   <button
                     v-if="user.status === 'active'"
                     @click="confirmDeactivation(user)"
-                    class="px-2 py-1 border border-gray-400 text-xs rounded hover:bg-gray-100 transition"
+                    class="flex items-center gap-1 px-2 py-1 border border-gray-300 rounded text-gray-700 text-xs hover:bg-gray-100 transition"
                   >
-                    Deactivate
+                    <SlashIcon class="w-3 h-3" /> Deactivate
                   </button>
                   <button
                     v-if="user.status === 'deactivated'"
                     @click="confirmReactivation(user)"
-                    class="px-2 py-1 border border-gray-400 text-xs rounded hover:bg-gray-100 transition"
+                    class="flex items-center gap-1 px-2 py-1 border border-gray-300 rounded text-green-600 text-xs hover:bg-green-50 transition"
                   >
-                    Reactivate
+                    <CheckCircleIcon class="w-3 h-3" /> Reactivate
                   </button>
                   <button
                     @click="confirmDeletion(user.id)"
-                    class="px-2 py-1 border border-red-400 text-xs rounded text-red-600 hover:bg-red-100 transition"
+                    class="flex items-center gap-1 px-2 py-1 border border-red-400 text-red-600 rounded text-xs hover:bg-red-100 transition"
                   >
-                    Delete
+                    <Trash2Icon class="w-3 h-3" /> Delete
                   </button>
                 </td>
               </tr>
@@ -78,21 +88,9 @@
           </table>
         </div>
 
-        <!-- No Users -->
-        <div v-else class="flex flex-col items-center justify-center mt-12 text-gray-600">
-          <svg
-            class="w-16 h-16 mb-4"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            viewBox="0 0 24 24"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0M2.25 12a9.75 9.75 0 1119.5 0 9.75 9.75 0 01-19.5 0z"
-            />
-          </svg>
+        <!-- Empty State -->
+        <div v-else class="flex flex-col items-center justify-center mt-12 text-gray-500">
+          <UsersIcon class="w-12 h-12 mb-2 text-gray-400" />
           <p class="text-sm">No users found in the system.</p>
         </div>
       </main>
@@ -106,11 +104,12 @@ import { auth, db } from "@/firebase";
 import { getDoc, doc, collection, updateDoc, deleteDoc, onSnapshot } from "firebase/firestore";
 import AdminSidebar from "@/components/admin_sidebar.vue";
 import AdminTopbar from "@/components/admintopbar.vue";
+import { User2Icon, Trash2Icon, CheckCircleIcon, SlashIcon, UsersIcon } from "lucide-vue-next";
 
 const users = ref([]);
 const errorMessage = ref("");
 
-// Format timestamp for lastActive
+// Format timestamp
 const formatLastActive = (lastActive) => {
   if (!lastActive) return "Never";
   return new Date(lastActive).toLocaleDateString("en-US", {
@@ -151,7 +150,6 @@ const updateUserRole = async (user) => {
     alert("Cannot change role of a deactivated user.");
     return;
   }
-
   try {
     await updateDoc(doc(db, "users", user.id), { role: user.role });
     alert(`Role updated to ${user.role}`);
@@ -201,3 +199,10 @@ const confirmDeletion = (userId) => {
 
 onMounted(fetchUsers);
 </script>
+
+<style scoped>
+/* Optional: tighter hover transitions for table rows */
+table tbody tr:hover {
+  transition: background-color 0.2s ease;
+}
+</style>

@@ -1,5 +1,5 @@
 <template>
-  <header class="bg-gradient-to-r from-green-400 via-green-500 to-green-600 shadow-md relative z-10">
+  <header class="bg-gradient-to-r from-green-400 via-green-500 to-green-600 relative z-10">
     <div class="w-full px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-12 sm:h-14 md:h-16">
 

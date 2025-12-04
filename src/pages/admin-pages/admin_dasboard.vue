@@ -1,69 +1,55 @@
 <template>
-  <div
-    class="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden"
-  >
-    <!-- ✅ Topbar -->
-    <div
-      class="fixed top-0 left-0 right-0 z-30 shadow bg-white/90 backdrop-blur-md border-b border-gray-200"
-    >
+  <div class="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
+
+    <!-- Topbar -->
+    <div class="fixed top-0 left-0 right-0 z-30">
       <AdminTopbar />
     </div>
 
-    <!-- ✅ Welcome Popup (Top Right) -->
+    <!-- Welcome Popup -->
     <transition name="fade-slide">
-      <div
+      <div 
         v-if="showWelcomePopup"
-        class="fixed top-5 right-5 z-50 bg-white/90 backdrop-blur-md border border-green-200 rounded-2xl shadow-lg px-5 py-4 flex items-center gap-3 animate-popupEntry"
+        class="fixed top-4 right-4 z-50 bg-white/90 backdrop-blur-md border border-green-200 rounded-xl shadow-lg px-4 py-2.5 flex items-center gap-2 animate-popupEntry"
       >
-        <div class="p-2 bg-green-100 text-green-600 rounded-full shadow-inner">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-6 h-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
+        <div class="p-1.5 bg-green-100 text-green-600 rounded-full shadow-inner">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 12c2.28 0 4-1.72 4-4s-1.72-4-4-4-4 1.72-4 4 1.72 4 4 4zM4 20v-1c0-2.28 3.58-4 8-4s8 1.72 8 4v1"
             />
           </svg>
         </div>
         <div>
-          <p class="text-sm text-gray-500 font-medium">👋 Welcome back,</p>
-          <p class="text-base font-semibold text-green-700 tracking-tight">Admin!</p>
+          <p class="text-xs text-gray-500 font-medium">👋 Welcome back,</p>
+          <p class="text-sm font-semibold text-green-700">Admin!</p>
         </div>
       </div>
     </transition>
 
-    <div class="flex pt-16">
-      <!-- ✅ Sidebar -->
-      <aside
-        class="hidden md:block w-64 flex-shrink-0 border-r border-gray-200 bg-white/80 backdrop-blur-xl h-[calc(100vh-4rem)] overflow-y-auto custom-scrollbar shadow-lg"
-      >
+    <div class="flex pt-14">
+
+      <!-- Sidebar -->
+      <aside>
         <AdminSidebar />
       </aside>
 
-      <!-- ✅ Main Content -->
-      <main
-        class="flex-1 p-6 lg:p-10 space-y-12 overflow-y-auto h-[calc(100vh-4rem)] custom-scrollbar"
-      >
-        <!-- Dashboard Summary Cards -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 animate-fadeIn">
-          <div
+      <!-- Main Content -->
+      <main class="flex-1 p-4 lg:p-6 space-y-8 overflow-y-auto h-[calc(100vh-3.5rem)] custom-scrollbar">
+
+        <!-- Dashboard Cards -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fadeIn">
+          <div 
             v-for="(card, i) in dashboardCards"
             :key="i"
-            class="bg-white/90 backdrop-blur-md border border-gray-200 rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+            class="bg-white/90 backdrop-blur-md border border-gray-200 rounded-xl p-4 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
           >
-            <div class="flex items-center gap-5">
-              <div class="p-4 rounded-2xl bg-gradient-to-br from-green-100 to-green-200 text-green-700 shadow-inner">
-                <component :is="card.icon" class="w-7 h-7" />
+            <div class="flex items-center gap-3">
+              <div class="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 text-green-700 shadow-inner">
+                <component :is="card.icon" class="w-6 h-6" />
               </div>
               <div>
-                <p class="text-sm font-medium text-gray-500">{{ card.title }}</p>
-                <p class="text-2xl font-bold text-gray-900 tracking-tight">{{ card.value }}</p>
+                <p class="text-xs font-medium text-gray-500">{{ card.title }}</p>
+                <p class="text-xl font-bold text-gray-900">{{ card.value }}</p>
               </div>
             </div>
           </div>
@@ -71,27 +57,26 @@
 
         <!-- Export Button -->
         <div class="flex justify-end">
-          <button
+          <button 
             @click="exportToExcel"
-            class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-sm font-medium shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300"
+            class="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs font-medium shadow-md hover:shadow-lg active:scale-95 transition"
           >
-            📤 Export Metrics to Excel
+            📤 Export Metrics
           </button>
         </div>
 
         <!-- Charts Section -->
-        <section class="space-y-12 animate-fadeUp">
-          <!-- Revenue Trend Chart -->
-          <div
-            class="border border-gray-200 rounded-2xl p-6 bg-white/90 backdrop-blur-md shadow-md hover:shadow-xl transition-all duration-300 chart-animate"
-          >
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-              <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+        <section class="space-y-10 animate-fadeUp">
+
+          <!-- Revenue Chart -->
+          <div class="border border-gray-200 rounded-xl p-4 bg-white/90 backdrop-blur-md shadow-md hover:shadow-lg transition chart-animate">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+              <h2 class="text-base font-semibold text-gray-800 flex items-center gap-2">
                 📈 Revenue Trend (Daily)
               </h2>
               <select
                 v-model="selectedWeek"
-                class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:outline-none"
+                class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs focus:ring-2 focus:ring-green-500"
               >
                 <option value="">All Weeks</option>
                 <option v-for="week in availableWeeks" :key="week.label" :value="week.label">
@@ -99,70 +84,67 @@
                 </option>
               </select>
             </div>
-            <div class="h-72 sm:h-80 animate-chartEntry">
+            <div class="h-60 sm:h-64 animate-chartEntry">
               <canvas ref="revenueChartRef" class="h-full w-full" />
             </div>
           </div>
 
           <!-- Service Trends -->
-          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <h2 class="text-base font-semibold text-gray-800 flex items-center gap-2">
               📊 Service Trends
             </h2>
-            <button
+            <button 
               @click="showServiceModal = true"
-              class="px-5 py-2 rounded-xl text-sm bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md hover:shadow-lg active:scale-95 transition"
+              class="px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md active:scale-95 transition"
             >
               View Totals
             </button>
           </div>
 
           <!-- Service Charts -->
-          <div
+          <div 
             v-for="(_, index) in serviceChartRefs"
             :key="index"
-            class="border border-gray-200 rounded-2xl p-6 bg-white/90 backdrop-blur-md shadow-md hover:shadow-xl transition-all duration-300 chart-animate"
+            class="border border-gray-200 rounded-xl p-4 bg-white/90 backdrop-blur-md shadow-md hover:shadow-lg transition chart-animate"
           >
-            <h3 class="text-base font-medium mb-4 text-gray-700 flex items-center gap-2">
-              📌 Batch {{ index + 1 }}
-            </h3>
-            <div class="h-72 sm:h-80 animate-chartEntry">
+            <h3 class="text-sm font-medium mb-3 text-gray-700">📌 Batch {{ index + 1 }}</h3>
+            <div class="h-60 sm:h-64 animate-chartEntry">
               <canvas :ref="(el) => (serviceChartRefs[index] = el)" class="h-full w-full" />
             </div>
           </div>
+
         </section>
       </main>
     </div>
 
-    <!-- ✅ Service Totals Modal -->
+    <!-- Service Totals Modal -->
     <transition name="fade">
       <div
         v-if="showServiceModal"
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4"
       >
-        <div
-          class="bg-white/95 w-full max-w-lg p-6 rounded-2xl border border-gray-200 shadow-2xl relative animate-fadeIn"
-        >
-          <h2 class="text-lg font-semibold mb-5 text-gray-800">📋 Service Totals</h2>
-          <button
+        <div class="bg-white/95 w-full max-w-md p-5 rounded-xl border border-gray-200 shadow-2xl relative animate-fadeIn">
+          <h2 class="text-base font-semibold mb-4 text-gray-800">📋 Service Totals</h2>
+          <button 
             @click="showServiceModal = false"
             class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-lg"
-          >
-            ✕
-          </button>
-          <div class="max-h-96 overflow-y-auto space-y-2 custom-scrollbar pr-1">
-            <div
+          >✕</button>
+
+          <div class="max-h-80 overflow-y-auto space-y-2 custom-scrollbar pr-1">
+            <div 
               v-for="(count, service) in sortedServiceTotals"
               :key="service"
-              class="flex justify-between items-center px-4 py-2 border border-gray-100 rounded-lg hover:bg-gray-50 transition"
+              class="flex justify-between items-center px-3 py-1.5 border border-gray-100 rounded-lg hover:bg-gray-50 transition"
             >
-              <span class="text-sm text-gray-600">{{ service }}</span>
-              <span class="font-semibold text-gray-900">{{ count }}</span>
+              <span class="text-xs text-gray-600">{{ service }}</span>
+              <span class="font-semibold text-gray-900 text-sm">{{ count }}</span>
             </div>
           </div>
         </div>
       </div>
     </transition>
+
   </div>
 </template>
 
