@@ -107,6 +107,7 @@
               <option value="Paid">Paid</option>
               <option value="Pending">Pending</option>
               <option value="Not Paid">Not Paid</option>
+              <option value="Flagged">Flagged</option>
             </select>
           </div>
 
@@ -142,7 +143,15 @@
                     </button>
                     <span v-else class="text-gray-400">No receipt</span>
                   </td>
-                  <td class="px-2 py-1">{{ invoice.status }}</td>
+                  <td class="px-2 py-1">
+                    <span
+                      v-if="invoice.status === 'Flagged'"
+                      class="px-2 py-0.5 bg-red-100 text-red-700 text-[10px] rounded-full font-semibold"
+                    >
+                      ⚠ Flagged
+                    </span>
+                    <span v-else>{{ invoice.status }}</span>
+                  </td>
                   <td class="px-2 py-1 text-center flex flex-wrap justify-center gap-1">
                     <button
                       v-if="invoice.status === 'Pending'"
@@ -194,7 +203,10 @@
 
               <div class="flex justify-end gap-2">
                 <button @click="showApproveModal = false" class="px-3 py-1.5 bg-gray-200 rounded-lg text-sm">Cancel</button>
-                <button @click="approveInvoice" class="px-3 py-1.5 bg-green-600 text-white rounded-lg text-sm flex items-center gap-1">
+                <button
+                  @click="approveInvoice"
+                  class="px-3 py-1.5 bg-green-600 text-white rounded-lg text-sm flex items-center gap-1"
+                >
                   <CheckIcon class="w-4 h-4" /> Confirm
                 </button>
               </div>
@@ -260,7 +272,7 @@ const filteredInvoices = computed(() =>
     return statusOk && textOk
   })
 )
-const statusPriority = { Pending: 1, 'Not Paid': 2, Paid: 3 }
+const statusPriority = { Pending: 1, 'Not Paid': 2, Paid: 3, Flagged: 0 }
 const sortedInvoices = computed(() =>
   [...filteredInvoices.value].sort((a, b) => (statusPriority[a.status] || 99) - (statusPriority[b.status] || 99))
 )
@@ -271,6 +283,7 @@ const fetchUsers = async () => {
   const snap = await getDocs(collection(db, 'users'))
   users.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
 }
+
 /* FETCH LAST PAYMENTS */
 const fetchLastPayments = async () => {
   const snap = await getDocs(collection(db, 'invoices'))

@@ -69,7 +69,10 @@
               <div
                 v-for="invoice in filteredInvoices"
                 :key="invoice.id"
-                class="bg-white p-2 rounded-lg border border-gray-200 shadow-sm flex flex-col justify-between cursor-pointer hover:shadow-md"
+                :class="[
+                  'bg-white p-2 rounded-lg border shadow-sm flex flex-col justify-between cursor-pointer hover:shadow-md',
+                  invoice.status === 'Flagged' ? 'border-red-500' : 'border-gray-200'
+                ]"
               >
                 <!-- Top Row -->
                 <div class="flex items-start justify-between gap-2">
@@ -80,6 +83,7 @@
                       :value="invoice"
                       v-model="selectedInvoices"
                       class="form-checkbox text-blue-600 h-4 w-4"
+                      :disabled="invoice.status === 'Flagged'"
                     />
                   </div>
 
@@ -103,6 +107,11 @@
                     <Receipt class="w-3 h-3" /> ₱{{ calculateInvoiceAmount(invoice).toFixed(2) }}
                   </div>
                 </div>
+
+                <!-- Flagged Reason -->
+                <div v-if="invoice.status === 'Flagged'" class="text-red-500 text-[9px] mt-1">
+                  ⚠ Flagged for review
+                </div>
               </div>
             </div>
 
@@ -110,7 +119,7 @@
             <div class="mt-2 flex justify-start">
               <button
                 @click="handleSubmitClick"
-                :disabled="processingPayment"
+                :disabled="processingPayment || selectedInvoices.length === 0"
                 class="bg-blue-600 text-white text-xs font-semibold px-3 py-1 rounded shadow hover:bg-blue-700 flex items-center gap-2 transition"
               >
                 <svg
@@ -171,7 +180,12 @@
         v-if="showGCashModal"
         class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
       >
-        <div class="bg-white w-72 p-3 rounded-lg shadow-xl space-y-3 animate-fade-in border-2 border-blue-500">
+        <div
+          :class="[
+            'bg-white w-72 p-3 rounded-lg shadow-xl space-y-3 animate-fade-in',
+            gcashError ? 'border-2 border-red-500' : 'border-2 border-blue-500'
+          ]"
+        >
           <h3 class="text-sm font-bold text-gray-800">GCash Payment</h3>
           <div class="flex items-center space-x-2">
             <img src="/gcash_logo.jpg" class="w-10 h-10 rounded-full" />
@@ -215,13 +229,16 @@
       </div>
     </transition>
 
-    <!-- Success Toast -->
+    <!-- Success / Error Toast -->
     <transition name="fade">
       <div
         v-if="showSuccessToast"
-        class="fixed top-4 right-4 bg-white text-gray-800 px-3 py-1.5 rounded shadow flex items-center gap-1 border border-gray-300 text-xs z-50"
+        :class="[
+          'fixed top-4 right-4 px-3 py-1.5 rounded shadow flex items-center gap-1 border text-xs z-50',
+          gcashError ? 'bg-red-100 text-red-700 border-red-400' : 'bg-white text-gray-800 border-gray-300'
+        ]"
       >
-        <Check class="w-3 h-3 text-green-500" /> {{ successMessage }}
+        <Check class="w-3 h-3" /> {{ successMessage }}
       </div>
     </transition>
   </div>
@@ -264,8 +281,7 @@ export default {
       gcashReceiptBase64: null,
       showSuccessToast: false,
       successMessage: "",
-      showErrorModal: false,
-      errorMessage: "",
+      gcashError: false, // flag for red border / toast
     };
   },
   computed: {
@@ -309,7 +325,11 @@ export default {
           where("status", "==", "not paid")
         );
         const snap = await getDocs(q);
-        this.invoices = snap.docs.map((d) => ({ id: d.id, ...d.data(), services: Array.isArray(d.data().services) ? d.data().services : [] }));
+        this.invoices = snap.docs.map((d) => ({
+          id: d.id,
+          ...d.data(),
+          services: Array.isArray(d.data().services) ? d.data().services : [],
+        }));
       } catch (err) {
         console.error(err);
       } finally {
@@ -317,8 +337,15 @@ export default {
       }
     },
     handleSubmitClick() {
-      if (this.selectedInvoices.length === 0) alert("Select invoices first!");
-      else this.showPaymentMethodModal = true;
+      if (this.selectedInvoices.length === 0) {
+        this.successMessage = "Select invoices first!";
+        this.gcashError = true;
+        this.showSuccessToast = true;
+        setTimeout(() => (this.showSuccessToast = false), 3000);
+      } else {
+        this.showPaymentMethodModal = true;
+        this.gcashError = false;
+      }
     },
     async submitPayments(method) {
       this.showPaymentMethodModal = false;
@@ -335,52 +362,110 @@ export default {
         this.selectedInvoices = [];
         await this.fetchUnpaidInvoices();
         this.successMessage = `Payment submitted successfully (${method})`;
+        this.gcashError = false;
         this.showSuccessToast = true;
         setTimeout(() => (this.showSuccessToast = false), 3000);
-      } catch (err) { console.error(err); alert("Error processing payments"); }
+      } catch (err) { console.error(err); this.showError("Payment processing failed"); }
       finally { this.processingPayment = false; }
     },
     async handleGCashSubmit() {
       if (!this.gcashReferenceNumber || !this.gcashReceiptBase64) {
-        alert("Enter reference number & upload receipt"); return;
+        this.showError("Enter reference number & upload receipt");
+        return;
       }
       this.processingPayment = true;
       try {
         const submittedAt = serverTimestamp();
+
+        // Check duplicate reference number
+        const dupSnap = await getDocs(
+          query(collection(db, "payments"), where("referenceNumber", "==", this.gcashReferenceNumber))
+        );
+
+        let isFlagged = false;
+        let reasons = [];
+
+        if (!dupSnap.empty) {
+          isFlagged = true;
+          reasons.push("Duplicate reference number");
+        }
+
+        this.selectedInvoices.forEach(inv => {
+          if (this.calculateInvoiceAmount(inv) <= 0) {
+            isFlagged = true;
+            reasons.push(`Invoice ${inv.id} has invalid amount`);
+          }
+        });
+
+        const hour = new Date().getHours();
+        if (hour >= 2 && hour <= 4) {
+          isFlagged = true;
+          reasons.push("Suspicious payment time (2AM-4AM)");
+        }
+
         for (const inv of this.selectedInvoices) {
-          await addDoc(collection(db, "payments"), {
+          const paymentData = {
             invoiceID: inv.id,
             method: "GCash",
-            status: "Pending",
+            status: isFlagged ? "Flagged" : "Pending",
             submittedAt,
             email: this.userEmail,
             referenceNumber: this.gcashReferenceNumber,
             receiptBase64: this.gcashReceiptBase64,
-          });
+            flaggedReasons: isFlagged ? reasons : [],
+          };
+
+          await addDoc(collection(db, "payments"), paymentData);
+
           await updateDoc(doc(db, "invoices", inv.id), {
-            status: "Pending",
+            status: isFlagged ? "Flagged" : "Pending",
             paymentMethod: "GCash",
             submittedAt,
             referenceNumber: this.gcashReferenceNumber,
             receiptBase64: this.gcashReceiptBase64,
           });
+
+          if (isFlagged) {
+            await addDoc(collection(db, "fraudAlerts"), {
+              paymentId: inv.id,
+              userId: this.userEmail,
+              reasons,
+              timestamp: serverTimestamp(),
+            });
+          }
         }
+
         this.gcashReferenceNumber = "";
         this.gcashReceiptBase64 = null;
         this.selectedInvoices = [];
         this.showGCashModal = false;
+
         await this.fetchUnpaidInvoices();
-        this.successMessage = `GCash payment submitted successfully`;
+
+        this.successMessage = isFlagged
+          ? "GCash payment submitted but flagged for review"
+          : "GCash payment submitted successfully";
+        this.gcashError = isFlagged;
         this.showSuccessToast = true;
         setTimeout(() => (this.showSuccessToast = false), 3000);
-      } catch (err) { console.error(err); alert("GCash submission failed"); }
-      finally { this.processingPayment = false; }
+      } catch (err) {
+        console.error(err);
+        this.showError("GCash submission failed");
+      } finally {
+        this.processingPayment = false;
+      }
+    },
+    showError(msg) {
+      this.successMessage = msg;
+      this.gcashError = true;
+      this.showSuccessToast = true;
+      setTimeout(() => (this.showSuccessToast = false), 3000);
     },
     getCurrentUser() {
       const auth = getAuth();
       onAuthStateChanged(auth, async (user) => {
         if (user) { this.userEmail = user.email; await this.fetchUnpaidInvoices(); }
-        else { alert("User not authenticated"); this.loading = false; }
+        else { this.showError("User not authenticated"); this.loading = false; }
       });
     },
   },
