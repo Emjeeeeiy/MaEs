@@ -1,204 +1,196 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center relative px-2 py-4 md:px-4 md:py-8">
-    <!-- ✅ Background Image -->
-    <div
-      class="absolute inset-0 bg-cover bg-center"
-      style="background-image: url('/MaEs_bg.png');"
-    ></div>
+  <div class="min-h-screen bg-white text-gray-800 flex flex-col relative">
 
-    <!-- ✅ Overlay -->
-    <div class="absolute inset-0 bg-black/40"></div>
+    <!-- MAIN -->
+    <main class="flex-1 px-3 py-6 flex flex-col md:flex-row items-center justify-center gap-12">
 
-    <!-- ✅ Glass Container -->
-    <div
-      class="relative w-full max-w-4xl bg-white/20 backdrop-blur-xl rounded-xl shadow-2xl overflow-hidden flex flex-col md:flex-row"
-    >
-      <!-- ✅ Left Info Section -->
-      <div class="md:w-1/2 bg-white text-green-700 p-6 md:p-10 flex flex-col justify-center text-left">
-        <div class="mb-4 md:mb-6">
-          <img src="/MaEs_logo2.png" alt="Logo" class="h-14 w-14 mb-2 md:mb-4" />
-          <h2 class="text-xl md:text-2xl font-bold">Maria Estrella General Hospital, Inc.</h2>
-          <p class="mt-1 md:mt-2 text-sm md:text-base text-gray-600">
-            A secure hospital management and billing system designed to improve patient care and streamline operations.
-          </p>
-        </div>
-        <ul class="space-y-2 text-sm md:text-base">
-          <li class="flex items-center gap-2">
-            <span class="bg-green-600 rounded-full h-2 w-2"></span>
-            Fast & secure access for staff and patients
-          </li>
-          <li class="flex items-center gap-2">
-            <span class="bg-green-600 rounded-full h-2 w-2"></span>
-            Role-based dashboard for Admin & Users
-          </li>
-          <li class="flex items-center gap-2">
-            <span class="bg-green-600 rounded-full h-2 w-2"></span>
-            Integrated billing & record management
-          </li>
-        </ul>
-      </div>
+      <!-- LOGIN CARD -->
+      <div class="order-2 md:order-1 w-full max-w-md">
 
-      <!-- ✅ Right Login Section -->
-      <div class="md:w-1/2 p-4 md:p-8 bg-white/30 backdrop-blur-xl relative">
-        <!-- ✅ Popup (Top Right Corner) -->
+        <!-- POPUP -->
         <transition
           enter-active-class="transition-all duration-500 ease-out"
-          enter-from-class="opacity-0 translate-x-10 -translate-y-10"
-          enter-to-class="opacity-100 translate-x-0 translate-y-0"
-          leave-active-class="transition-all duration-500 ease-in"
-          leave-from-class="opacity-100 translate-x-0"
-          leave-to-class="opacity-0 translate-x-10"
+          enter-from-class="opacity-0 -translate-y-2"
+          enter-to-class="opacity-100 translate-y-0"
         >
           <div
             v-if="showPopup"
-            class="absolute top-2 md:top-4 right-2 md:right-4 flex items-center gap-2 md:gap-3 bg-white/90 backdrop-blur-md border border-green-200 shadow-lg rounded-lg md:rounded-xl px-3 py-1 md:px-4 md:py-2 z-50 animate-bounceIn"
+            class="mb-3 flex items-center gap-1 bg-green-50 border border-green-200 px-3 py-1.5 rounded-lg"
           >
-            <svg
+            <Loader2
               v-if="!loginSuccess"
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-5 h-5 md:w-6 md:h-6 text-green-600 animate-spin-slow"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 12a8 8 0 018-8v2a6 6 0 100 12v2a8 8 0 01-8-8z" />
-            </svg>
-
-            <svg
+              class="h-4 w-4 text-green-600 animate-spin"
+            />
+            <CheckCircle
               v-else
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-5 h-5 md:w-6 md:h-6 text-green-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-
-            <span class="text-green-700 font-medium text-sm md:text-base">
+              class="h-4 w-4 text-green-600"
+            />
+            <span class="text-green-700 text-xs font-medium">
               {{ loginSuccess ? "Login Successful" : "Logging in..." }}
             </span>
           </div>
         </transition>
 
-        <!-- Title -->
-        <h2 class="text-xl md:text-2xl font-bold text-green-700 mb-4 md:mb-6 text-center md:text-left">Log in</h2>
+        <!-- CARD -->
+        <div class="border border-gray-300 rounded-lg p-6 bg-white">
 
-        <!-- Error Message -->
-        <p v-if="errorMessage" class="text-sm md:text-base text-red-600 text-center md:text-left mb-2 md:mb-4">
-          {{ errorMessage }}
-        </p>
+          <h2 class="text-xl font-bold text-green-700 mb-4 text-center">
+            Log in
+          </h2>
 
-        <!-- Login Form -->
-        <form @submit.prevent="loginUser" class="space-y-4 md:space-y-5">
-          <div>
-            <label class="block text-sm md:text-base font-medium text-gray-700 mb-1">Email</label>
-            <input
-              v-model="email"
-              type="email"
-              placeholder="Enter your email"
-              class="w-full border border-gray-300 rounded-lg px-4 py-2 md:px-5 md:py-3 text-sm md:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500"
-            />
-          </div>
+          <p v-if="errorMessage" class="text-red-600 text-xs mb-3 text-center">
+            {{ errorMessage }}
+          </p>
 
-          <!-- ✅ Password Input with Eye Icon -->
-          <div>
-            <label class="block text-sm md:text-base font-medium text-gray-700 mb-1">Password</label>
-            <div class="relative">
-              <input
-                v-model="password"
-                :type="showPassword ? 'text' : 'password'"
-                placeholder="Enter your password"
-                class="w-full border border-gray-300 rounded-lg px-4 py-2 pr-10 md:px-5 md:py-3 text-sm md:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-500"
-              />
-              <button
-                type="button"
-                @click="toggleShowPassword"
-                class="absolute inset-y-0 right-3 md:right-4 flex items-center text-gray-500 hover:text-green-700 transition"
-              >
-                <!-- 👁 Show Icon -->
-                <svg
-                  v-if="!showPassword"
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5 md:h-6 md:w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
+          <form @submit.prevent="loginUser" class="space-y-3">
 
-                <!-- 🙈 Hide Icon -->
-                <svg
-                  v-else
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-5 w-5 md:h-6 md:w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-5.523 0-10-4.477-10-10 0-1.905.532-3.688 1.458-5.211m3.163-2.354A10.05 10.05 0 0112 3c5.523 0 10 4.477 10 10 0 1.905-.532 3.688-1.458 5.211m-3.163 2.354A9.965 9.965 0 0112 21a9.965 9.965 0 01-6.379-2.144M3 3l18 18" />
-                </svg>
-              </button>
+            <!-- EMAIL -->
+            <div>
+              <label class="block text-xs font-medium mb-1">Email</label>
+              <div class="relative">
+                <Mail class="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                <input
+                  v-model="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  class="w-full border border-gray-300 rounded-md pl-8 pr-3 py-2 text-sm focus:ring-1 focus:ring-green-500 focus:outline-none"
+                />
+              </div>
             </div>
 
-            <div class="text-right mt-1">
-              <router-link to="/reset_password" class="text-sm md:text-base text-green-700 hover:underline">
-                Forgot Password?
-              </router-link>
+            <!-- PASSWORD -->
+            <div>
+              <label class="block text-xs font-medium mb-1">Password</label>
+              <div class="relative">
+                <Lock class="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
+                <input
+                  v-model="password"
+                  :type="showPassword ? 'text' : 'password'"
+                  placeholder="Enter your password"
+                  class="w-full border border-gray-300 rounded-md pl-8 pr-8 py-2 text-sm focus:ring-1 focus:ring-green-500 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  @click="toggleShowPassword"
+                  class="absolute right-2 top-2.5 text-gray-500"
+                >
+                  <Eye v-if="!showPassword" class="h-4 w-4" />
+                  <EyeOff v-else class="h-4 w-4" />
+                </button>
+              </div>
+
+              <div class="text-right mt-1">
+                <button
+                  type="button"
+                  class="text-xs text-green-700 hover:underline"
+                  @click="forgotPasswordModal = true"
+                >
+                  Forgot Password?
+                </button>
+              </div>
             </div>
+
+            <!-- LOGIN -->
+            <button
+              type="submit"
+              :disabled="!email || !password"
+              :class="[ 
+                'w-full font-semibold py-2 rounded-md text-sm',
+                !email || !password
+                  ? 'bg-gray-400 text-white cursor-not-allowed'
+                  : 'bg-green-600 text-white'
+              ]"
+            >
+              Login
+            </button>
+          </form>
+
+          <div class="flex items-center justify-center text-gray-500 text-sm my-3">
+            <span class="border-t w-1/4"></span>
+            <span class="mx-2">or</span>
+            <span class="border-t w-1/4"></span>
           </div>
 
           <button
-            type="submit"
-            class="w-full bg-green-600 hover:bg-green-700 text-white text-sm md:text-base font-semibold py-3 md:py-3.5 rounded-lg transition duration-150"
+            @click="signInWithGoogle"
+            class="w-full border border-gray-300 py-2 rounded-md flex items-center justify-center gap-2 text-sm"
           >
-            Login
+            <img
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              class="h-4 w-4"
+            />
+            Continue with Google
           </button>
-        </form>
 
-        <!-- Divider -->
-        <div class="my-4 md:my-6 flex items-center justify-between">
-          <hr class="w-full border-gray-300" />
-          <span class="text-sm md:text-base text-black px-2">or</span>
-          <hr class="w-full border-gray-300" />
-        </div>
+          <p class="mt-4 text-xs text-center">
+            Don’t have an account?
+            <router-link
+              to="/register"
+              class="text-green-700 font-semibold hover:underline"
+            >
+              Register
+            </router-link>
+          </p>
 
-        <!-- Google Sign-In -->
-        <button
-          @click="signInWithGoogle"
-          class="w-full border border-gray-300 py-3 md:py-3.5 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-100 transition"
-        >
-          <img
-            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-            alt="Google"
-            class="h-5 w-5 md:h-6 md:w-6"
-          />
-          <span class="text-sm md:text-base font-medium text-gray-700">Continue with Google</span>
-        </button>
-
-        <!-- Register Link -->
-        <p class="mt-4 md:mt-6 text-center md:text-left text-sm md:text-base text-gray-700">
-          Don’t have an account?
-          <router-link to="/register" class="text-green-700 font-semibold hover:underline">Register</router-link>
-        </p>
-
-        <!-- Back to Home -->
-        <div class="mt-2 md:mt-4 text-center md:text-left">
-          <router-link
-            to="/"
-            class="inline-block text-sm md:text-base text-gray-600 hover:text-green-700 font-medium hover:underline"
-          >
-            ← Back to Home
-          </router-link>
         </div>
       </div>
-    </div>
+
+      <!-- INFO -->
+      <div class="order-1 md:order-2 max-w-md text-center md:text-left">
+        <h2 class="text-2xl font-bold text-green-700 mb-2">
+          Maria Estrella General Hospital, Inc.
+        </h2>
+        <p class="text-gray-600 mb-4">
+          A secure hospital management and billing system designed to improve patient care.
+        </p>
+        <HeartbeatLine />
+      </div>
+
+    </main>
+
+    <!-- FOOTER COMPONENT -->
+    <AppFooter />
+
+    <!-- FORGOT PASSWORD MODAL -->
+    <transition name="fade">
+      <div
+        v-if="forgotPasswordModal"
+        class="fixed inset-0 bg-black/50 flex items-center justify-center backdrop-blur-sm z-50"
+      >
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md shadow-lg border border-gray-200 relative">
+          <h3 class="text-xl font-bold text-green-700 mb-4 text-center">
+            Reset Password
+          </h3>
+          <input
+            type="email"
+            v-model="forgotEmail"
+            placeholder="Enter your registered email"
+            class="w-full px-4 py-2 border rounded-md text-sm focus:ring-1 focus:ring-green-500 focus:outline-none mb-3"
+          />
+          <p v-if="forgotMessage" class="text-sm text-green-600 text-center mb-2">
+            {{ forgotMessage }}
+          </p>
+          <p v-if="forgotError" class="text-sm text-red-500 text-center mb-2">
+            {{ forgotError }}
+          </p>
+          <div class="flex gap-2">
+            <button
+              @click="sendForgotPassword"
+              class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-md transition"
+            >
+              Send Reset Link
+            </button>
+            <button
+              @click="forgotPasswordModal = false"
+              class="flex-1 border border-gray-300 hover:bg-gray-100 py-2 rounded-md transition"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
   </div>
 </template>
 
@@ -206,14 +198,27 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import {
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  CheckCircle,
+} from "lucide-vue-next";
+
+import {
   getAuth,
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
   signOut,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import { db } from "@/firebase";
 import { doc, getDoc } from "firebase/firestore";
+
+import HeartbeatLine from "@/components/heartbeat_line.vue";
+import AppFooter from "@/components/footeroutside.vue";
 
 const email = ref("");
 const password = ref("");
@@ -221,31 +226,31 @@ const errorMessage = ref("");
 const showPassword = ref(false);
 const showPopup = ref(false);
 const loginSuccess = ref(false);
+const forgotPasswordModal = ref(false);
+
+const forgotEmail = ref("");
+const forgotMessage = ref("");
+const forgotError = ref("");
+
+const toggleShowPassword = () => (showPassword.value = !showPassword.value);
 
 const auth = getAuth();
 const router = useRouter();
-
-const toggleShowPassword = () => {
-  showPassword.value = !showPassword.value;
-};
 
 const loginUser = async () => {
   errorMessage.value = "";
   showPopup.value = true;
   loginSuccess.value = false;
-
   try {
     const { user } = await signInWithEmailAndPassword(auth, email.value, password.value);
-
     if (!user.emailVerified) {
       errorMessage.value = "Please verify your email.";
       await signOut(auth);
       showPopup.value = false;
       return;
     }
-
     await routeByRole(user.uid);
-  } catch (err) {
+  } catch {
     errorMessage.value = "Invalid email or password.";
     showPopup.value = false;
   }
@@ -255,27 +260,23 @@ const signInWithGoogle = async () => {
   errorMessage.value = "";
   showPopup.value = true;
   loginSuccess.value = false;
-
   try {
     const provider = new GoogleAuthProvider();
     const { user } = await signInWithPopup(auth, provider);
     await routeByRole(user.uid);
-  } catch (err) {
-    console.error(err);
+  } catch {
     errorMessage.value = "Google sign-in failed.";
     showPopup.value = false;
   }
 };
 
 const routeByRole = async (uid) => {
-  const userRef = doc(db, "users", uid);
-  const snap = await getDoc(userRef);
+  const snap = await getDoc(doc(db, "users", uid));
   if (!snap.exists()) {
     errorMessage.value = "User data not found.";
     showPopup.value = false;
     return;
   }
-
   const data = snap.data();
   if (data.status === "deactivated") {
     errorMessage.value = "Account deactivated.";
@@ -283,53 +284,42 @@ const routeByRole = async (uid) => {
     showPopup.value = false;
     return;
   }
-
   loginSuccess.value = true;
-
   setTimeout(() => {
     showPopup.value = false;
     router.push(data.role === "admin" ? "/admin-dashboard" : "/dashboard");
-  }, 1500);
+  }, 1200);
+};
+
+// Forgot Password Modal Logic
+const sendForgotPassword = async () => {
+  forgotMessage.value = "";
+  forgotError.value = "";
+  if (!forgotEmail.value) {
+    forgotError.value = "Please enter your email.";
+    return;
+  }
+  try {
+    await sendPasswordResetEmail(auth, forgotEmail.value.trim());
+    forgotMessage.value = "✅ Password reset link sent! Check your inbox.";
+    forgotEmail.value = "";
+  } catch (err) {
+    if (err.code === "auth/user-not-found") {
+      forgotError.value = "This email is not registered.";
+    } else if (err.code === "auth/invalid-email") {
+      forgotError.value = "Invalid email address.";
+    } else {
+      forgotError.value = "Error sending reset link. Try again later.";
+    }
+  }
 };
 </script>
 
 <style scoped>
-button,
-a {
-  transition: transform 0.15s ease;
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.25s ease;
 }
-button:hover,
-a:hover {
-  transform: translateY(-1px);
-}
-
-/* ✅ Animation */
-@keyframes bounceIn {
-  0% {
-    transform: scale(0.8) translateY(-10px);
-    opacity: 0;
-  }
-  50% {
-    transform: scale(1.05) translateY(5px);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1) translateY(0);
-  }
-}
-.animate-bounceIn {
-  animation: bounceIn 0.6s ease-out;
-}
-
-@keyframes spin-slow {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-.animate-spin-slow {
-  animation: spin-slow 2s linear infinite;
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
 }
 </style>

@@ -126,6 +126,16 @@ router.beforeEach(async (to, from, next) => {
 
   const currentUser = await getCurrentUser();
 
+  // ✅ NEW FEATURE: Check if user has visited/created an account in this browser
+  const hasAccount = localStorage.getItem('hasAccount'); // true if they already signed up
+
+  // Logic for landing page redirect
+  if (to.name === 'LandingPage' && hasAccount) {
+    // If user already has an account, redirect to login
+    return next('/login');
+  }
+
+  // Admin-only guard
   if (requiresAdmin) {
     if (!currentUser) return next('/login');
 
@@ -141,6 +151,7 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
+  // Auth-only pages
   if (requiresAuth && !currentUser) {
     return next('/login');
   }
