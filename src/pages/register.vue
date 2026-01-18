@@ -142,7 +142,7 @@
 </template>
 
 <script>
-import FooterOutside from "@/components/FooterOutside.vue"; // <-- Import footer component
+import FooterOutside from "@/components/footeroutside.vue"; 
 
 export default {
   components: {
