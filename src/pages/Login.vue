@@ -94,7 +94,7 @@
             <button
               type="submit"
               :disabled="!email || !password"
-              :class="[ 
+              :class="[
                 'w-full font-semibold py-2 rounded-md text-sm',
                 !email || !password
                   ? 'bg-gray-400 text-white cursor-not-allowed'
@@ -137,6 +137,16 @@
 
       <!-- INFO -->
       <div class="order-1 md:order-2 max-w-md text-center md:text-left">
+
+        <!-- LOGO -->
+        <div class="flex justify-center md:justify-start mb-3">
+          <img
+            src="/MaEs_logo2.png"
+            alt="MaEs Logo"
+            class="h-14 w-14 rounded-full border border-gray-200 shadow-sm"
+          />
+        </div>
+
         <h2 class="text-2xl font-bold text-green-700 mb-2">
           Maria Estrella General Hospital, Inc.
         </h2>
@@ -148,7 +158,7 @@
 
     </main>
 
-    <!-- FOOTER COMPONENT -->
+    <!-- FOOTER -->
     <AppFooter />
 
     <!-- FORGOT PASSWORD MODAL -->
@@ -291,7 +301,6 @@ const routeByRole = async (uid) => {
   }, 1200);
 };
 
-// Forgot Password Modal Logic
 const sendForgotPassword = async () => {
   forgotMessage.value = "";
   forgotError.value = "";
@@ -316,10 +325,12 @@ const sendForgotPassword = async () => {
 </script>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity 0.25s ease;
 }
-.fade-enter-from, .fade-leave-to {
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
 }
 </style>
