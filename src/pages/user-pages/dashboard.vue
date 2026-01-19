@@ -1,9 +1,7 @@
 <template>
-  <div class="flex flex-col h-screen bg-gray-50 text-gray-800 overflow-hidden">
+  <div class="flex flex-col h-screen bg-white text-gray-800 overflow-hidden">
     <!-- Topbar -->
-    <div
-      class="flex-shrink-0 z-20 transition-all duration-200 bg-white border-b border-gray-200"
-    >
+    <div class="flex-shrink-0 z-20 bg-white">
       <Topbar @toggleSidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
     </div>
 
@@ -21,229 +19,194 @@
         @click="isMobileSidebarOpen = false"
       ></div>
 
-      <!-- Main -->
+      <!-- MAIN -->
       <main
-        class="flex-1 overflow-y-auto px-3 py-3 pb-28 sm:pb-20"
+        class="flex-1 overflow-y-auto px-6 py-4 sm:ml-20"
         :class="{ 'blur-sm': isMobileSidebarOpen }"
       >
-        <!-- Top compact header (counts + totals) -->
-        <div class="mb-3">
-          <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-2">
-              <h1 class="text-sm font-semibold text-gray-700">Dashboard</h1>
+        <!-- TOP SECTION: Metrics + Appointments -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- LEFT: Cards -->
+          <div class="flex flex-col gap-3">
+            <!-- Summary Cards -->
+            <div class="flex items-center gap-3 bg-white border border-gray-200 p-3 rounded-lg">
+              <div class="w-12 h-12 rounded-md bg-red-50 flex items-center justify-center">
+                <AlertTriangle class="w-6 h-6 text-red-600" />
+              </div>
+              <div>
+                <div class="text-xs text-red-700 font-semibold">Not Paid</div>
+                <div class="text-lg font-bold text-red-800">
+                  ₱{{ unpaidTotalAmount.toLocaleString('en-US', {minimumFractionDigits:2}) }}
+                </div>
+              </div>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3 bg-white border border-gray-200 p-3 rounded-lg">
+              <div class="w-12 h-12 rounded-md bg-yellow-50 flex items-center justify-center">
+                <Clock class="w-6 h-6 text-yellow-600" />
+              </div>
+              <div>
+                <div class="text-xs text-yellow-700 font-semibold">Pending</div>
+                <div class="text-lg font-bold text-yellow-700">{{ unpaidClaims }}</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 bg-white border border-gray-200 p-3 rounded-lg">
+              <div class="w-12 h-12 rounded-md bg-green-50 flex items-center justify-center">
+                <Wallet class="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <div class="text-xs text-green-700 font-semibold">Paid</div>
+                <div class="text-lg font-bold text-green-700">{{ paidClaims }}</div>
+              </div>
+            </div>
+
+            <!-- REFRESH ICON + VIEW ALL INVOICES -->
+            <div class="flex items-center gap-2 mt-2">
+              <button
+                @click="refreshPage"
+                class="p-1 bg-gray-100 rounded hover:bg-gray-200"
+                title="Refresh"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582M20 20v-5h-.581M5.353 6.353A9 9 0 1118.647 17.647" />
+                </svg>
+              </button>
               <button
                 @click="goToInvoices"
-                class="text-xs px-3 py-1 rounded bg-blue-600 text-white hover:bg-blue-700"
+                class="text-[10px] px-2 py-0.5 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
               >
                 View All Invoices
               </button>
             </div>
           </div>
-        </div>
 
-        <!-- Overview (compact cards) -->
-        <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-          <!-- Not paid -->
-          <div
-            class="flex items-center gap-3 bg-white border border-gray-200 p-2 md:p-4 rounded-lg shadow-sm"
-          >
-            <div class="flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-md bg-red-50">
-              <AlertTriangle class="w-5 h-5 md:w-7 md:h-7 text-red-600" />
+          <!-- RIGHT: Appointments (max 3) -->
+          <div class="bg-white border border-gray-200 p-4 rounded-lg flex flex-col">
+            <div class="flex items-center justify-between mb-2">
+              <h2 class="text-sm font-semibold text-gray-700">Recent Appointments</h2>
+              <button
+                @click="goToAppointments"
+                class="text-[10px] px-2 py-0.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+              >
+                View All
+              </button>
             </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center justify-between">
-                <div>
-                  <div class="text-[10px] md:text-sm text-red-700 font-semibold">Not Paid</div>
-                  <div class="text-base md:text-lg font-bold text-red-800">₱{{ unpaidTotalAmount.toLocaleString('en-US',{minimumFractionDigits:2}) }}</div>
+            <div v-if="appointments.length === 0" class="text-xs text-gray-500">
+              No appointments yet.
+            </div>
+            <ul class="flex-1 space-y-2">
+              <li
+                v-for="appt in recentAppointments"
+                :key="appt.id"
+                class="border border-gray-200 rounded p-2 text-xs hover:bg-gray-50"
+              >
+                <div class="font-semibold">{{ appt.department }}</div>
+                <div>{{ formattedDate(appt.date) }}</div>
+                <div class="text-gray-500 truncate">{{ appt.notes || '-' }}</div>
+                <div class="mt-1 text-[10px] px-1 py-0.5 inline-block rounded-full" 
+                     :class="appointmentBadgeClass(appt.status)">
+                  {{ appt.status }}
                 </div>
-                <div class="text-right text-[11px] md:text-sm text-gray-500">{{ unpaidClaims }} open</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Pending -->
-          <div class="flex items-center gap-3 bg-white border border-gray-200 p-2 md:p-4 rounded-lg shadow-sm">
-            <div class="flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-md bg-yellow-50">
-              <Clock class="w-5 h-5 md:w-7 md:h-7 text-yellow-600" />
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center justify-between">
-                <div>
-                  <div class="text-[10px] md:text-sm text-yellow-700 font-semibold">Pending</div>
-                  <div class="text-base md:text-lg font-bold text-yellow-700">{{ unpaidClaims }}</div>
-                </div>
-                <div class="text-right text-[11px] md:text-sm text-gray-500">{{ overdueCount }} overdue</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Paid -->
-          <div class="flex items-center gap-3 bg-white border border-gray-200 p-2 md:p-4 rounded-lg shadow-sm">
-            <div class="flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-md bg-green-50">
-              <Wallet class="w-5 h-5 md:w-7 md:h-7 text-green-600" />
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center justify-between">
-                <div>
-                  <div class="text-[10px] md:text-sm text-green-700 font-semibold">Paid</div>
-                  <div class="text-base md:text-lg font-bold text-green-700">{{ paidClaims }}</div>
-                </div>
-                <div class="text-right text-[11px] md:text-sm text-gray-500">recent</div>
-              </div>
-            </div>
+              </li>
+            </ul>
           </div>
         </section>
 
-
-        <!-- Compact controls row -->
-        <div class="mt-3 flex items-center justify-between gap-3">
-          <div class="flex items-center gap-2">
-            <label class="text-xs text-gray-600">Status</label>
-            <select v-model="filterStatus" class="text-xs px-2 py-1 border rounded bg-white">
-              <option value="">All</option>
-              <option value="Pending">Pending</option>
-              <option value="Paid">Paid</option>
-              <option value="Not Paid">Not Paid</option>
-            </select>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search id / service..."
-              class="text-xs px-2 py-1 border rounded w-48 bg-white"
-            />
-            <button @click="refresh" class="text-xs px-2 py-1 bg-gray-100 border rounded">Refresh</button>
-          </div>
-        </div>
-
-        <!-- Invoices grid / list (compact) -->
-        <section class="mt-3">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-            <template v-if="filteredInvoices.length">
-              <article
-                v-for="inv in filteredInvoices"
-                :key="inv.id"
-                class="bg-white border border-gray-200 p-2 rounded-lg shadow-sm hover:shadow-md cursor-pointer flex flex-col justify-between"
-                @click="goToInvoices"
-              >
-                <div class="flex items-start justify-between gap-2">
-                  <div class="min-w-0">
-                    <div class="text-[11px] font-semibold text-gray-800 truncate">
-                      {{ inv.shortId || '—' }}
-                    </div>
-                    <div class="text-[11px] text-gray-600 truncate">
-                      {{ inv.services?.map(s => s.serviceName).join(', ') || 'No services' }}
-                    </div>
-                  </div>
-
-                  <div class="text-right flex-shrink-0">
-                    <div class="text-[11px] font-semibold text-green-700">{{ formatCurrency(calculateInvoiceTotal(inv)) }}</div>
-                    <div>
-                      <span
-                        :class="badgeClass(inv.status)"
-                        class="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                      >
-                        {{ inv.status }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="mt-2 flex items-center justify-between text-[11px] text-gray-500">
-                  <div>{{ formattedDate(inv.createdAt) }}</div>
-                  <div class="text-right">{{ inv.email ? maskEmail(inv.email) : '' }}</div>
-                </div>
-              </article>
-            </template>
-
-            <!-- empty -->
-            <div v-if="filteredInvoices.length === 0" class="col-span-full bg-white border border-dashed border-gray-200 p-3 rounded-lg text-center text-sm text-gray-500">
-              No invoices found
+        <!-- RECENT INVOICES TABLE -->
+        <section class="mt-6 bg-white border border-gray-200 rounded-lg p-4 overflow-x-auto">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-sm font-semibold text-gray-700">Recent Invoices</h2>
+            <!-- SEARCH ICON -->
+            <div class="relative">
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search..."
+                class="pl-6 pr-2 py-1 text-xs border rounded bg-gray-50 focus:outline-none focus:ring focus:ring-blue-200"
+              />
+              <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-1 top-1.5 h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0a7.5 7.5 0 10-10.607-10.607 7.5 7.5 0 0010.607 10.607z"/>
+              </svg>
             </div>
           </div>
+
+          <table class="min-w-full text-xs border-collapse">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="px-2 py-1 text-left">ID</th>
+                <th class="px-2 py-1 text-left">Services</th>
+                <th class="px-2 py-1 text-left">Status</th>
+                <th class="px-2 py-1 text-left">Created</th>
+                <th class="px-2 py-1 text-left">Email</th>
+                <th class="px-2 py-1 text-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="inv in filteredInvoices"
+                :key="inv.id"
+                class="border-t hover:bg-gray-50 cursor-pointer"
+                @click="goToInvoices"
+              >
+                <td class="px-2 py-1">{{ inv.shortId }}</td>
+                <td class="px-2 py-1">{{ inv.services?.map(s => s.serviceName).join(', ') }}</td>
+                <td class="px-2 py-1">
+                  <span :class="badgeClass(inv.status)" class="px-2 py-0.5 rounded-full font-semibold">
+                    {{ inv.status }}
+                  </span>
+                </td>
+                <td class="px-2 py-1">{{ formattedDate(inv.createdAt) }}</td>
+                <td class="px-2 py-1">{{ maskEmail(inv.email) }}</td>
+                <td class="px-2 py-1 text-right">₱{{ calculateInvoiceTotal(inv).toLocaleString('en-US', {minimumFractionDigits:2}) }}</td>
+              </tr>
+            </tbody>
+          </table>
         </section>
       </main>
     </div>
-
-    <!-- small welcome toast (compact) -->
-    <transition name="fade">
-      <div
-        v-if="showWelcomePopup"
-        class="fixed top-4 right-4 z-50 bg-white border border-gray-200 px-3 py-2 rounded-md text-xs flex items-center gap-2 shadow"
-      >
-        <CheckCircle class="w-4 h-4 text-green-600" />
-        <div>
-          <div class="font-medium text-gray-800">Welcome</div>
-          <div class="text-[11px] text-gray-500">You're logged in</div>
-        </div>
-      </div>
-    </transition>
   </div>
 </template>
 
 <script setup>
-/* Compact dashboard — Option B */
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/firebase";
-import LoadingAnimation from "@/components/loading_animation.vue";
 import Topbar from "@/components/topbar.vue";
 import Sidebar from "@/components/Sidebar.vue";
-
-import {
-  FileText,
-  AlertTriangle,
-  Clock,
-  Wallet,
-  CheckCircle,
-} from "lucide-vue-next";
+import { AlertTriangle, Clock, Wallet } from "lucide-vue-next";
 
 const router = useRouter();
 const auth = getAuth();
 
 const invoices = ref([]);
+const appointments = ref([]);
 const loading = ref(true);
+
 const unpaidTotalAmount = ref(0);
 const unpaidClaims = ref(0);
 const paidClaims = ref(0);
-const overdueCount = ref(0);
 const isMobileSidebarOpen = ref(false);
-const showWelcomePopup = ref(false);
 
 const filterStatus = ref("");
 const searchQuery = ref("");
 
-/* Fetch invoices for current user */
+// Fetch invoices
 const fetchInvoicesByEmail = async (email) => {
   loading.value = true;
   try {
     const q = query(collection(db, "invoices"), where("email", "==", email));
     const snap = await getDocs(q);
-    const docs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-    // compact sort: newest first by createdAt or fallback to id
-    docs.sort((a, b) => {
-      const ta = a.createdAt?.seconds || a.createdAt?._seconds || 0;
-      const tb = b.createdAt?.seconds || b.createdAt?._seconds || 0;
-      return tb - ta;
-    });
-
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    docs.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
     invoices.value = docs;
 
-    // compute small metrics
     unpaidTotalAmount.value = 0;
     unpaidClaims.value = 0;
     paidClaims.value = 0;
-    overdueCount.value = 0;
 
-    const now = new Date();
     for (const inv of docs) {
       const status = (inv.status || "").toLowerCase();
       const amt = Number(inv.totalAmount || inv.services?.reduce((s, it) => s + (it.amount || 0), 0) || 0);
@@ -252,9 +215,6 @@ const fetchInvoicesByEmail = async (email) => {
         unpaidClaims.value++;
         unpaidTotalAmount.value += amt;
       }
-      const raw = inv.date;
-      const due = raw?.toDate?.() || (typeof raw === "string" ? new Date(raw) : null);
-      if (due && due < now && status !== "paid") overdueCount.value++;
     }
   } catch (err) {
     console.error("Error fetching invoices", err);
@@ -263,57 +223,57 @@ const fetchInvoicesByEmail = async (email) => {
   }
 };
 
+// Fetch appointments
+const fetchAppointmentsByEmail = async (email) => {
+  try {
+    const q = query(collection(db, "appointments"), where("email", "==", email));
+    const snap = await getDocs(q);
+    const docs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    docs.sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0));
+    appointments.value = docs;
+  } catch (err) {
+    console.error("Error fetching appointments", err);
+  }
+};
+
 onMounted(() => {
   onAuthStateChanged(auth, async (user) => {
     if (user?.email) {
       await fetchInvoicesByEmail(user.email);
-      showWelcomePopup.value = true;
-      setTimeout(() => (showWelcomePopup.value = false), 2000);
-    } else {
-      invoices.value = [];
-      loading.value = false;
+      await fetchAppointmentsByEmail(user.email);
     }
   });
 });
 
-/* Utilities */
-const calculateInvoiceTotal = (inv) => {
-  return inv.services?.reduce((s, it) => s + (Number(it.amount) || 0), 0) || Number(inv.totalAmount || 0);
-};
-
-const formattedDate = (ts) => {
-  if (!ts) return "-";
-  if (ts?.toDate) return ts.toDate().toISOString().split("T")[0];
-  if (typeof ts === "string") return new Date(ts).toISOString().split("T")[0];
-  return new Date(ts.seconds ? ts.seconds * 1000 : ts).toISOString().split("T")[0];
-};
-
-const formatCurrency = (n) => {
-  const v = Number(n || 0);
-  return v.toLocaleString("en-US", { minimumFractionDigits: 2 });
-};
-
+// Utilities
+const calculateInvoiceTotal = (inv) => inv.services?.reduce((s, it) => s + (Number(it.amount) || 0), 0) || Number(inv.totalAmount || 0);
+const formattedDate = (ts) => ts?.toDate ? ts.toDate().toISOString().split("T")[0] : (typeof ts === "string" ? new Date(ts).toISOString().split("T")[0] : "-");
 const maskEmail = (e) => {
   if (!e) return "";
   const [name, domain] = e.split("@");
-  const short = name.length > 2 ? name.slice(0, 2) + "…" : name;
-  return `${short}@${domain}`;
+  return `${name.slice(0,2)}…@${domain}`;
 };
-
 const badgeClass = (status) => {
   const s = (status || "").toLowerCase();
   if (s === "paid") return "bg-green-100 text-green-700";
   if (s === "not paid") return "bg-red-100 text-red-700";
   return "bg-yellow-100 text-yellow-700";
 };
+const appointmentBadgeClass = (status) => {
+  const s = (status || "").toLowerCase();
+  if (s === "confirmed") return "bg-green-100 text-green-700";
+  if (s === "cancelled") return "bg-red-100 text-red-700";
+  return "bg-yellow-100 text-yellow-700";
+};
 
 const goToInvoices = () => router.push("/invoices");
-const refresh = async () => {
-  const user = auth.currentUser;
-  if (user?.email) {
-    await fetchInvoicesByEmail(user.email);
-  }
-};
+const goToAppointments = () => router.push("/appointment");
+
+// REFRESH PAGE BUTTON
+const refreshPage = () => window.location.reload(); // full page reload
+
+// Only show latest 3 appointments
+const recentAppointments = computed(() => appointments.value.slice(0, 3));
 
 const filteredInvoices = computed(() => {
   const qs = searchQuery.value.toLowerCase().trim();
@@ -321,14 +281,13 @@ const filteredInvoices = computed(() => {
   return invoices.value.filter((inv) => {
     if (status && (inv.status || "").toLowerCase() !== status) return false;
     if (!qs) return true;
-    const svc = (inv.services || []).map((s) => s.serviceName).join(" ").toLowerCase();
+    const svc = (inv.services || []).map(s => s.serviceName).join(" ").toLowerCase();
     return (inv.shortId || "").toLowerCase().includes(qs) || svc.includes(qs) || (inv.email || "").toLowerCase().includes(qs);
   });
 });
 </script>
 
 <style scoped>
-/* compact styles */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.18s ease;

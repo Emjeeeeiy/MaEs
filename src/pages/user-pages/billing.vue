@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col h-screen bg-gray-50 text-gray-800 overflow-hidden">
     <!-- Fixed Topbar -->
-    <div class="flex-shrink-0 z-10 bg-white shadow-sm border-b border-gray-200">
+    <div class="flex-shrink-0 z-10 bg-white">
       <Topbar @toggle-sidebar="isMobileSidebarOpen = !isMobileSidebarOpen" />
     </div>
 

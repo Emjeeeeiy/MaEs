@@ -1,29 +1,29 @@
 <template>
-  <header class="bg-gradient-to-r from-green-400 via-green-500 to-green-600 relative z-10">
+  <header class="bg-white relative z-10">
     <div class="w-full px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-12 sm:h-14 md:h-16">
 
         <!-- Page Title -->
-        <div class="font-bold text-white text-base sm:text-lg md:text-xl capitalize drop-shadow truncate">
+        <div class="font-bold text-black text-base sm:text-lg md:text-xl capitalize truncate">
           {{ pageTitle }}
         </div>
 
         <!-- Topbar Icons -->
-        <nav class="flex gap-4 sm:gap-5 text-white relative items-center">
+        <nav class="flex gap-4 sm:gap-5 text-black relative items-center">
           <!-- Feedback -->
           <button @click="showModal = true" title="Feedback">
-            <ChatBubbleBottomCenterTextIcon class="w-5 h-5 sm:w-6 sm:h-6 text-white hover:scale-110 transition" />
+            <ChatBubbleBottomCenterTextIcon class="w-5 h-5 sm:w-6 sm:h-6 text-black" />
           </button>
 
           <!-- Upload File -->
           <button @click="showDocumentModal = true" title="Upload File">
-            <DocumentArrowUpIcon class="w-5 h-5 sm:w-6 sm:h-6 text-white hover:scale-110 transition" />
+            <DocumentArrowUpIcon class="w-5 h-5 sm:w-6 sm:h-6 text-black" />
           </button>
 
           <!-- Notifications -->
           <div class="relative z-50" ref="notifRef">
             <button @click="toggleNotifDropdown" title="Notifications">
-              <BellIcon class="w-5 h-5 sm:w-6 sm:h-6 text-white hover:rotate-12 transition" />
+              <BellIcon class="w-5 h-5 sm:w-6 sm:h-6 text-black" />
               <span
                 v-if="notifications.length"
                 class="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] sm:text-xs w-3 h-3 sm:w-4 sm:h-4 rounded-full flex items-center justify-center"
@@ -37,7 +37,7 @@
             <transition name="fade">
               <div
                 v-if="notifDropdownOpen"
-                class="absolute right-0 mt-2 w-60 sm:w-64 max-h-72 sm:max-h-80 overflow-y-auto border border-gray-200 rounded-md shadow-lg z-50 bg-white"
+                class="absolute right-0 mt-2 w-60 sm:w-64 max-h-72 sm:max-h-80 overflow-y-auto rounded-md z-50 bg-white"
               >
                 <div v-if="!notifications.length" class="text-gray-600 text-sm p-3">No new notifications.</div>
                 <div
