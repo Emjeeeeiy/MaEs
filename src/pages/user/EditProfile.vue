@@ -22,13 +22,13 @@
           
           <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
             <div class="relative group cursor-pointer">
-              <div class="w-28 h-28 md:w-32 md:h-32 rounded-[32px] overflow-hidden bg-slate-800 border-4 border-teal-500/30 p-1 transition-transform group-hover:scale-105">
+              <div class="w-28 h-28 md:w-32 md:h-32 rounded-4xl overflow-hidden bg-slate-800 border-4 border-teal-500/30 p-1 transition-transform group-hover:scale-105">
                 <img
                   v-if="previewImage"
                   :src="previewImage"
-                  class="w-full h-full object-cover rounded-[24px]"
+                  class="w-full h-full object-cover rounded-3xl"
                 />
-                <div v-else class="w-full h-full flex items-center justify-center bg-slate-900 text-teal-500 text-3xl font-black rounded-[24px]">
+                <div v-else class="w-full h-full flex items-center justify-center bg-slate-900 text-teal-500 text-3xl font-black rounded-3xl">
                   {{ username.charAt(0).toUpperCase() }}
                 </div>
               </div>
@@ -105,13 +105,13 @@
         <div class="flex flex-col sm:flex-row gap-4 pt-4">
            <button
             type="submit"
-            class="flex-1 bg-slate-950 text-white py-5 rounded-[24px] text-xs font-black uppercase tracking-[0.2em] hover:bg-teal-500 hover:text-slate-950 transition-all shadow-xl shadow-slate-200 active:scale-[0.98]"
+            class="flex-1 bg-slate-950 text-white py-5 rounded-3xl text-xs font-black uppercase tracking-[0.2em] hover:bg-teal-500 hover:text-slate-950 transition-all shadow-xl shadow-slate-200 active:scale-[0.98]"
           >
             Save Changes
           </button>
           <router-link
             to="/profile"
-            class="px-10 py-5 bg-white border border-slate-200 text-slate-500 rounded-[24px] text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-50 transition-all text-center"
+            class="px-10 py-5 bg-white border border-slate-200 text-slate-500 rounded-3xl text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-50 transition-all text-center"
           >
             Cancel
           </router-link>

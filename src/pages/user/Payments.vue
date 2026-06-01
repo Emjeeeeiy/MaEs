@@ -7,7 +7,7 @@
           <div v-for="i in 3" :key="i" class="h-56 bg-slate-50 border border-slate-100 rounded-[28px]"></div>
         </div>
         <div class="lg:col-span-1">
-          <div class="h-80 bg-slate-900/5 rounded-[32px] border border-slate-100"></div>
+          <div class="h-80 bg-slate-900/5 rounded-4xl border border-slate-100"></div>
         </div>
       </div>
     </div>
@@ -35,7 +35,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
         
         <div class="lg:col-span-3">
-          <div v-if="filteredInvoices.length === 0" class="flex flex-col items-center justify-center py-20 text-slate-400 bg-slate-50 rounded-[32px] border border-dashed border-slate-200">
+          <div v-if="filteredInvoices.length === 0" class="flex flex-col items-center justify-center py-20 text-slate-400 bg-slate-50 rounded-4xl border border-dashed border-slate-200">
             <Receipt class="w-12 h-12 opacity-20 mb-3" />
             <p class="text-lg font-semibold">No unpaid invoices found.</p>
           </div>
@@ -46,7 +46,7 @@
               :key="invoice.id"
               @click="toggleSelection(invoice)"
               :class="[
-                'group relative p-6 border rounded-[28px] transition-all cursor-pointer flex flex-col justify-between h-full min-h-[220px]',
+                'group relative p-6 border rounded-[28px] transition-all cursor-pointer flex flex-col justify-between h-full min-h-55',
                 selectedInvoiceIds.includes(invoice.id) 
                   ? 'bg-teal-50/50 border-teal-200 ring-1 ring-teal-200 shadow-md shadow-teal-500/5' 
                   : 'bg-white border-slate-100 hover:border-teal-100 hover:shadow-lg',
@@ -90,7 +90,7 @@
         </div>
 
         <div class="lg:col-span-1 sticky top-6">
-          <div class="bg-slate-950 rounded-[32px] p-8 text-white shadow-2xl shadow-teal-900/20 relative overflow-hidden">
+          <div class="bg-slate-950 rounded-4xl p-8 text-white shadow-2xl shadow-teal-900/20 relative overflow-hidden">
             <div class="absolute -top-10 -right-10 w-32 h-32 bg-teal-500/10 rounded-full blur-3xl"></div>
             
             <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
@@ -98,7 +98,7 @@
               Payment Summary
             </h2>
 
-            <div class="space-y-4 max-h-[250px] overflow-y-auto no-scrollbar mb-8">
+            <div class="space-y-4 max-h-62.5 overflow-y-auto no-scrollbar mb-8">
               <div v-if="selectedInvoiceIds.length === 0" class="py-10 text-center opacity-40">
                 <p class="text-sm italic">Select invoices to pay</p>
               </div>
@@ -147,8 +147,8 @@
 
     <!-- Modals -->
     <Transition name="fade">
-      <div v-if="showPaymentMethodModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-6">
-        <div class="bg-white w-full max-w-sm p-8 rounded-[32px] shadow-2xl animate-fade-in border border-slate-100">
+      <div v-if="showPaymentMethodModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-100 p-6">
+        <div class="bg-white w-full max-w-sm p-8 rounded-4xl shadow-2xl animate-fade-in border border-slate-100">
           <h3 class="text-xl font-black text-slate-950 mb-6 text-center">Payment Method</h3>
           <div class="grid grid-cols-1 gap-3">
             <button @click="handlePaymentMethod('Cash')" class="flex items-center justify-between p-4 bg-slate-50 hover:bg-teal-50 border border-slate-100 hover:border-teal-200 rounded-2xl transition-all font-bold text-slate-900">
@@ -166,8 +166,8 @@
     </Transition>
 
     <Transition name="fade">
-      <div v-if="showGCashModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-6">
-        <div class="bg-white w-full max-w-sm p-8 rounded-[32px] shadow-2xl animate-fade-in border-4 border-blue-500">
+      <div v-if="showGCashModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-100 p-6">
+        <div class="bg-white w-full max-w-sm p-8 rounded-4xl shadow-2xl animate-fade-in border-4 border-blue-500">
           <div class="flex justify-between items-start mb-6">
             <h3 class="text-xl font-black text-slate-950">GCash Transfer</h3>
             <img src="/gcash_logo.jpg" class="w-12 h-12 rounded-xl" />

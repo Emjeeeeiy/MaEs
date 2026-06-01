@@ -22,7 +22,7 @@
 
       <transition name="fade" mode="out-in">
         <div v-if="loading" key="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 animate-pulse">
-           <div v-for="i in 3" :key="i" class="bg-slate-50 border border-slate-100 rounded-[40px] h-[400px]"></div>
+           <div v-for="i in 3" :key="i" class="bg-slate-50 border border-slate-100 rounded-[40px] h-100"></div>
         </div>
 
         <div v-else key="content">
@@ -69,7 +69,7 @@
               </div>
 
               <div class="flex-1 px-8 pb-8">
-                <div class="bg-slate-50/80 rounded-[32px] p-6 space-y-5 border border-slate-100/50">
+                <div class="bg-slate-50/80 rounded-4xl p-6 space-y-5 border border-slate-100/50">
                   <div class="flex items-center gap-2 mb-2">
                     <ClipboardCheck class="w-4 h-4 text-teal-600" />
                     <span class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Medical Findings</span>

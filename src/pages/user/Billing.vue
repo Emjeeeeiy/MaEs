@@ -53,11 +53,11 @@
           <div class="lg:col-span-3 space-y-10">
             <div v-for="i in 3" :key="i" class="space-y-4">
               <div class="h-6 bg-slate-100 rounded w-1/4"></div>
-              <div class="h-64 bg-slate-50 border border-slate-100 rounded-[24px]"></div>
+              <div class="h-64 bg-slate-50 border border-slate-100 rounded-3xl"></div>
             </div>
           </div>
           <div class="lg:col-span-1">
-            <div class="h-96 bg-slate-900/5 rounded-[32px] border border-slate-100"></div>
+            <div class="h-96 bg-slate-900/5 rounded-4xl border border-slate-100"></div>
           </div>
         </div>
 
@@ -72,7 +72,7 @@
                   <span class="text-xs text-slate-400 font-medium">({{ groupedFilteredServices[category].length }} items)</span>
                 </div>
 
-                <div class="overflow-hidden bg-white border border-slate-100 rounded-[24px] shadow-sm">
+                <div class="overflow-hidden bg-white border border-slate-100 rounded-3xl shadow-sm">
                   <table class="w-full text-left border-collapse">
                     <thead class="bg-slate-50/50 border-b border-slate-100">
                       <tr>
@@ -132,7 +132,7 @@
           </div>
 
           <div class="lg:col-span-1 sticky top-6">
-            <div class="bg-slate-950 rounded-[32px] p-8 text-white shadow-2xl shadow-teal-900/20 relative overflow-hidden">
+            <div class="bg-slate-950 rounded-4xl p-8 text-white shadow-2xl shadow-teal-900/20 relative overflow-hidden">
               <div class="absolute -top-10 -right-10 w-32 h-32 bg-teal-500/10 rounded-full blur-3xl"></div>
               
               <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
@@ -140,7 +140,7 @@
                 Invoice Summary
               </h2>
 
-              <div class="space-y-4 max-h-[300px] overflow-y-auto no-scrollbar mb-8">
+              <div class="space-y-4 max-h-75 overflow-y-auto no-scrollbar mb-8">
                 <div v-if="selectedServices.length === 0" class="py-10 text-center opacity-40">
                   <p class="text-sm italic">No services selected yet.</p>
                 </div>
@@ -187,7 +187,7 @@
               </div>
             </div>
             
-            <div class="mt-4 p-5 bg-teal-50 border border-teal-100 rounded-[24px]">
+            <div class="mt-4 p-5 bg-teal-50 border border-teal-100 rounded-3xl">
                 <div class="flex gap-3">
                     <div class="text-teal-600"><FileText class="w-5 h-5"/></div>
                     <p class="text-xs text-teal-800 leading-relaxed">

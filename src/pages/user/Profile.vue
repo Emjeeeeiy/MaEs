@@ -20,9 +20,9 @@
                   v-if="profileImageUrl"
                   :src="profileImageUrl"
                   alt="Profile"
-                  class="w-full h-full object-cover rounded-[32px]"
+                  class="w-full h-full object-cover rounded-4xl"
                 />
-                <div class="w-full h-full flex items-center justify-center text-4xl font-black text-teal-500 bg-slate-900 rounded-[32px]" v-else>
+                <div class="w-full h-full flex items-center justify-center text-4xl font-black text-teal-500 bg-slate-900 rounded-4xl" v-else>
                   {{ username.charAt(0).toUpperCase() }}
                 </div>
               </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
+  <div class="flex flex-col min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
     <!-- Topbar -->
     <div class="fixed top-0 left-0 right-0 z-30">
       <AdminTopbar />

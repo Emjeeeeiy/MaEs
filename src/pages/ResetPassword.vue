@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-slate-50 text-slate-800 flex flex-col antialiased font-sans">
-    <main class="flex-grow flex items-center justify-center px-4 py-12">
+    <main class="grow flex items-center justify-center px-4 py-12">
       <form
         @submit.prevent="resetPassword"
         class="w-full max-w-md rounded-2xl p-6 sm:p-8 space-y-6 bg-white shadow-sm border border-slate-200/60"

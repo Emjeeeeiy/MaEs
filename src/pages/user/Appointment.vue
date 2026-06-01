@@ -4,7 +4,7 @@
       <div class="h-10 bg-slate-100 rounded-xl w-1/4"></div>
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
         <div class="lg:col-span-7 space-y-6">
-          <div v-for="i in 3" :key="i" class="h-40 bg-slate-50 border border-slate-100 rounded-[32px]"></div>
+          <div v-for="i in 3" :key="i" class="h-40 bg-slate-50 border border-slate-100 rounded-4xl"></div>
           <div class="h-16 bg-slate-200 rounded-3xl w-full"></div>
         </div>
         <div class="lg:col-span-5">
@@ -24,7 +24,7 @@
         <div class="lg:col-span-7 space-y-6">
           <form @submit.prevent="submitAppointment" class="space-y-8">
             
-            <div class="bg-slate-50/50 p-6 rounded-[32px] border border-slate-100 space-y-4">
+            <div class="bg-slate-50/50 p-6 rounded-4xl border border-slate-100 space-y-4">
               <div class="flex items-center gap-3 mb-2">
                 <div class="p-2 bg-teal-500 text-white rounded-xl shadow-lg shadow-teal-500/20">
                   <Calendar class="w-5 h-5" />
@@ -40,7 +40,7 @@
               />
             </div>
 
-            <div class="bg-slate-50/50 p-6 rounded-[32px] border border-slate-100 space-y-4">
+            <div class="bg-slate-50/50 p-6 rounded-4xl border border-slate-100 space-y-4">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                   <div class="p-2 bg-slate-950 text-white rounded-xl">
@@ -75,7 +75,7 @@
               </div>
             </div>
 
-            <div class="bg-slate-50/50 p-6 rounded-[32px] border border-slate-100 space-y-4">
+            <div class="bg-slate-50/50 p-6 rounded-4xl border border-slate-100 space-y-4">
               <h3 class="font-bold text-slate-900 ml-1">Additional Notes (Optional)</h3>
               <textarea
                 v-model="form.notes"
@@ -109,7 +109,7 @@
             </div>
 
             <div v-if="todayAppointment" class="space-y-6">
-              <div class="p-5 bg-white/5 border border-white/10 rounded-[24px]">
+              <div class="p-5 bg-white/5 border border-white/10 rounded-3xl">
                 <div class="flex justify-between items-start mb-4">
                   <span class="px-3 py-1 bg-teal-500/20 text-teal-400 text-[10px] font-black rounded-full uppercase tracking-tighter border border-teal-500/30">
                     {{ todayAppointment.status }}
@@ -146,7 +146,7 @@
 
 
     <Transition name="fade">
-      <div v-if="showServiceModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div v-if="showServiceModal" class="fixed inset-0 z-100 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="closeServiceModal"></div>
         <div class="relative bg-white max-w-2xl w-full rounded-[40px] shadow-2xl border border-slate-100 overflow-hidden animate-fade-in">
           <div class="p-8 border-b border-slate-50 flex justify-between items-center">
@@ -170,7 +170,7 @@
               />
             </div>
 
-            <div class="max-h-[400px] overflow-y-auto pr-2 space-y-6 custom-scroll">
+            <div class="max-h-100 overflow-y-auto pr-2 space-y-6 custom-scroll">
               <div v-for="(group, category) in filteredServiceGroups" :key="category">
                 <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">{{ category }}</h4>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -202,15 +202,15 @@
     </Transition>
 
     <Transition name="fade">
-      <div v-if="showAllModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div v-if="showAllModal" class="fixed inset-0 z-100 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="closeAllModal"></div>
         <div class="relative bg-white max-w-lg w-full rounded-[40px] shadow-2xl border border-slate-100 animate-fade-in overflow-hidden">
           <div class="p-8 border-b border-slate-50 flex justify-between items-center">
             <h3 class="text-2xl font-black text-slate-950">Appointment History</h3>
             <button @click="closeAllModal" class="text-slate-400 hover:text-red-500 transition font-bold text-sm">Close</button>
           </div>
-          <div class="p-8 max-h-[500px] overflow-y-auto space-y-3 custom-scroll">
-            <div v-for="appt in appointments" :key="appt.id" class="bg-slate-50 p-5 rounded-[24px] border border-slate-100">
+          <div class="p-8 max-h-125 overflow-y-auto space-y-3 custom-scroll">
+            <div v-for="appt in appointments" :key="appt.id" class="bg-slate-50 p-5 rounded-3xl border border-slate-100">
               <div class="flex justify-between items-center mb-3">
                 <span class="text-xs font-mono text-slate-500">{{ appt.date }}</span>
                 <span :class="['px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter', statusColor(appt.status)]">

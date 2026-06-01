@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex items-center justify-center min-h-screen bg-gradient-to-br from-white via-blue-50 to-gray-100 text-gray-800"
+    class="flex items-center justify-center min-h-screen bg-linear-to-br from-white via-blue-50 to-gray-100 text-gray-800"
   >
     <div
       class="text-center p-8 rounded-2xl shadow-lg bg-white max-w-md border border-gray-200"

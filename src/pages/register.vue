@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-slate-50 text-slate-800 flex flex-col antialiased font-sans">
 
     <!-- MAIN CONTENT -->
-    <main class="flex-grow flex items-center justify-center px-4 py-12 sm:py-20">
+    <main class="grow flex items-center justify-center px-4 py-12 sm:py-20">
       <form
         @submit.prevent="registerUser"
         class="w-full max-w-md rounded-2xl p-6 sm:p-8 space-y-5 bg-white shadow-sm border border-slate-200/60"
@@ -152,7 +152,7 @@
           :class="[ 
             'w-full py-3 rounded-xl text-sm font-semibold transition-all shadow-sm mt-2',
             isPasswordValid && acceptedTerms && acceptedPrivacy
-              ? 'bg-emerald-600 text-white hover:bg-emerald-500 hover:translate-y-[-1px]'
+              ? 'bg-emerald-600 text-white hover:bg-emerald-500 hover:-translate-y-px'
               : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
           ]"
         >
