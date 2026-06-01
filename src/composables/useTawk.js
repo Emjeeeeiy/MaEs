@@ -6,25 +6,13 @@ let tawkInitialized = false;
 let tawkLoadTimeout = null;
 
 export function useTawk() {
-  // Exclude routes kung saan ayaw mo lumabas ang Tawk widget
-  const excludedRoutes = ['/', '/auth', '/login', '/register', '/reset-password'];
-  const shouldLoadTawk = (path) => !excludedRoutes.includes(path);
-
-  // 🔐 Kunin ang role ng user mula Firestore
-  async function getUserRole() {
-    const user = auth.currentUser;
-    if (!user) return null;
-
-    const snap = await getDoc(doc(db, 'users', user.uid));
-    return snap.exists() ? snap.data().role : null;
-  }
-
+  
   // 📝 Optional logging ng mga Tawk events sa Firestore
   async function logTawkEvent(message, data = {}) {
     console.info('[TAWK EVENT]', message, data);
     try {
       const user = auth.currentUser;
-      if (!user) throw new Error('User not authenticated');
+      if (!user) return; // Don't log if no user
 
       await addDoc(collection(db, 'tawkLogs'), {
         userId: user.uid,
@@ -42,15 +30,9 @@ export function useTawk() {
     }
   }
 
-  // ✅ Load Tawk widget (depende sa role ng user)
+  // ✅ Load Tawk widget
   const loadTawk = async () => {
-    if (tawkInitialized || !auth.currentUser) return;
-
-    const role = await getUserRole();
-    if (!['user', 'admin'].includes(role)) {
-      logTawkEvent('Tawk skipped due to role restriction', { role });
-      return;
-    }
+    if (tawkInitialized) return;
 
     unloadTawk(); // full cleanup bago mag-load ulit
 
@@ -103,16 +85,12 @@ export function useTawk() {
 
   // ❌ Unload Tawk (full cleanup)
   const unloadTawk = () => {
-    if (!tawkInitialized) return;
-
     clearTimeout(tawkLoadTimeout);
 
     try {
       if (window.Tawk_API?.endChat) window.Tawk_API.endChat();
       if (window.Tawk_API?.logout) window.Tawk_API.logout();
       if (window.Tawk_API?.hideWidget) window.Tawk_API.hideWidget();
-
-      logTawkEvent('Tawk fully unloaded and session ended');
     } catch (e) {
       console.warn('[TAWK] API teardown failed:', e);
     }
@@ -143,5 +121,5 @@ export function useTawk() {
     });
   };
 
-  return { loadTawk, unloadTawk, shouldLoadTawk };
+  return { loadTawk, unloadTawk };
 }

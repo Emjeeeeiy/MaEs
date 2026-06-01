@@ -1,253 +1,292 @@
 <template>
-  <div class="min-h-screen bg-white text-gray-800">
+  <div class="min-h-screen bg-white text-slate-800 antialiased font-sans">
 
-    <!-- HEADER -->
     <header
       :class="[
-        'sticky top-0 z-50 bg-white/95 backdrop-blur-sm transition-all duration-300',
-        isScrolled ? 'shadow-lg rounded-b-2xl py-1' : 'shadow-md py-2'
+        'sticky top-0 z-50 bg-white/80 backdrop-blur-md transition-all duration-300 border-b',
+        isScrolled ? 'shadow-sm border-slate-100 py-2' : 'border-transparent py-4'
       ]"
     >
-      <div
-        :class="[
-          'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center transition-all duration-300',
-          isScrolled ? 'py-1' : 'py-2'
-        ]"
-      >
-        <!-- Logo -->
-        <div class="flex items-center gap-2 sm:gap-3">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+        <div class="flex items-center gap-3 cursor-pointer" @click="scrollTo('home')">
           <img
             src="/MaEs_logo2.png"
             alt="MAES Logo"
-            class="rounded-full shadow-sm transition-all duration-300"
-            :class="isScrolled ? 'h-7 w-7 sm:h-8 sm:w-8' : 'h-8 w-8 sm:h-10 sm:w-10'"
+            class="rounded-full object-cover transition-all duration-300"
+            :class="isScrolled ? 'h-8 w-8' : 'h-10 w-10'"
           />
-          <span
-            class="font-bold text-green-700 tracking-tight transition-all duration-300 text-sm sm:text-base"
-          >
-            Maria Estrella
-          </span>
+          <div class="flex flex-col">
+            <span class="font-bold text-emerald-800 tracking-tight text-sm sm:text-base leading-none">
+              Maria Estrella
+            </span>
+            <span class="text-[10px] text-slate-400 font-medium tracking-wider uppercase mt-0.5">
+              Paytrack
+            </span>
+          </div>
         </div>
 
-        <!-- Navigation (always visible, responsive fonts) -->
-        <nav class="flex gap-3 sm:gap-6 text-xs sm:text-sm font-medium text-gray-700">
-          <button @click="scrollTo('home')" class="hover:text-green-700 transition">Home</button>
-          <button @click="scrollTo('how')" class="hover:text-green-700 transition">How it Works</button>
-          <button @click="scrollTo('features')" class="hover:text-green-700 transition">Features</button>
-          <button @click="scrollTo('features')" class="hover:text-green-700 transition">Benefits</button>
-          <button @click="scrollTo('contact')" class="hover:text-green-700 transition">Contact</button>
+        <nav class="flex gap-4 sm:gap-8 text-xs sm:text-sm font-medium text-slate-600">
+          <button @click="scrollTo('home')" class="hover:text-emerald-700 transition-colors">Home</button>
+          <button @click="scrollTo('how')" class="hover:text-emerald-700 transition-colors">Process</button>
+          <button @click="scrollTo('features')" class="hover:text-emerald-700 transition-colors">Features</button>
+          <button @click="scrollTo('contact')" class="hover:text-emerald-700 transition-colors">Contact</button>
         </nav>
       </div>
     </header>
 
-    <!-- HERO -->
     <section
       ref="home"
-      class="relative flex items-center justify-center text-center py-24 sm:py-32 bg-cover bg-center bg-no-repeat"
+      class="relative flex items-center justify-center text-center py-24 sm:py-36 bg-cover bg-center bg-no-repeat overflow-hidden"
       :style="{ backgroundImage: 'url(/hospital_bg.jpeg)' }"
     >
-      <!-- Overlay -->
-      <div class="absolute inset-0 bg-black/40"></div>
+      <div class="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]"></div>
       
-      <!-- Subtle Green Fog Overlay -->
-      <div class="absolute inset-0 bg-green-500/10 mix-blend-overlay pointer-events-none"></div>
+      <div class="absolute inset-0 bg-linear-to-t from-slate-900/40 via-transparent to-transparent pointer-events-none"></div>
 
-      <!-- Content -->
-      <div class="relative max-w-4xl mx-auto px-4 text-white space-y-6">
-        <h1 class="text-3xl sm:text-5xl font-bold drop-shadow-lg text-green-200">MaEs - Paytrack</h1>
-        <p class="text-sm sm:text-lg drop-shadow-md text-green-100">
-          A fully digital hospital billing and management platform built for efficiency, transparency, and ease of use.
+      <div class="relative max-w-3xl mx-auto px-4 text-white space-y-8">
+        <div class="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase border border-emerald-500/30">
+           Healthcare Billing
+        </div>
+        
+        <h1 class="text-4xl sm:text-6xl font-black tracking-tight drop-shadow-sm text-white">
+          MaEs <span class="text-emerald-400">Paytrack</span>
+        </h1>
+        
+        <p class="text-base sm:text-xl text-slate-200 max-w-2xl mx-auto font-light leading-relaxed">
+          A beautifully minimal, fully digital hospital billing platform engineered for absolute efficiency, transparency, and administrative ease.
         </p>
 
-        <div class="flex justify-center gap-3 sm:gap-6">
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
           <button
             @click="goToRegister"
-            class="bg-green-600 text-white px-5 sm:px-7 py-2 sm:py-3 rounded-lg hover:bg-green-700 transition font-medium text-sm sm:text-base shadow-lg"
+            class="w-full sm:w-auto bg-emerald-600 text-white px-8 py-3.5 rounded-xl hover:bg-emerald-500 transition-all font-semibold text-sm shadow-md shadow-emerald-900/20 hover:-translate-y-px"
           >
-            Get Started
+            Get Started Free
           </button>
           <button
             @click="goToLogin"
-            class="bg-white text-green-800 px-5 sm:px-7 py-2 sm:py-3 rounded-lg hover:bg-green-50 transition font-medium text-sm sm:text-base shadow-lg"
+            class="w-full sm:w-auto bg-white/10 text-white backdrop-blur-md px-8 py-3.5 rounded-xl hover:bg-white/20 transition-all font-semibold text-sm border border-white/20"
           >
-            Login
+            Sign In to Dashboard
           </button>
         </div>
 
-        <!-- Heartbeat Animation -->
-        <div class="mt-10 flex justify-center">
+        <div class="pt-8 flex justify-center opacity-85">
           <HeartbeatLine />
         </div>
       </div>
     </section>
 
-    <!-- HOW IT WORKS -->
-    <section ref="how" class="py-16 sm:py-20 bg-green-900">
+    <section ref="how" class="py-20 sm:py-28 bg-slate-50">
       <div class="max-w-6xl mx-auto px-4">
-        <h2 class="text-2xl sm:text-3xl font-bold text-center mb-10 sm:mb-16 text-green-300">
-          How It Works
+        <div class="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
+          <h2 class="text-xs uppercase tracking-widest text-emerald-600 font-bold mb-3">Workflow Workflow</h2>
+          <p class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            Optimized billing in 4 simple steps
+          </p>
+          <p class="mt-4 text-slate-500 text-sm sm:text-base">
+            Our frictionless automation blueprint reduces overhead layout timelines and keeps hospital desk administrative tasks moving smoothly.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+          
+          <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative group hover:shadow-md transition">
+            <div class="w-12 h-12 flex items-center justify-center bg-emerald-50 text-emerald-700 rounded-xl mb-5 font-bold group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+              <User class="w-5 h-5" />
+            </div>
+            <span class="absolute top-6 right-6 text-slate-200 font-bold text-lg">01</span>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Secure Registration</h3>
+            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Create an administrative or staff hub account linked directly to your secure hospital node.
+            </p>
+          </div>
+
+          <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative group hover:shadow-md transition">
+            <div class="w-12 h-12 flex items-center justify-center bg-emerald-50 text-emerald-700 rounded-xl mb-5 font-bold group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+              <UserPlus class="w-5 h-5" />
+            </div>
+            <span class="absolute top-6 right-6 text-slate-200 font-bold text-lg">02</span>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Log Admissions</h3>
+            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Input patient vitals, personal data, and treatments received into our clean digital records ledger.
+            </p>
+          </div>
+
+          <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative group hover:shadow-md transition">
+            <div class="w-12 h-12 flex items-center justify-center bg-emerald-50 text-emerald-700 rounded-xl mb-5 font-bold group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+              <FileText class="w-5 h-5" />
+            </div>
+            <span class="absolute top-6 right-6 text-slate-200 font-bold text-lg">03</span>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Auto-Generate</h3>
+            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              The engine compiles active items instantly, generating clean itemized invoices without manual math.
+            </p>
+          </div>
+
+          <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative group hover:shadow-md transition">
+            <div class="w-12 h-12 flex items-center justify-center bg-emerald-50 text-emerald-700 rounded-xl mb-5 font-bold group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+              <CreditCard class="w-5 h-5" />
+            </div>
+            <span class="absolute top-6 right-6 text-slate-200 font-bold text-lg">04</span>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Track Settlements</h3>
+            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              Process secure digital mobile payments while monitoring real-time balance sheets seamlessly.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section ref="features" class="py-20 sm:py-28 bg-white border-t border-slate-100">
+      <div class="max-w-6xl mx-auto px-4">
+        
+        <div class="text-center max-w-2xl mx-auto mb-16 sm:mb-20">
+          <h2 class="text-xs uppercase tracking-widest text-emerald-600 font-bold mb-3">System Capabilities</h2>
+          <p class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            Engineered for high-reliability medical operations
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16">
+          
+          <div class="space-y-6">
+            <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+              <div class="p-2 bg-emerald-50 rounded-lg text-emerald-700">
+                <LayoutDashboard class="w-5 h-5" />
+              </div>
+              <h3 class="text-xl font-bold text-slate-900">Core Features</h3>
+            </div>
+            
+            <div class="space-y-4">
+              <div class="p-5 bg-slate-50 rounded-xl border border-slate-100 transition hover:bg-slate-50/50">
+                <h4 class="font-semibold text-slate-900 text-sm sm:text-base flex items-center gap-2 mb-1">
+                  <FileSpreadsheet class="w-4 h-4 text-emerald-600" /> Digital Patient Invoicing
+                </h4>
+                <p class="text-xs sm:text-sm text-slate-500 leading-relaxed pl-6">
+                  Instantly break down complex stays into easily understandable itemized invoices for rooms, medications, and dynamic physician fees.
+                </p>
+              </div>
+
+              <div class="p-5 bg-slate-50 rounded-xl border border-slate-100 transition hover:bg-slate-50/50">
+                <h4 class="font-semibold text-slate-900 text-sm sm:text-base flex items-center gap-2 mb-1">
+                  <Wallet class="w-4 h-4 text-emerald-600" /> GCash & Cash Reconciliation
+                </h4>
+                <p class="text-xs sm:text-sm text-slate-500 leading-relaxed pl-6">
+                  Supports modern e-wallets alongside standard over-the-counter payments to keep collections simple for patient relatives.
+                </p>
+              </div>
+
+              <div class="p-5 bg-slate-50 rounded-xl border border-slate-100 transition hover:bg-slate-50/50">
+                <h4 class="font-semibold text-slate-900 text-sm sm:text-base flex items-center gap-2 mb-1">
+                  <BarChart3 class="w-4 h-4 text-emerald-600" /> Real-time Analytics Dashboard
+                </h4>
+                <p class="text-xs sm:text-sm text-slate-500 leading-relaxed pl-6">
+                  Gain an instant birds-eye insight on total collections, outstanding receivables, and peak admissions volume on a single clean interface.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-6">
+            <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+              <div class="p-2 bg-emerald-50 rounded-lg text-emerald-700">
+                <CheckCircle2 class="w-5 h-5" />
+              </div>
+              <h3 class="text-xl font-bold text-slate-900">Why Choose MAES?</h3>
+            </div>
+
+            <div class="space-y-4">
+              <div class="p-5 bg-slate-50 rounded-xl border border-slate-100 transition hover:bg-slate-50/50">
+                <h4 class="font-semibold text-slate-900 text-sm sm:text-base flex items-center gap-2 mb-1">
+                  <Zap class="w-4 h-4 text-emerald-600" /> Eradicate Manual Labor
+                </h4>
+                <p class="text-xs sm:text-sm text-slate-500 leading-relaxed pl-6">
+                  Transition your frontline medical secretaries away from confusing paper logs or messy spreadsheets into structured cloud automation.
+                </p>
+              </div>
+
+              <div class="p-5 bg-slate-50 rounded-xl border border-slate-100 transition hover:bg-slate-50/50">
+                <h4 class="font-semibold text-slate-900 text-sm sm:text-base flex items-center gap-2 mb-1">
+                  <ShieldAlert class="w-4 h-4 text-emerald-600" /> Precision Accounting
+                </h4>
+                <p class="text-xs sm:text-sm text-slate-500 leading-relaxed pl-6">
+                  Protect against clerical human computation error patterns and minimize discrepancy issues between admissions desks and internal cashiers.
+                </p>
+              </div>
+
+              <div class="p-5 bg-slate-50 rounded-xl border border-slate-100 transition hover:bg-slate-50/50">
+                <h4 class="font-semibold text-slate-900 text-sm sm:text-base flex items-center gap-2 mb-1">
+                  <Eye class="w-4 h-4 text-emerald-600" /> Transparent Operations
+                </h4>
+                <p class="text-xs sm:text-sm text-slate-500 leading-relaxed pl-6">
+                  Deliver absolute financial clarity to patients and regulatory auditors alike with transparent data storage structures.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section ref="contact" class="py-20 sm:py-28 text-center bg-slate-950 text-white relative overflow-hidden">
+      <div class="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-size-[4rem_4rem] mask-[radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20"></div>
+
+      <div class="relative max-w-4xl mx-auto px-4 space-y-6">
+        <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
+          Ready to transform your healthcare administrative flow?
         </h2>
+        <p class="max-w-xl mx-auto text-slate-400 text-sm sm:text-base font-light">
+          Deploy MaEs Paytrack to your medical facility today and experience error-free financial processing operations instantly.
+        </p>
 
-        <!-- Timeline -->
-        <div class="relative flex flex-col md:flex-row md:justify-between md:items-start gap-4 sm:gap-6">
-
-          <!-- Line -->
-          <div class="absolute top-0 md:top-1/2 left-5 md:left-0 md:right-0 h-full md:h-0.5 w-0.5 md:w-full bg-green-700/50 z-0"></div>
-
-          <!-- Step 1 -->
-          <div class="flex items-start md:flex-col md:items-center gap-3 relative z-10">
-            <div class="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-green-700 text-white rounded-full">
-              <User class="w-4 sm:w-5 h-4 sm:h-5" />
-            </div>
-            <div class="text-left md:text-center">
-              <h3 class="font-semibold text-green-200 text-sm sm:text-base">1. Register</h3>
-              <p class="text-xs sm:text-sm text-green-100">Create an account to access the system.</p>
-            </div>
-          </div>
-
-          <!-- Step 2 -->
-          <div class="flex items-start md:flex-col md:items-center gap-3 relative z-10 mt-6 md:mt-0">
-            <div class="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-green-700 text-white rounded-full">
-              <UserPlus class="w-4 sm:w-5 h-4 sm:h-5" />
-            </div>
-            <div class="text-left md:text-center">
-              <h3 class="font-semibold text-green-200 text-sm sm:text-base">2. Add Patient Info</h3>
-              <p class="text-xs sm:text-sm text-green-100">Admins input patient and service details.</p>
-            </div>
-          </div>
-
-          <!-- Step 3 -->
-          <div class="flex items-start md:flex-col md:items-center gap-3 relative z-10 mt-6 md:mt-0">
-            <div class="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-green-700 text-white rounded-full">
-              <FileText class="w-4 sm:w-5 h-4 sm:h-5" />
-            </div>
-            <div class="text-left md:text-center">
-              <h3 class="font-semibold text-green-200 text-sm sm:text-base">3. Generate Invoice</h3>
-              <p class="text-xs sm:text-sm text-green-100">System creates billing invoices automatically.</p>
-            </div>
-          </div>
-
-          <!-- Step 4 -->
-          <div class="flex items-start md:flex-col md:items-center gap-3 relative z-10 mt-6 md:mt-0">
-            <div class="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-green-700 text-white rounded-full">
-              <CreditCard class="w-4 sm:w-5 h-4 sm:h-5" />
-            </div>
-            <div class="text-left md:text-center">
-              <h3 class="font-semibold text-green-200 text-sm sm:text-base">4. Pay & Track</h3>
-              <p class="text-xs sm:text-sm text-green-100">Patients can pay and track payment status.</p>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- FEATURES/BENEFITS ACCORDION -->
-    <section ref="features" class="py-16 sm:py-20 bg-green-900">
-      <h2 class="text-2xl sm:text-3xl font-bold text-center mb-10 sm:mb-16 text-green-300">
-          Features & Benefits
-        </h2>
-      <div class="max-w-4xl mx-auto px-4 space-y-6 sm:space-y-8">
-
-        <!-- Accordion Item: Core Features -->
-        <div class="border-b border-green-700 pb-3 sm:pb-4">
-          <button
-            @click="toggle('features')"
-            class="flex items-center w-full text-left focus:outline-none gap-2 sm:gap-3 text-green-200"
-          >
-            <span
-              class="transition-transform duration-300"
-              :class="open === 'features' ? 'rotate-45' : 'rotate-0'"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 sm:h-6 w-5 sm:w-6" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-            </span>
-            <span class="font-bold text-base sm:text-xl">Core Features</span>
+        <div class="pt-4">
+          <button @click="goToRegister" class="bg-emerald-600 text-white px-8 py-3.5 rounded-xl hover:bg-emerald-500 transition-all font-semibold text-sm shadow-lg shadow-emerald-950/50 hover:-translate-y-px">
+            Create Medical Unit Account
           </button>
-
-          <transition name="slide-fade">
-            <div v-if="open === 'features'" class="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-              <div class="p-3 sm:p-4 bg-green-800 rounded-xl shadow hover:shadow-lg transition flex items-center gap-2 text-green-100 text-sm sm:text-base">
-                <FileText class="w-5 h-5" /> Digital Patient Invoicing
-              </div>
-              <div class="p-3 sm:p-4 bg-green-800 rounded-xl shadow hover:shadow-lg transition flex items-center gap-2 text-green-100 text-sm sm:text-base">
-                <CreditCard class="w-5 h-5" /> GCash & Cash Integration
-              </div>
-              <div class="p-3 sm:p-4 bg-green-800 rounded-xl shadow hover:shadow-lg transition flex items-center gap-2 text-green-100 text-sm sm:text-base">
-                <BarChart2 class="w-5 h-5" /> Admin Dashboard
-              </div>
-            </div>
-          </transition>
         </div>
 
-        <!-- Accordion Item: Why Choose MAES -->
-        <div class="border-b border-green-700 pb-3 sm:pb-4">
-          <button
-            @click="toggle('benefits')"
-            class="flex items-center w-full text-left focus:outline-none gap-2 sm:gap-3 text-green-200"
-          >
-            <span
-              class="transition-transform duration-300"
-              :class="open === 'benefits' ? 'rotate-45' : 'rotate-0'"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 sm:h-6 w-5 sm:w-6" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-            </span>
-            <span class="font-bold text-base sm:text-xl">Why Choose MAES?</span>
-          </button>
-
-          <transition name="slide-fade">
-            <div v-if="open === 'benefits'" class="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-              <div class="p-3 sm:p-4 bg-green-800 rounded-xl shadow hover:shadow-lg transition flex items-center gap-2 text-green-100 text-sm sm:text-base">
-                <TrendingUp class="w-5 h-5" /> Less Manual Work
-              </div>
-              <div class="p-3 sm:p-4 bg-green-800 rounded-xl shadow hover:shadow-lg transition flex items-center gap-2 text-green-100 text-sm sm:text-base">
-                <CheckCircle class="w-5 h-5" /> Improved Accuracy
-              </div>
-              <div class="p-3 sm:p-4 bg-green-800 rounded-xl shadow hover:shadow-lg transition flex items-center gap-2 text-green-100 text-sm sm:text-base">
-                <Eye class="w-5 h-5" /> Better Transparency
-              </div>
-            </div>
-          </transition>
+        <div class="pt-12 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md mx-auto text-xs sm:text-sm border-t border-slate-800/60 text-slate-400">
+          <div class="flex items-center justify-center gap-2 bg-slate-900/50 py-3 rounded-xl border border-slate-800/40">
+            <span>📞</span> <strong class="text-slate-200">+639-310-783-528</strong>
+          </div>
+          <div class="flex items-center justify-center gap-2 bg-slate-900/50 py-3 rounded-xl border border-slate-800/40">
+            <span>📧</span> <span class="text-slate-200 font-medium">meghlabibis@gmail.com</span>
+          </div>
         </div>
-
       </div>
     </section>
 
-    <!-- CONTACT -->
-    <section ref="contact" class="py-16 sm:py-20 text-center bg-green-900">
-      <<h2 class="text-2xl sm:text-3xl font-bold text-center mb-10 sm:mb-16 text-green-300">
-        Get in Touch
-      </h2>
-      <p class="mb-4 sm:mb-8 text-green-100 text-sm sm:text-base">Join hospitals and clinics using MAES.</p>
-
-      <button @click="goToRegister" class="bg-green-700 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg hover:bg-green-800 transition font-medium text-sm sm:text-base">
-        Create Account
-      </button>
-
-      <div class="mt-6 sm:mt-10 text-xs sm:text-sm text-green-200">
-        <p>📞 <strong>+639-310-783-528</strong></p>
-        <p>📧 meghlabibis@gmail.com</p>
-      </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer class="text-center py-4 sm:py-6 text-xs sm:text-sm text-gray-100 bg-gray-800">
-      &copy; 2025 MAES Hospital System. All rights reserved.
+    <footer class="text-center py-6 border-t border-slate-900 text-xs text-slate-500 bg-slate-950">
+      &copy; 2026 MAES Hospital System. Built for next-gen medical resource management.
     </footer>
   </div>
 </template>
-
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import HeartbeatLine from '@/components/heartbeat_line.vue'
+import HeartbeatLine from '@/components/HeartbeatLine.vue'
+import { useTawk } from "@/composables/useTawk";
+import {
+  User,
+  UserPlus,
+  FileText,
+  CreditCard,
+  LayoutDashboard,
+  FileSpreadsheet,
+  Wallet,
+  BarChart3,
+  CheckCircle2,
+  Zap,
+  ShieldAlert,
+  Eye
+} from 'lucide-vue-next'
 
 const router = useRouter()
+const { loadTawk, unloadTawk } = useTawk();
+
 const goToLogin = () => router.push('/login')
 const goToRegister = () => router.push('/register')
 
@@ -266,8 +305,15 @@ const handleScroll = () => {
   isScrolled.value = window.scrollY > 20
 }
 
-onMounted(() => window.addEventListener('scroll', handleScroll))
-onUnmounted(() => window.removeEventListener('scroll', handleScroll))
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+  loadTawk();
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+  unloadTawk();
+})
 
 // Smooth scroll
 const home = ref(null)

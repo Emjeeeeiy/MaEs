@@ -18,9 +18,9 @@
           <FileTextIcon class="w-5 h-5 text-green-600" /> Uploaded Financial Documents
         </h1>
 
-        <!-- Loading State -->
-        <div v-if="loading" class="flex items-center justify-center h-36">
-          <p class="text-gray-500 text-sm sm:text-base">Loading documents...</p>
+        <!-- Skeleton Loading State -->
+        <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 animate-pulse">
+          <div v-for="i in 3" :key="i" class="h-48 bg-gray-200 rounded-xl border border-gray-100 shadow-sm"></div>
         </div>
 
         <!-- Empty State -->
@@ -86,8 +86,8 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/firebase'
 
-import AdminSidebar from '@/components/admin_sidebar.vue'
-import AdminTopbar from '@/components/admintopbar.vue'
+import AdminSidebar from '@/components/AdminSidebar.vue'
+import AdminTopbar from '@/components/AdminTopbar.vue'
 import { FileTextIcon, CalendarIcon, EyeIcon, Trash2Icon } from 'lucide-vue-next'
 
 const documents = ref([])

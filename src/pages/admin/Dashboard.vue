@@ -1,30 +1,10 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
+  <div class="flex flex-col min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
 
     <!-- Topbar -->
     <div class="fixed top-0 left-0 right-0 z-30">
       <AdminTopbar />
     </div>
-
-    <!-- Welcome Popup -->
-    <transition name="fade-slide">
-      <div 
-        v-if="showWelcomePopup"
-        class="fixed top-4 right-4 z-50 bg-white/90 backdrop-blur-md border border-green-200 rounded-xl shadow-lg px-4 py-2.5 flex items-center gap-2 animate-popupEntry"
-      >
-        <div class="p-1.5 bg-green-100 text-green-600 rounded-full shadow-inner">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 12c2.28 0 4-1.72 4-4s-1.72-4-4-4-4 1.72-4 4 1.72 4 4 4zM4 20v-1c0-2.28 3.58-4 8-4s8 1.72 8 4v1"
-            />
-          </svg>
-        </div>
-        <div>
-          <p class="text-xs text-gray-500 font-medium">👋 Welcome back,</p>
-          <p class="text-sm font-semibold text-green-700">Admin!</p>
-        </div>
-      </div>
-    </transition>
 
     <div class="flex pt-14">
 
@@ -44,7 +24,7 @@
             class="bg-white/90 backdrop-blur-md border border-gray-200 rounded-xl p-4 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
           >
             <div class="flex items-center gap-3">
-              <div class="p-3 rounded-xl bg-gradient-to-br from-green-100 to-green-200 text-green-700 shadow-inner">
+              <div class="p-3 rounded-xl bg-linear-to-br from-green-100 to-green-200 text-green-700 shadow-inner">
                 <component :is="card.icon" class="w-6 h-6" />
               </div>
               <div>
@@ -59,7 +39,7 @@
         <div class="flex justify-end">
           <button 
             @click="exportToExcel"
-            class="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs font-medium shadow-md hover:shadow-lg active:scale-95 transition"
+            class="px-4 py-2 rounded-lg bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs font-medium shadow-md hover:shadow-lg active:scale-95 transition"
           >
             📤 Export Metrics
           </button>
@@ -96,7 +76,7 @@
             </h2>
             <button 
               @click="showServiceModal = true"
-              class="px-4 py-2 rounded-lg text-xs bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md active:scale-95 transition"
+              class="px-4 py-2 rounded-lg text-xs bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-md active:scale-95 transition"
             >
               View Totals
             </button>
@@ -153,8 +133,8 @@ import { ref, onMounted, nextTick, watch, computed } from 'vue'
 import { getFirestore, collection, getDocs } from 'firebase/firestore'
 import Chart from 'chart.js/auto'
 import * as XLSX from 'xlsx'
-import AdminSidebar from '@/components/admin_sidebar.vue'
-import AdminTopbar from '@/components/admintopbar.vue'
+import AdminSidebar from '@/components/AdminSidebar.vue'
+import AdminTopbar from '@/components/AdminTopbar.vue'
 import { ChartBarIcon, UsersIcon, CreditCardIcon, CurrencyDollarIcon } from '@heroicons/vue/24/solid'
 
 const db = getFirestore()
@@ -166,7 +146,6 @@ const revenueTrend = ref({})
 const selectedWeek = ref('')
 const availableWeeks = ref([])
 const showServiceModal = ref(false)
-const showWelcomePopup = ref(false)
 
 let serviceChartInstances = []
 let revenueChartInstance = null
@@ -386,10 +365,6 @@ function exportToExcel() {
 }
 
 onMounted(async () => {
-  showWelcomePopup.value = true
-  setTimeout(() => {
-    showWelcomePopup.value = false
-  }, 4000)
   await fetchDashboardData()
   prepareWeeks()
   await nextTick()
@@ -438,30 +413,6 @@ watch(selectedWeek, drawCharts)
   100% {
     transform: scale(1);
     opacity: 1;
-  }
-}
-
-/* ✅ Popup animation */
-.fade-slide-enter-active,
-.fade-slide-leave-active {
-  transition: all 0.5s ease;
-}
-.fade-slide-enter-from,
-.fade-slide-leave-to {
-  opacity: 0;
-  transform: translateY(-10px) scale(0.97);
-}
-.animate-popupEntry {
-  animation: popupFadeIn 0.7s ease-in-out;
-}
-@keyframes popupFadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-15px) scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
   }
 }
 </style>

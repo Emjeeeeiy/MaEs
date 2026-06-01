@@ -152,15 +152,17 @@
 import { ref, onMounted, computed } from 'vue'
 import { collection, onSnapshot, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore'
 import { db } from '@/firebase'
-import AdminSidebar from '@/components/admin_sidebar.vue'
-import AdminTopbar from '@/components/admintopbar.vue'
+import AdminSidebar from '@/components/AdminSidebar.vue'
+import AdminTopbar from '@/components/AdminTopbar.vue'
 import { CheckIcon, XIcon, Trash2Icon, AlertTriangleIcon } from 'lucide-vue-next'
+import { useNotifications } from '@/composables/useNotifications'
 
 const appointments = ref([])
 const filterStatus = ref('')
 const searchQuery = ref('')
 const showDeleteModal = ref(false)
 const pendingDeleteId = ref(null)
+const { success: notifySuccess, error: notifyError } = useNotifications()
 
 onMounted(() => {
   const apptCol = collection(db, 'appointments')
@@ -188,8 +190,10 @@ const updateStatus = async (id, newStatus) => {
       updateData.approvedAt = null
     }
     await updateDoc(doc(db, 'appointments', id), updateData)
+    notifySuccess(`Appointment ${newStatus.toLowerCase()} successfully!`)
   } catch (err) {
     console.error('Failed to update status:', err.message)
+    notifyError('Failed to update appointment status.')
   }
 }
 
@@ -201,9 +205,11 @@ const confirmDelete = (id) => {
 const deleteAppointment = async () => {
   try {
     await deleteDoc(doc(db, 'appointments', pendingDeleteId.value))
+    notifySuccess('Appointment deleted successfully!')
     showDeleteModal.value = false
   } catch (err) {
     console.error('Failed to delete:', err.message)
+    notifyError('Failed to delete appointment.')
   }
 }
 

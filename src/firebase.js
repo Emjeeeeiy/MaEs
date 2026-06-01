@@ -3,15 +3,15 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/
 import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
-// Your Firebase configuration (Replace with actual values if necessary)
+// Your Firebase configuration using environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyB932LihfaOUYVCksqn9iVTglDq6QQrkhA",
-  authDomain: "hospital-billing-a5bef.firebaseapp.com",
-  projectId: "hospital-billing-a5bef",
-  storageBucket: "hospital-billing-a5bef.firebasestorage.app",
-  messagingSenderId: "298673867675",
-  appId: "1:298673867675:web:ceedde4d4ff09eecdb2f3e",
-  measurementId: "G-FKFY1TM68W"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase

@@ -145,7 +145,7 @@
                   </td>
                   <td class="px-2 py-1">
                     <span
-                      v-if="invoice.status === 'Flagged'"
+                      v-if="invoice.status?.toLowerCase() === 'flagged'"
                       class="px-2 py-0.5 bg-red-100 text-red-700 text-[10px] rounded-full font-semibold"
                     >
                       ⚠ Flagged
@@ -154,8 +154,8 @@
                   </td>
                   <td class="px-2 py-1 text-center flex flex-wrap justify-center gap-1">
                     <button
-                      v-if="invoice.status === 'Pending'"
-                      @click="openApproveModal(invoice.id)"
+                      v-if="invoice.status?.toLowerCase() === 'pending'"
+                      @click="handleApprove(invoice)"
                       class="px-2 py-1 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs flex items-center gap-1"
                     >
                       <CheckIcon class="w-3 h-3" /> Approve
@@ -219,7 +219,7 @@
           <div v-if="showReceiptModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
             <div class="bg-white p-4 sm:p-5 rounded-2xl max-w-2xl relative">
               <button @click="closeReceiptModal" class="absolute top-2 right-2 bg-gray-200 px-3 py-1 rounded">✕</button>
-              <img :src="currentReceiptUrl" class="max-h-[70vh] mx-auto rounded" />
+              <img :src="`data:image/jpeg;base64,${currentReceiptBase64}`" class="max-h-[70vh] mx-auto rounded" />
             </div>
           </div>
         </transition>
@@ -232,11 +232,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { collection, getDocs, query, where, updateDoc, deleteDoc, doc, Timestamp, addDoc } from 'firebase/firestore'
 import { db } from '@/firebase'
-import AdminSidebar from '@/components/admin_sidebar.vue'
-import AdminTopbar from '@/components/admintopbar.vue'
+import AdminSidebar from '@/components/AdminSidebar.vue'
+import AdminTopbar from '@/components/AdminTopbar.vue'
 import { User2Icon, ClipboardListIcon, EyeIcon, CheckIcon, TrashIcon, ArrowLeftIcon } from 'lucide-vue-next'
+import { useNotifications } from '@/composables/useNotifications'
 
-/* STATE */
 const users = ref([])
 const invoices = ref([])
 const selectedUserName = ref('')
@@ -250,41 +250,64 @@ const invoiceToApproveId = ref(null)
 const approveAmount = ref(0)
 const approveIdType = ref('')
 const showReceiptModal = ref(false)
-const currentReceiptUrl = ref('')
+const currentReceiptBase64 = ref('')
 const userLastPayments = ref({})
+const { success: notifySuccess, error: notifyError } = useNotifications()
 
-/* COMPUTED */
-const discountedAmount = computed(() => approveIdType.value ? approveAmount.value * 0.8 : approveAmount.value)
+const discountedAmount = computed(() =>
+  approveIdType.value ? approveAmount.value * 0.8 : approveAmount.value
+)
+
+// ================= USERS =================
 const filteredUsers = computed(() => {
   const q = userSearchQuery.value.toLowerCase().trim()
   if (!q) return []
-  return users.value.filter(u => u.role !== 'admin' &&
-    (u.username?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q)))
+  return users.value.filter(u =>
+    u.role !== 'admin' &&
+    (u.username?.toLowerCase().includes(q) ||
+      u.email?.toLowerCase().includes(q))
+  )
 })
+
 const accountsTable = computed(() =>
-  users.value.filter(u => u.role !== 'admin')
+  users.value
+    .filter(u => u.role !== 'admin')
     .map(u => ({ ...u, lastPayment: userLastPayments.value[u.email] || null }))
 )
+
+// ================= INVOICES =================
 const filteredInvoices = computed(() =>
   invoices.value.filter(inv => {
-    const statusOk = !filterStatus.value || inv.status === filterStatus.value
-    const textOk = !searchQuery.value || JSON.stringify(inv).toLowerCase().includes(searchQuery.value.toLowerCase())
+    const statusOk =
+      !filterStatus.value ||
+      inv.status?.toLowerCase() === filterStatus.value.toLowerCase()
+    const textOk =
+      !searchQuery.value ||
+      JSON.stringify(inv)
+        .toLowerCase()
+        .includes(searchQuery.value.toLowerCase())
     return statusOk && textOk
   })
 )
-const statusPriority = { Pending: 1, 'Not Paid': 2, Paid: 3, Flagged: 0 }
-const sortedInvoices = computed(() =>
-  [...filteredInvoices.value].sort((a, b) => (statusPriority[a.status] || 99) - (statusPriority[b.status] || 99))
-)
-const formatDate = ts => ts?.toDate ? ts.toDate().toISOString().split('T')[0] : 'N/A'
 
-/* FETCH USERS */
+const statusPriority = { pending: 1, 'not paid': 2, paid: 3, flagged: 0 }
+const sortedInvoices = computed(() =>
+  [...filteredInvoices.value].sort(
+    (a, b) =>
+      (statusPriority[a.status?.toLowerCase()] || 99) -
+      (statusPriority[b.status?.toLowerCase()] || 99)
+  )
+)
+
+const formatDate = ts =>
+  ts?.toDate ? ts.toDate().toISOString().split('T')[0] : 'N/A'
+
+// ================= FIREBASE FETCH =================
 const fetchUsers = async () => {
   const snap = await getDocs(collection(db, 'users'))
   users.value = snap.docs.map(d => ({ id: d.id, ...d.data() }))
 }
 
-/* FETCH LAST PAYMENTS */
 const fetchLastPayments = async () => {
   const snap = await getDocs(collection(db, 'invoices'))
   const latest = {}
@@ -292,21 +315,31 @@ const fetchLastPayments = async () => {
     const data = d.data()
     if (data.email && data.createdAt?.toDate) {
       const dt = data.createdAt.toDate()
-      if (!latest[data.email] || latest[data.email] < dt) latest[data.email] = dt
+      if (!latest[data.email] || latest[data.email] < dt)
+        latest[data.email] = dt
     }
   })
   userLastPayments.value = latest
 }
 
-/* SELECT USER */
 const selectUser = async user => {
   selectedUserName.value = user.username
   selectedUserEmail.value = user.email
   userSearchQuery.value = `${user.username} - ${user.email}`
   showDropdown.value = false
-  const snap = await getDocs(query(collection(db, 'invoices'), where('email', '==', user.email)))
-  invoices.value = snap.docs.map(d => ({ id: d.id, ...d.data(), receiptBase64: d.data().receiptBase64 || null }))
+
+  const snap = await getDocs(
+    query(collection(db, 'invoices'), where('email', '==', user.email))
+  )
+
+  invoices.value = snap.docs.map(d => ({
+    id: d.id,
+    ...d.data(),
+    receiptBase64: d.data().receiptBase64 || null,
+    status: d.data().status || 'Pending'
+  }))
 }
+
 const clearSelectedUser = () => {
   selectedUserName.value = ''
   selectedUserEmail.value = ''
@@ -316,57 +349,126 @@ const clearSelectedUser = () => {
   invoices.value = []
 }
 
-/* APPROVE */
-const openApproveModal = id => {
+// ================= APPROVE LOGIC =================
+
+// ✅ MAIN APPROVE HANDLER
+const handleApprove = async invoice => {
+  const method = invoice.paymentMethod?.toLowerCase()
+
+  if (method === 'gcash') {
+    // 👉 DIRECT APPROVE (NO MODAL)
+    await approveDirect(invoice)
+  } else {
+    // 👉 CASH → OPEN MODAL
+    openApproveModal(invoice.id, invoice.totalAmount)
+  }
+}
+
+// ✅ OPEN MODAL FOR CASH
+const openApproveModal = (id, total) => {
   invoiceToApproveId.value = id
-  approveAmount.value = 0
+  approveAmount.value = total
   approveIdType.value = ''
   showApproveModal.value = true
 }
-const approveInvoice = async () => {
-  const invoiceId = invoiceToApproveId.value
-  const ref = doc(db, 'invoices', invoiceId)
-  const approvedAt = Timestamp.now()
-  const invoice = invoices.value.find(i => i.id === invoiceId)
-  await updateDoc(ref, {
-    status: 'Paid',
-    totalAmount: discountedAmount.value,
-    idType: approveIdType.value,
-    approvedAt
-  })
-  await addDoc(collection(db, 'notifications'), {
-    userEmail: invoice.email,
-    type: 'invoice-approved',
-    message: `Your payment for ${invoice.services.map(s => s.serviceName).join(', ')} has been approved.`,
-    timestamp: approvedAt,
-    read: false
-  })
-  invoice.status = 'Paid'
-  invoice.totalAmount = discountedAmount.value
-  invoice.idType = approveIdType.value
-  invoice.approvedAt = approvedAt
-  showApproveModal.value = false
+
+// ✅ DIRECT APPROVE FOR GCASH
+const approveDirect = async invoice => {
+  try {
+    const refDoc = doc(db, 'invoices', invoice.id)
+    const approvedAt = Timestamp.now()
+
+    await updateDoc(refDoc, {
+      status: 'Paid',
+      approvedAt
+    })
+
+    await addDoc(collection(db, 'notifications'), {
+      userEmail: invoice.email,
+      type: 'invoice-approved',
+      message: `Your payment for ${invoice.services
+        .map(s => s.serviceName)
+        .join(', ')} has been approved.`,
+      timestamp: approvedAt,
+      read: false
+    })
+
+    notifySuccess('Invoice approved successfully!')
+    invoice.status = 'Paid'
+    invoice.approvedAt = approvedAt
+  } catch (error) {
+    notifyError('Error approving invoice: ' + error.message)
+  }
 }
 
-/* RECEIPT MODAL */
-const openReceiptModal = url => {
-  currentReceiptUrl.value = url
+// ✅ APPROVE FROM MODAL (CASH)
+const approveInvoice = async () => {
+  try {
+    const invoiceId = invoiceToApproveId.value
+    const refDoc = doc(db, 'invoices', invoiceId)
+    const approvedAt = Timestamp.now()
+    const invoice = invoices.value.find(i => i.id === invoiceId)
+
+    await updateDoc(refDoc, {
+      status: 'Paid',
+      totalAmount: discountedAmount.value,
+      idType: approveIdType.value,
+      approvedAt
+    })
+
+    await addDoc(collection(db, 'notifications'), {
+      userEmail: invoice.email,
+      type: 'invoice-approved',
+      message: `Your payment for ${invoice.services
+        .map(s => s.serviceName)
+        .join(', ')} has been approved.`,
+      timestamp: approvedAt,
+      read: false
+    })
+
+    notifySuccess('Invoice approved and updated!')
+    invoice.status = 'Paid'
+    invoice.totalAmount = discountedAmount.value
+    invoice.idType = approveIdType.value
+    invoice.approvedAt = approvedAt
+
+    showApproveModal.value = false
+  } catch (error) {
+    notifyError('Error approving invoice: ' + error.message)
+  }
+}
+
+// ================= RECEIPT =================
+const openReceiptModal = base64 => {
+  currentReceiptBase64.value = base64
   showReceiptModal.value = true
 }
+
 const closeReceiptModal = () => {
   showReceiptModal.value = false
-  currentReceiptUrl.value = ''
+  currentReceiptBase64.value = ''
 }
 
-/* DELETE */
+// ================= DELETE =================
 const deleteInvoice = async id => {
-  await deleteDoc(doc(db, 'invoices', id))
-  invoices.value = invoices.value.filter(inv => inv.id !== id)
+  if (!confirm('Are you sure you want to delete this invoice?')) return
+  try {
+    await deleteDoc(doc(db, 'invoices', id))
+    notifySuccess('Invoice deleted successfully!')
+    invoices.value = invoices.value.filter(inv => inv.id !== id)
+  } catch (error) {
+    notifyError('Error deleting invoice: ' + error.message)
+  }
 }
 
-/* ON MOUNT */
+// ================= INIT =================
 onMounted(async () => {
   await fetchUsers()
   await fetchLastPayments()
 })
 </script>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>

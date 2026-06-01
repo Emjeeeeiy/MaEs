@@ -220,9 +220,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { db } from '@/firebase'
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore'
-import AdminSidebar from '@/components/admin_sidebar.vue'
-import AdminTopbar from '@/components/admintopbar.vue'
+import AdminSidebar from '@/components/AdminSidebar.vue'
+import AdminTopbar from '@/components/AdminTopbar.vue'
 import { PlusIcon, Edit2Icon, Edit3Icon, Trash2Icon } from 'lucide-vue-next'
+import { useNotifications } from '@/composables/useNotifications'
 
 const services = ref([])
 const searchTerm = ref('')
@@ -235,6 +236,7 @@ const selectedIds = ref([])
 const showDeleteModal = ref(false)
 const bulkStepMode = ref(false)
 const currentBulkIndex = ref(0)
+const { success: notifySuccess, error: notifyError } = useNotifications()
 
 const categories = [
   'CHEMISTRY', 'SPECIAL CHEMISTRY', 'ELECTROLYTES', 'CLINICAL MICROSCOPY',
@@ -258,17 +260,27 @@ const filteredServices = computed(() => {
 
 const addService = async () => {
   if (!form.value.serviceName || !form.value.category || form.value.amount == null) return
-  await addDoc(collection(db, 'services'), form.value)
-  closeModal()
-  fetchServices()
+  try {
+    await addDoc(collection(db, 'services'), form.value)
+    notifySuccess('Service added successfully!')
+    closeModal()
+    fetchServices()
+  } catch (error) {
+    notifyError('Error adding service: ' + error.message)
+  }
 }
 
 const updateService = async () => {
   if (!form.value.serviceName || !form.value.category || form.value.amount == null) return
-  await updateDoc(doc(db, 'services', editId.value), form.value)
-  closeModal()
-  fetchServices()
-  exitEditMode()
+  try {
+    await updateDoc(doc(db, 'services', editId.value), form.value)
+    notifySuccess('Service updated successfully!')
+    closeModal()
+    fetchServices()
+    exitEditMode()
+  } catch (error) {
+    notifyError('Error updating service: ' + error.message)
+  }
 }
 
 const openBulkEdit = () => {
@@ -290,25 +302,35 @@ const loadBulkForm = () => {
 
 const saveBulkEdit = async () => {
   if (!form.value.serviceName || !form.value.category || form.value.amount == null) return
-  await updateDoc(doc(db, 'services', editId.value), form.value)
-  if (currentBulkIndex.value < selectedIds.value.length - 1) {
-    currentBulkIndex.value++
-    loadBulkForm()
-  } else {
-    closeModal()
-    fetchServices()
-    exitEditMode()
+  try {
+    await updateDoc(doc(db, 'services', editId.value), form.value)
+    if (currentBulkIndex.value < selectedIds.value.length - 1) {
+      currentBulkIndex.value++
+      loadBulkForm()
+    } else {
+      notifySuccess('All services updated successfully!')
+      closeModal()
+      fetchServices()
+      exitEditMode()
+    }
+  } catch (error) {
+    notifyError('Error updating service: ' + error.message)
   }
 }
 
 const bulkDelete = async () => {
-  for (const id of selectedIds.value) {
-    await deleteDoc(doc(db, 'services', id))
+  try {
+    for (const id of selectedIds.value) {
+      await deleteDoc(doc(db, 'services', id))
+    }
+    notifySuccess(`${selectedIds.value.length} service(s) deleted successfully!`)
+    selectedIds.value = []
+    showDeleteModal.value = false
+    fetchServices()
+    exitEditMode()
+  } catch (error) {
+    notifyError('Error deleting services: ' + error.message)
   }
-  selectedIds.value = []
-  showDeleteModal.value = false
-  fetchServices()
-  exitEditMode()
 }
 
 const handleSubmit = () => {
@@ -344,3 +366,10 @@ const toggleRowSelection = (id) => {
 
 onMounted(fetchServices)
 </script>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+</style>

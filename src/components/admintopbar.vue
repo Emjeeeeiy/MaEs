@@ -77,12 +77,16 @@ import { db } from '@/firebase'
 import { auth } from '@/firebase'
 import { signOut } from 'firebase/auth'
 import { collection, query, where, orderBy, onSnapshot, Timestamp } from 'firebase/firestore'
+import { useNotifications } from '@/composables/useNotifications'
 
 // 🔒 Logout Function
 const router = useRouter()
+const { success: notifySuccess } = useNotifications()
+
 const logout = async () => {
   try {
     await signOut(auth)
+    notifySuccess('Logged out successfully.')
     router.push('/login')
   } catch (err) {
     console.error('Logout error:', err)

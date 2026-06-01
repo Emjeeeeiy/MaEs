@@ -5,31 +5,31 @@ import { doc, getDoc } from 'firebase/firestore';
 
 // Public pages
 import LandingPage from '../pages/LandingPage.vue';
-import Login from '@/pages/Login.vue';
-import Register from '../pages/register.vue';
-import ResetPassword from '../pages/reset_password.vue';
+const Login = () => import('../pages/Login.vue');
+const Register = () => import('../pages/Register.vue');
+const ResetPassword = () => import('../pages/ResetPassword.vue');
 
 // User pages
-import Dashboard from '../pages/user-pages/dashboard.vue';
-import Payments from '../pages/user-pages/payments.vue';
-import Billing from '../pages/user-pages/billing.vue';
-import Invoices from '../pages/user-pages/invoices.vue';
-import Profile from '../pages/user-pages/profile.vue';
-import EditProfile from '../pages/user-pages/edit_profile.vue';
-import Appointment from '../pages/user-pages/appointment.vue';
-import Result from '../pages/user-pages/result.vue';
+const UserDashboard = () => import('../pages/user/Dashboard.vue');
+const UserPayments = () => import('../pages/user/Payments.vue');
+const UserBilling = () => import('../pages/user/Billing.vue');
+const UserInvoices = () => import('../pages/user/Invoices.vue');
+const UserProfile = () => import('../pages/user/Profile.vue');
+const UserEditProfile = () => import('../pages/user/EditProfile.vue');
+const UserAppointment = () => import('../pages/user/Appointment.vue');
+const UserResult = () => import('../pages/user/Result.vue');
 
 // Admin pages
-import AdminDashboard from '../pages/admin-pages/admin_dasboard.vue';
-import AdminInvoices from '../pages/admin-pages/admin_invoices.vue';
-import AdminManagement from '../pages/admin-pages/admin_management.vue';
-import AdminServices from '../pages/admin-pages/admin_services.vue';
-import AdminRfa from '../pages/admin-pages/admin_rfa.vue';
-import AdminAppointment from '../pages/admin-pages/admin_appointment.vue';
-import AdminResult from '../pages/admin-pages/admin_result.vue';
+const AdminDashboard = () => import('../pages/admin/Dashboard.vue');
+const AdminInvoices = () => import('../pages/admin/Invoices.vue');
+const AdminManagement = () => import('../pages/admin/Management.vue');
+const AdminServices = () => import('../pages/admin/Services.vue');
+const AdminRfa = () => import('../pages/admin/Rfa.vue');
+const AdminAppointment = () => import('../pages/admin/Appointment.vue');
+const AdminResult = () => import('../pages/admin/Result.vue');
 
 // 404 Page
-import NotFound from '../pages/notFound.vue';
+const NotFound = () => import('../pages/NotFound.vue');
 
 const routes = [
   // Default route (Landing Page)
@@ -85,14 +85,14 @@ const routes = [
   },
 
   // User Routes
-  { path: '/dashboard', name: 'Dashboard', component: Dashboard, meta: { requiresAuth: true } },
-  { path: '/payments', name: 'Payments', component: Payments, meta: { requiresAuth: true } },
-  { path: '/billing', name: 'Billing', component: Billing, meta: { requiresAuth: true } },
-  { path: '/invoices', name: 'Invoices', component: Invoices, meta: { requiresAuth: true } },
-  { path: '/profile', name: 'Profile', component: Profile, meta: { requiresAuth: true } },
-  { path: '/edit_profile', name: 'EditProfile', component: EditProfile, meta: { requiresAuth: true } },
-  { path: '/appointment', name: 'Appointment', component: Appointment, meta: { requiresAuth: true } },
-  { path: '/result', name: 'Result', component: Result, meta: { requiresAuth: true } },
+  { path: '/dashboard', name: 'Dashboard', component: UserDashboard, meta: { requiresAuth: true } },
+  { path: '/payments', name: 'Payments', component: UserPayments, meta: { requiresAuth: true } },
+  { path: '/billing', name: 'Billing', component: UserBilling, meta: { requiresAuth: true } },
+  { path: '/invoices', name: 'Invoices', component: UserInvoices, meta: { requiresAuth: true } },
+  { path: '/profile', name: 'Profile', component: UserProfile, meta: { requiresAuth: true } },
+  { path: '/edit_profile', name: 'EditProfile', component: UserEditProfile, meta: { requiresAuth: true } },
+  { path: '/appointment', name: 'Appointment', component: UserAppointment, meta: { requiresAuth: true } },
+  { path: '/result', name: 'Result', component: UserResult, meta: { requiresAuth: true } },
 
   // Catch-all (404)
   { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },

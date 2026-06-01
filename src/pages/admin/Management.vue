@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
+  <div class="flex flex-col min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
     <!-- Topbar -->
     <div class="fixed top-0 left-0 right-0 z-30">
       <AdminTopbar />
@@ -102,12 +102,14 @@
 import { ref, onMounted } from "vue";
 import { auth, db } from "@/firebase";
 import { getDoc, doc, collection, updateDoc, deleteDoc, onSnapshot } from "firebase/firestore";
-import AdminSidebar from "@/components/admin_sidebar.vue";
-import AdminTopbar from "@/components/admintopbar.vue";
+import AdminSidebar from "@/components/AdminSidebar.vue";
+import AdminTopbar from "@/components/AdminTopbar.vue";
 import { User2Icon, Trash2Icon, CheckCircleIcon, SlashIcon, UsersIcon } from "lucide-vue-next";
+import { useNotifications } from "@/composables/useNotifications";
 
 const users = ref([]);
 const errorMessage = ref("");
+const { success, error: notifyError } = useNotifications();
 
 // Format timestamp
 const formatLastActive = (lastActive) => {
@@ -141,20 +143,21 @@ const fetchUsers = async () => {
     });
   } catch (error) {
     errorMessage.value = error.message;
+    notifyError(error.message);
   }
 };
 
 // Role update
 const updateUserRole = async (user) => {
   if (user.status === "deactivated") {
-    alert("Cannot change role of a deactivated user.");
+    notifyError("Cannot change role of a deactivated user.");
     return;
   }
   try {
     await updateDoc(doc(db, "users", user.id), { role: user.role });
-    alert(`Role updated to ${user.role}`);
+    success(`Role updated to ${user.role}`);
   } catch (error) {
-    alert("Error updating role: " + error.message);
+    notifyError("Error updating role: " + error.message);
   }
 };
 
@@ -162,27 +165,27 @@ const updateUserRole = async (user) => {
 const deactivateUser = async (user) => {
   try {
     await updateDoc(doc(db, "users", user.id), { status: "deactivated" });
-    alert("User deactivated.");
+    success("User deactivated successfully.");
   } catch (error) {
-    alert("Error: " + error.message);
+    notifyError("Error: " + error.message);
   }
 };
 
 const reactivateUser = async (user) => {
   try {
     await updateDoc(doc(db, "users", user.id), { status: "active" });
-    alert("User reactivated.");
+    success("User reactivated successfully.");
   } catch (error) {
-    alert("Error: " + error.message);
+    notifyError("Error: " + error.message);
   }
 };
 
 const deleteUser = async (userId) => {
   try {
     await deleteDoc(doc(db, "users", userId));
-    alert("User deleted.");
+    success("User deleted successfully.");
   } catch (error) {
-    alert("Error: " + error.message);
+    notifyError("Error: " + error.message);
   }
 };
 

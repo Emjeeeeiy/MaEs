@@ -90,9 +90,9 @@
                 <span
                   class="px-1.5 py-0.5 text-[10px] rounded-lg font-medium"
                   :class="{
-                    'bg-green-100 text-green-700': invoice.status === 'paid',
-                    'bg-yellow-100 text-yellow-700': invoice.status === 'pending',
-                    'bg-red-100 text-red-700': invoice.status === 'unpaid',
+                    'bg-green-100 text-green-700': invoice.status === 'Paid',
+                    'bg-yellow-100 text-yellow-700': invoice.status === 'Pending',
+                    'bg-red-100 text-red-700': invoice.status === 'Not Paid',
                   }"
                 >
                   {{ invoice.status || 'N/A' }}
@@ -151,29 +151,6 @@
         </div>
       </div>
     </transition>
-
-    <!-- Success Modal -->
-    <transition name="fade">
-      <div
-        v-if="successMessage"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4"
-      >
-        <div class="bg-white/95 w-full max-w-sm p-4 sm:p-5 rounded-xl border border-gray-200 shadow-xl relative animate-fadeIn text-center">
-          <h3 class="text-sm sm:text-base font-semibold text-green-600 mb-2 flex items-center justify-center gap-1">
-            <CheckCircleIcon class="w-4 h-4" /> Saved Successfully
-          </h3>
-          <p class="text-gray-700 mb-3 text-xs sm:text-sm">{{ successMessage }}</p>
-          <div>
-            <button
-              @click="successMessage = ''"
-              class="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm font-medium shadow transition active:scale-95"
-            >
-              Okay
-            </button>
-          </div>
-        </div>
-      </div>
-    </transition>
   </div>
 </template>
 
@@ -181,16 +158,17 @@
 import { ref, computed, onMounted } from "vue";
 import { collection, getDocs, updateDoc, doc, query, orderBy } from "firebase/firestore";
 import { db } from "@/firebase";
-import AdminSidebar from "@/components/admin_sidebar.vue";
-import AdminTopbar from "@/components/admintopbar.vue";
-import { User2Icon, ClipboardListIcon, Edit3Icon, CheckIcon, CheckCircleIcon } from "lucide-vue-next";
+import AdminSidebar from "@/components/AdminSidebar.vue";
+import AdminTopbar from "@/components/AdminTopbar.vue";
+import { User2Icon, ClipboardListIcon, Edit3Icon, CheckIcon } from "lucide-vue-next";
+import { useNotifications } from "@/composables/useNotifications";
 
 const invoices = ref([]);
 const searchQuery = ref("");
 const selectedEmail = ref(null);
 const selectedInvoice = ref(null);
 const results = ref({});
-const successMessage = ref("");
+const { success: notifySuccess, error: notifyError } = useNotifications();
 
 const fetchInvoices = async () => {
   const snap = await getDocs(query(collection(db, "invoices"), orderBy("createdAt", "desc")));
@@ -243,9 +221,16 @@ const submitResults = async (invoice) => {
     await updateDoc(doc(db, "invoices", invoice.id), { services: updatedServices });
     invoice.services = updatedServices;
     selectedInvoice.value = null;
-    successMessage.value = "Results saved successfully.";
+    notifySuccess("Results saved successfully!");
   } catch (err) {
-    successMessage.value = "Error saving results: " + err.message;
+    notifyError("Error saving results: " + err.message);
   }
 };
 </script>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+</style>
