@@ -1,66 +1,66 @@
 <template>
   <UserLayout>
-    <div class="max-w-7xl mx-auto px-6 py-6 md:px-10 md:py-10 space-y-8">
+    <div class="max-w-7xl mx-auto px-6 py-8 md:px-10 space-y-8">
       
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <div class="flex items-center gap-2 mb-1">
-            <div class="w-2 h-8 bg-teal-500 rounded-full"></div>
-            <h1 class="text-3xl font-bold tracking-tight text-slate-950">Lab Results</h1>
+            <div class="w-1.5 h-6 bg-teal-500 rounded-full"></div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900">Lab Results</h1>
           </div>
-          <p class="text-base text-slate-500 ml-4">View and download your official laboratory findings.</p>
+          <p class="text-sm text-slate-500 ml-3.5">View and download your official laboratory findings.</p>
         </div>
         
         <button
           @click="refresh"
-          class="flex items-center gap-2 px-6 py-2.5 text-xs font-black uppercase tracking-widest bg-slate-50 text-slate-600 rounded-2xl hover:bg-slate-100 transition-all border border-slate-200 shadow-sm"
+          class="flex items-center gap-2 px-5 py-2 text-[11px] font-bold uppercase tracking-wider bg-white text-slate-600 rounded-xl hover:bg-slate-50 transition-all border border-slate-200 shadow-sm"
         >
-          <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loading }" />
+          <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': loading }" />
           Sync Records
         </button>
       </div>
 
       <transition name="fade" mode="out-in">
-        <div v-if="loading" key="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 animate-pulse">
-           <div v-for="i in 3" :key="i" class="bg-slate-50 border border-slate-100 rounded-[40px] h-100"></div>
+        <div v-if="loading" key="loading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-pulse">
+           <div v-for="i in 3" :key="i" class="bg-slate-50 border border-slate-100 rounded-3xl h-96"></div>
         </div>
 
         <div v-else key="content">
           <div
             v-if="invoices.length === 0"
-            class="flex flex-col items-center justify-center py-24 text-slate-400 bg-slate-50/50 rounded-[40px] border border-dashed border-slate-200"
+            class="flex flex-col items-center justify-center py-20 text-slate-400 bg-slate-50 rounded-3xl border border-dashed border-slate-200"
           >
-            <div class="w-20 h-20 bg-white rounded-3xl shadow-sm flex items-center justify-center mb-6">
-              <FlaskConical class="w-10 h-10 text-slate-200" />
+            <div class="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-4">
+              <FlaskConical class="w-8 h-8 text-slate-200" />
             </div>
-            <p class="text-xl font-bold text-slate-900">No results found</p>
-            <p class="text-sm mt-1">Your lab reports will appear here once processed.</p>
+            <p class="text-lg font-bold text-slate-900">No results found</p>
+            <p class="text-xs mt-1">Your reports will appear here once processed.</p>
           </div>
 
-          <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             <div
               v-for="inv in invoices"
               :key="inv.id"
-              class="group bg-white rounded-[40px] border border-slate-100 hover:border-teal-100 transition-all hover:shadow-2xl hover:shadow-slate-200/50 flex flex-col overflow-hidden"
+              class="group bg-white rounded-3xl border border-slate-200 hover:border-teal-200 transition-all hover:shadow-xl hover:shadow-slate-200/40 flex flex-col overflow-hidden"
             >
-              <div class="p-8 pb-4 flex justify-between items-start">
+              <div class="p-6 pb-4 flex justify-between items-start">
                 <div class="space-y-1">
-                  <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Release Date</span>
-                  <h3 class="text-lg font-black text-slate-900">{{ formatDate(inv.createdAt) }}</h3>
+                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Released On</span>
+                  <h3 class="text-base font-bold text-slate-900">{{ formatDate(inv.createdAt) }}</h3>
                 </div>
                 <button
                   @click="exportPDF(inv)"
-                  class="p-4 bg-teal-500 text-slate-950 rounded-2xl hover:bg-teal-400 transition-all shadow-lg shadow-teal-500/20 active:scale-90"
+                  class="p-3 bg-teal-500 text-white rounded-xl hover:bg-teal-600 transition-all shadow-lg shadow-teal-500/10 active:scale-95"
                   title="Download PDF"
                 >
-                  <Download class="w-5 h-5" />
+                  <Download class="w-4 h-4" />
                 </button>
               </div>
 
-              <div class="px-8 mb-6">
+              <div class="px-6 mb-4">
                 <span
                   :class="[
-                    'px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-tighter border',
+                    'px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-tight border',
                     inv.status === 'Paid' ? 'bg-teal-50 text-teal-700 border-teal-100' : 'bg-amber-50 text-amber-700 border-amber-100'
                   ]"
                 >
@@ -68,21 +68,21 @@
                 </span>
               </div>
 
-              <div class="flex-1 px-8 pb-8">
-                <div class="bg-slate-50/80 rounded-4xl p-6 space-y-5 border border-slate-100/50">
-                  <div class="flex items-center gap-2 mb-2">
-                    <ClipboardCheck class="w-4 h-4 text-teal-600" />
-                    <span class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Medical Findings</span>
+              <div class="flex-1 px-6 pb-6">
+                <div class="bg-slate-50 p-5 space-y-4 rounded-2xl border border-slate-100">
+                  <div class="flex items-center gap-2 mb-1">
+                    <ClipboardCheck class="w-3.5 h-3.5 text-teal-600" />
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Medical Findings</span>
                   </div>
 
-                  <div class="space-y-6">
+                  <div class="space-y-4">
                     <div
                       v-for="svc in inv.services"
                       :key="svc.serviceName"
-                      class="relative pl-4 border-l-2 border-teal-200"
+                      class="relative pl-3 border-l-2 border-teal-200"
                     >
-                      <p class="text-xs font-black text-slate-900 mb-1.5 uppercase tracking-tight">{{ svc.serviceName }}</p>
-                      <div class="text-[11px] font-bold text-slate-600 leading-relaxed italic">
+                      <p class="text-[11px] font-bold text-slate-900 mb-0.5 uppercase tracking-tight">{{ svc.serviceName }}</p>
+                      <div class="text-[11px] font-medium text-slate-600 leading-relaxed italic">
                         {{ svc.result || 'Analysis in progress...' }}
                       </div>
                     </div>
@@ -90,12 +90,11 @@
                 </div>
               </div>
 
-              <div class="px-8 py-5 bg-slate-950 text-white/50 flex justify-between items-center mt-auto">
-                 <span class="text-[9px] font-black uppercase tracking-widest">MaEs Diagnostic Hub</span>
+              <div class="px-6 py-4 bg-slate-900 text-white/40 flex justify-between items-center mt-auto">
+                 <span class="text-[8px] font-bold uppercase tracking-widest">MaEs Diagnostic Hub</span>
                  <div class="flex gap-1">
                     <div class="w-1 h-1 rounded-full bg-teal-500"></div>
                     <div class="w-1 h-1 rounded-full bg-teal-500/50"></div>
-                    <div class="w-1 h-1 rounded-full bg-teal-500/20"></div>
                  </div>
               </div>
             </div>

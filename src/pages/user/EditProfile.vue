@@ -1,90 +1,88 @@
 <template>
   <UserLayout>
-    <div class="max-w-3xl mx-auto px-6 py-6 md:px-10 md:py-10 space-y-8 animate-fade-in">
+    <div class="max-w-3xl mx-auto px-6 py-8 md:px-10 space-y-8 animate-fade-in">
       
       <div class="flex items-center justify-between">
         <div>
           <div class="flex items-center gap-2 mb-1">
-            <div class="w-2 h-8 bg-teal-500 rounded-full"></div>
-            <h1 class="text-3xl font-bold tracking-tight text-slate-950">Account Settings</h1>
+            <div class="w-1.5 h-6 bg-teal-500 rounded-full"></div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900">Account Settings</h1>
           </div>
-          <p class="text-base text-slate-500 ml-4">Update your personal information and profile picture.</p>
+          <p class="text-sm text-slate-500 ml-3.5">Update your personal information and profile picture.</p>
         </div>
-        <router-link to="/profile" class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl transition-all">
-           <X class="w-5 h-5" />
+        <router-link to="/profile" class="p-2.5 bg-slate-50 hover:bg-slate-100 text-slate-400 rounded-xl transition-all border border-slate-200">
+           <X class="w-4 h-4" />
         </router-link>
       </div>
 
-      <form @submit.prevent="updateProfile" class="space-y-8">
+      <form @submit.prevent="updateProfile" class="space-y-6">
         
-        <div class="bg-slate-950 rounded-[40px] p-8 text-white relative overflow-hidden shadow-2xl">
-          <div class="absolute -top-12 -right-12 w-48 h-48 bg-teal-500/10 rounded-full blur-3xl"></div>
-          
+        <div class="bg-slate-900 rounded-3xl p-8 text-white relative overflow-hidden shadow-xl">
           <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
             <div class="relative group cursor-pointer">
-              <div class="w-28 h-28 md:w-32 md:h-32 rounded-4xl overflow-hidden bg-slate-800 border-4 border-teal-500/30 p-1 transition-transform group-hover:scale-105">
+              <div class="w-28 h-28 rounded-2xl overflow-hidden bg-slate-800 border-2 border-teal-500/30 p-1">
                 <img
                   v-if="previewImage"
                   :src="previewImage"
-                  class="w-full h-full object-cover rounded-3xl"
+                  class="w-full h-full object-cover rounded-xl"
                 />
-                <div v-else class="w-full h-full flex items-center justify-center bg-slate-900 text-teal-500 text-3xl font-black rounded-3xl">
+                <div v-else class="w-full h-full flex items-center justify-center bg-slate-800 text-teal-500 text-2xl font-black rounded-xl">
                   {{ username.charAt(0).toUpperCase() }}
                 </div>
               </div>
               <input type="file" @change="handleImageChange" class="absolute inset-0 opacity-0 cursor-pointer z-20" />
-              <div class="absolute -bottom-2 -right-2 bg-teal-500 p-2 rounded-xl shadow-lg border-4 border-slate-950">
-                <Camera class="w-4 h-4 text-slate-950" />
+              <div class="absolute -bottom-2 -right-2 bg-teal-500 p-2 rounded-lg shadow-lg border-2 border-slate-900">
+                <Camera class="w-3.5 h-3.5 text-slate-900" />
               </div>
             </div>
 
             <div class="text-center md:text-left">
-              <h3 class="text-lg font-black tracking-tight">Profile Portrait</h3>
-              <p class="text-slate-400 text-sm font-bold mt-1">Click the avatar to upload a new photo.<br>Supported: JPG, PNG.</p>
+              <h3 class="text-base font-bold tracking-tight">Profile Portrait</h3>
+              <p class="text-slate-400 text-[11px] font-medium mt-1 leading-relaxed">Click to upload a new photo.<br>Supported formats: JPG, PNG.</p>
             </div>
           </div>
         </div>
 
-        <div class="bg-slate-50/50 rounded-[40px] p-8 md:p-10 border border-slate-100">
+        <div class="bg-white rounded-3xl p-8 md:p-10 border border-slate-200">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
             
             <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Legal Full Name</label>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
               <div class="relative">
                 <UserIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input v-model="completeName" type="text" class="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all text-sm font-bold text-slate-950 outline-none" placeholder="John Doe" />
+                <input v-model="completeName" type="text" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all text-sm font-semibold text-slate-900 outline-none" placeholder="Enter name" />
               </div>
             </div>
 
             <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Date of Birth</label>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Birthday</label>
               <div class="relative">
                 <CalendarIcon class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input v-model="birthday" type="date" class="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all text-sm font-bold text-slate-950 outline-none" />
+                <input v-model="birthday" type="date" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all text-sm font-semibold text-slate-900 outline-none" />
               </div>
             </div>
 
             <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Current Age</label>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Age</label>
               <div class="relative">
                 <Hash class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input v-model="age" type="number" class="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all text-sm font-bold text-slate-950 outline-none" />
+                <input v-model="age" type="number" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all text-sm font-semibold text-slate-900 outline-none" />
               </div>
             </div>
 
             <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Mobile Connection</label>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Mobile</label>
               <div class="relative">
                 <Phone class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input v-model="cellphone" type="text" class="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all text-sm font-bold text-slate-950 outline-none" placeholder="+63" />
+                <input v-model="cellphone" type="text" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all text-sm font-semibold text-slate-900 outline-none" placeholder="+63" />
               </div>
             </div>
 
             <div class="space-y-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Gender Identity</label>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Gender</label>
               <div class="relative">
                 <UserCheck class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <select v-model="gender" class="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all text-sm font-bold text-slate-950 outline-none appearance-none">
+                <select v-model="gender" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all text-sm font-semibold text-slate-900 outline-none appearance-none">
                   <option value="">Select Gender</option>
                   <option>Male</option>
                   <option>Female</option>
@@ -93,10 +91,10 @@
             </div>
 
             <div class="space-y-2 md:col-span-2">
-              <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Residential Address</label>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">Address</label>
               <div class="relative">
                 <MapPin class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input v-model="address" type="text" class="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all text-sm font-bold text-slate-950 outline-none" placeholder="Complete Street, City, Province" />
+                <input v-model="address" type="text" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all text-sm font-semibold text-slate-900 outline-none" placeholder="Complete address" />
               </div>
             </div>
           </div>
@@ -105,13 +103,13 @@
         <div class="flex flex-col sm:flex-row gap-4 pt-4">
            <button
             type="submit"
-            class="flex-1 bg-slate-950 text-white py-5 rounded-3xl text-xs font-black uppercase tracking-[0.2em] hover:bg-teal-500 hover:text-slate-950 transition-all shadow-xl shadow-slate-200 active:scale-[0.98]"
+            class="flex-1 bg-slate-900 text-white py-4 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-teal-600 transition-all shadow-lg active:scale-[0.98]"
           >
             Save Changes
           </button>
           <router-link
             to="/profile"
-            class="px-10 py-5 bg-white border border-slate-200 text-slate-500 rounded-3xl text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-50 transition-all text-center"
+            class="px-8 py-4 bg-white border border-slate-200 text-slate-500 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-slate-50 transition-all text-center"
           >
             Cancel
           </router-link>

@@ -1,11 +1,13 @@
 // composables/useTawk.js
 import { auth, db } from '../firebase';
 import { getDoc, doc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { useNotifications } from './useNotifications';
 
 let tawkInitialized = false;
 let tawkLoadTimeout = null;
 
 export function useTawk() {
+  const { warning: notifyWarning } = useNotifications();
   
   // 📝 Optional logging ng mga Tawk events sa Firestore
   async function logTawkEvent(message, data = {}) {
@@ -79,6 +81,7 @@ export function useTawk() {
 
       script.onerror = () => {
         logTawkEvent('❌ Tawk script failed to load', { src: script.src });
+        notifyWarning('Chat support failed to load. Please check if your adblocker, Brave Shields, or antivirus SSL web shield is blocking "embed.tawk.to".', 10000);
       };
 
       document.body.appendChild(script);

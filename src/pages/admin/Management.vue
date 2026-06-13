@@ -1,110 +1,143 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
-    <!-- Topbar -->
-    <div class="fixed top-0 left-0 right-0 z-30">
-      <AdminTopbar />
-    </div>
-
-    <div class="flex pt-14">
-      <!-- Sidebar -->
-      <aside>
-        <AdminSidebar />
-      </aside>
-
-      <!-- Main Content -->
-      <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 h-[calc(100vh-3.5rem)] custom-scrollbar">
-        <!-- Error Message -->
-        <div v-if="errorMessage" class="border border-red-400 bg-red-100 text-red-800 p-2 rounded text-sm">
-          {{ errorMessage }}
+  <AdminLayout>
+    <div class="min-h-screen bg-gray-50/50 dark:bg-[#121212] p-6 text-gray-900 dark:text-gray-100 font-sans">
+      
+      <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-5 border-b border-gray-200/60 dark:border-gray-800/60">
+        <div>
+          <h1 class="text-xl font-semibold tracking-tight text-gray-900 dark:text-white">User Management</h1>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pamahalaan ang mga account, gampanin (roles), at access ng mga gumagamit sa system.</p>
         </div>
+      </header>
 
-        <!-- Users Table -->
-        <div v-if="users.length" class="border border-gray-300 bg-white rounded-lg shadow-sm overflow-hidden">
-          <table class="w-full text-sm border-collapse">
-            <thead class="bg-gray-200 text-gray-800 text-xs font-semibold uppercase">
-              <tr>
-                <th class="px-3 py-2 text-left border-b border-gray-300">Username</th>
-                <th class="px-3 py-2 text-left border-b border-gray-300">Email</th>
-                <th class="px-3 py-2 text-left border-b border-gray-300">Role</th>
-                <th class="px-3 py-2 text-left border-b border-gray-300">Status</th>
-                <th class="px-3 py-2 text-left border-b border-gray-300">Last Active</th>
-                <th class="px-3 py-2 text-left border-b border-gray-300">Actions</th>
+      <div 
+        v-if="errorMessage" 
+        class="mb-6 flex items-center gap-2.5 p-3.5 border border-red-200 dark:border-red-900/30 bg-red-50/50 dark:bg-red-950/10 text-red-700 dark:text-red-400 rounded-xl text-xs"
+      >
+        <AlertCircleIcon class="w-4 h-4 shrink-0" />
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <div 
+        v-if="users.length" 
+        class="bg-white dark:bg-[#1a1a1a] border border-gray-200/70 dark:border-gray-800/70 rounded-xl shadow-xs overflow-hidden"
+      >
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs border-collapse">
+            <thead>
+              <tr class="border-b border-gray-100 dark:border-gray-800/80 text-gray-400 dark:text-gray-500 uppercase tracking-wider font-medium">
+                <th class="px-5 py-3.5 text-left font-medium">Username</th>
+                <th class="px-5 py-3.5 text-left font-medium">Email</th>
+                <th class="px-5 py-3.5 text-left font-medium">Role</th>
+                <th class="px-5 py-3.5 text-left font-medium">Status</th>
+                <th class="px-5 py-3.5 text-left font-medium">Last Active</th>
+                <th class="px-5 py-3.5 text-right font-medium">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-800/50 text-gray-700 dark:text-gray-300">
               <tr
                 v-for="user in users"
                 :key="user.id"
-                class="border-b border-gray-200 hover:bg-gray-50 transition"
+                class="hover:bg-gray-50/50 dark:hover:bg-[#222]/30 transition duration-150"
               >
-                <td class="px-3 py-2 flex items-center gap-2">
-                  <User2Icon class="w-4 h-4 text-gray-500" />
-                  <span>{{ user.username || "Unknown" }}</span>
+                <td class="px-5 py-3.5 font-medium text-gray-900 dark:text-white">
+                  <div class="flex items-center gap-2.5">
+                    <div class="p-1.5 rounded-lg bg-gray-50 dark:bg-[#222] border border-gray-100 dark:border-gray-800 text-gray-400">
+                      <User2Icon class="w-3.5 h-3.5" />
+                    </div>
+                    <span>{{ user.username || "Unknown" }}</span>
+                  </div>
                 </td>
-                <td class="px-3 py-2">{{ user.email }}</td>
-                <td class="px-3 py-2">
-                  <select
-                    v-model="user.role"
-                    @change="updateUserRole(user)"
-                    class="border border-gray-300 text-xs px-2 py-1 rounded"
-                  >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                  </select>
+                
+                <td class="px-5 py-3.5 text-gray-500 dark:text-gray-400">{{ user.email }}</td>
+                
+                <td class="px-5 py-3.5">
+                  <div class="relative inline-block w-28">
+                    <select
+                      v-model="user.role"
+                      @change="updateUserRole(user)"
+                      class="w-full appearance-none pl-2.5 pr-7 py-1 bg-gray-50 hover:bg-gray-100 dark:bg-[#222] dark:hover:bg-[#2a2a2a] border border-gray-200/60 dark:border-gray-800 rounded-md text-gray-700 dark:text-gray-300 focus:outline-none focus:border-gray-400 dark:focus:border-gray-600 transition"
+                    >
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                    <ChevronDownIcon class="w-3 h-3 absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  </div>
                 </td>
-                <td class="px-3 py-2">
+                
+                <td class="px-5 py-3.5">
                   <span
-                    :class="user.status === 'deactivated' ? 'text-red-600' : 'text-green-600'"
-                    class="font-medium text-xs"
+                    :class="user.status === 'deactivated' 
+                      ? 'bg-red-50 text-red-700 border-red-100 dark:bg-red-950/10 dark:text-red-400 dark:border-red-900/20' 
+                      : 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-950/10 dark:text-emerald-400 dark:border-emerald-900/20'"
+                    class="inline-flex items-center px-2 py-0.5 border rounded-md font-medium text-[11px]"
                   >
                     {{ user.status === 'deactivated' ? 'Deactivated' : 'Active' }}
                   </span>
                 </td>
-                <td class="px-3 py-2 text-xs">{{ formatLastActive(user.lastActive) }}</td>
-                <td class="px-3 py-2 flex gap-1">
-                  <button
-                    v-if="user.status === 'active'"
-                    @click="confirmDeactivation(user)"
-                    class="flex items-center gap-1 px-2 py-1 border border-gray-300 rounded text-gray-700 text-xs hover:bg-gray-100 transition"
-                  >
-                    <SlashIcon class="w-3 h-3" /> Deactivate
-                  </button>
-                  <button
-                    v-if="user.status === 'deactivated'"
-                    @click="confirmReactivation(user)"
-                    class="flex items-center gap-1 px-2 py-1 border border-gray-300 rounded text-green-600 text-xs hover:bg-green-50 transition"
-                  >
-                    <CheckCircleIcon class="w-3 h-3" /> Reactivate
-                  </button>
-                  <button
-                    @click="confirmDeletion(user.id)"
-                    class="flex items-center gap-1 px-2 py-1 border border-red-400 text-red-600 rounded text-xs hover:bg-red-100 transition"
-                  >
-                    <Trash2Icon class="w-3 h-3" /> Delete
-                  </button>
+                
+                <td class="px-5 py-3.5 text-gray-400 dark:text-gray-500">{{ formatLastActive(user.lastActive) }}</td>
+                
+                <td class="px-5 py-3.5 text-right">
+                  <div class="flex items-center justify-end gap-1.5">
+                    <button
+                      v-if="user.status === 'active'"
+                      @click="confirmDeactivation(user)"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 border border-gray-200 dark:border-gray-800 rounded-md text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#222] hover:text-gray-900 dark:hover:text-white transition"
+                    >
+                      <SlashIcon class="w-3 h-3" /> 
+                      <span>Deactivate</span>
+                    </button>
+                    
+                    <button
+                      v-if="user.status === 'deactivated'"
+                      @click="confirmReactivation(user)"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 border border-emerald-100 dark:border-emerald-900/30 rounded-md text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/10 transition"
+                    >
+                      <CheckCircleIcon class="w-3 h-3" /> 
+                      <span>Reactivate</span>
+                    </button>
+                    
+                    <button
+                      @click="confirmDeletion(user.id)"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 border border-transparent rounded-md text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition"
+                    >
+                      <Trash2Icon class="w-3 h-3" /> 
+                      <span>Delete</span>
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
+      </div>
 
-        <!-- Empty State -->
-        <div v-else class="flex flex-col items-center justify-center mt-12 text-gray-500">
-          <UsersIcon class="w-12 h-12 mb-2 text-gray-400" />
-          <p class="text-sm">No users found in the system.</p>
+      <div v-else class="flex flex-col items-center justify-center py-20 bg-white dark:bg-[#1a1a1a] border border-gray-200/70 dark:border-gray-800/70 rounded-xl shadow-xs">
+        <div class="p-4 rounded-full bg-gray-50 dark:bg-[#222] border border-gray-100 dark:border-gray-800 text-gray-400 mb-3">
+          <UsersIcon class="w-6 h-6" />
         </div>
-      </main>
+        <h3 class="text-sm font-medium text-gray-900 dark:text-white">No users found</h3>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Kasalukuyang walang rehistradong user sa system.</p>
+      </div>
+
     </div>
-  </div>
+  </AdminLayout>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import { db } from "@/firebase";
 import { getDoc, doc, collection, updateDoc, deleteDoc, onSnapshot, addDoc, serverTimestamp } from "firebase/firestore";
-import AdminSidebar from "@/components/AdminSidebar.vue";
-import AdminTopbar from "@/components/AdminTopbar.vue";
-import { User2Icon, Trash2Icon, CheckCircleIcon, SlashIcon, UsersIcon } from "lucide-vue-next";
+import AdminLayout from "@/components/AdminLayout.vue";
+import { 
+  User2 as User2Icon, 
+  Trash2 as Trash2Icon, 
+  CheckCircle as CheckCircleIcon, 
+  Slash as SlashIcon, 
+  Users as UsersIcon,
+  AlertCircle as AlertCircleIcon,
+  ChevronDown as ChevronDownIcon
+} from "lucide-vue-next";
 import { useNotifications } from "@/composables/useNotifications";
 import { useAuth } from "@/composables/useAuth";
 

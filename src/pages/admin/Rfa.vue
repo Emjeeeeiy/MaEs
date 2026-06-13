@@ -1,79 +1,121 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-gray-50 text-gray-800 overflow-x-hidden">
-    <!-- Topbar -->
-    <div class="fixed top-0 left-0 right-0 z-30">
-      <AdminTopbar />
-    </div>
-
-    <div class="flex pt-14">
-      <!-- Sidebar -->
-      <aside>
-        <AdminSidebar />
-      </aside>
-
-      <!-- Main Content -->
-      <main class="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto h-[calc(100vh-3.5rem)] custom-scrollbar">
-        <!-- Page Title -->
-        <h1 class="text-xl sm:text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <FileTextIcon class="w-5 h-5 text-green-600" /> Uploaded Financial Documents
-        </h1>
-
-        <!-- Skeleton Loading State -->
-        <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 animate-pulse">
-          <div v-for="i in 3" :key="i" class="h-48 bg-gray-200 rounded-xl border border-gray-100 shadow-sm"></div>
+  <AdminLayout>
+    <div class="min-h-screen bg-gray-50/50 dark:bg-[#121212] p-6 text-gray-900 dark:text-gray-100 font-sans">
+      
+      <!-- Workspace Heading & Counter Context -->
+      <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-5 border-b border-gray-200/60 dark:border-gray-800/60">
+        <div>
+          <div class="flex items-center gap-2.5">
+            <h1 class="text-xl font-semibold tracking-tight text-gray-900 dark:text-white flex items-center gap-2">
+              <FileTextIcon class="w-5 h-5 text-gray-400" />
+              <span>Financial Ledger Vault</span>
+            </h1>
+            <span v-if="!loading && documents.length > 0" class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 dark:bg-[#222] text-gray-600 dark:text-gray-400 border border-gray-200/40 dark:border-gray-800/40 font-mono">
+              {{ documents.length }} File{{ documents.length !== 1 ? 's' : '' }}
+            </span>
+          </div>
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pamahalaan, suriin, o burahin ang mga isinumiteng dokumentong pinansyal at resibo mula sa mga rehistradong kliyente.</p>
         </div>
+      </header>
 
-        <!-- Empty State -->
-        <div v-else-if="documents.length === 0" class="flex flex-col items-center justify-center h-36 text-center space-y-1 sm:space-y-2">
-          <p class="text-gray-500 text-sm sm:text-base">No documents found.</p>
-          <p class="text-gray-400 text-xs sm:text-sm">Uploaded files will appear here once available.</p>
-        </div>
-
-        <!-- Documents List -->
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <div
-            v-for="(doc, index) in documents"
-            :key="doc.id || index"
-            class="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition transform hover:-translate-y-0.5 flex flex-col justify-between"
-          >
-            <!-- Document Info -->
-            <div class="space-y-1 sm:space-y-2">
-              <h2 class="text-sm sm:text-base font-semibold text-gray-800 truncate">{{ doc.fileName }}</h2>
-              <p class="text-xs sm:text-sm text-gray-500">{{ doc.email }}</p>
-              <p v-if="doc.description" class="text-xs sm:text-sm text-gray-600 line-clamp-3">
-                {{ doc.description }}
-              </p>
-            </div>
-
-            <!-- File Actions -->
-            <div class="mt-3 sm:mt-4 flex items-center justify-between text-xs sm:text-sm text-gray-600">
-              <p class="flex items-center gap-1">
-                <CalendarIcon class="w-3.5 h-3.5 text-gray-400" /> {{ formatDate(doc.createdAt?.seconds) }}
-              </p>
-              <div class="flex items-center gap-2">
-                <a
-                  :href="doc.fileUrl"
-                  target="_blank"
-                  rel="noopener"
-                  class="flex items-center gap-1 px-2 py-1 rounded-md bg-green-600 hover:bg-green-700 active:scale-95 text-white font-medium shadow transition text-xs sm:text-sm"
-                >
-                  <EyeIcon class="w-3.5 h-3.5" /> View
-                </a>
-                <button
-                  @click="deleteDocument(doc.id)"
-                  class="flex items-center gap-1 px-2 py-1 rounded-md bg-red-600 hover:bg-red-700 active:scale-95 text-white font-medium shadow transition text-xs sm:text-sm"
-                >
-                  <Trash2Icon class="w-3.5 h-3.5" /> Delete
-                </button>
-              </div>
+      <!-- ================= SKELETON LOADING STATE ================= -->
+      <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 animate-pulse">
+        <div v-for="i in 3" :key="i" class="p-5 bg-white dark:bg-[#1a1a1a] rounded-xl border border-gray-100 dark:border-gray-800/60 space-y-4">
+          <div class="space-y-2">
+            <div class="h-4 bg-gray-200 dark:bg-gray-800 rounded-md w-3/4"></div>
+            <div class="h-3 bg-gray-100 dark:bg-gray-800/50 rounded-md w-1/2"></div>
+          </div>
+          <div class="h-12 bg-gray-50 dark:bg-gray-800/30 rounded-lg"></div>
+          <div class="flex justify-between items-center pt-2">
+            <div class="h-3 bg-gray-100 dark:bg-gray-800/50 rounded-md w-1/3"></div>
+            <div class="flex gap-2">
+              <div class="h-7 w-12 bg-gray-200 dark:bg-gray-800 rounded-md"></div>
+              <div class="h-7 w-12 bg-gray-200 dark:bg-gray-800 rounded-md"></div>
             </div>
           </div>
         </div>
-      </main>
-    </div>
-  </div>
-</template>
+      </div>
 
+      <!-- ================= EMPTY LEDGER STATE ================= -->
+      <div v-else-if="documents.length === 0" class="bg-white dark:bg-[#1a1a1a] border border-gray-200/70 dark:border-gray-800/70 rounded-xl p-12 text-center shadow-2xs max-w-xl mx-auto mt-6">
+        <div class="flex flex-col items-center justify-center gap-3">
+          <div class="p-3 rounded-full bg-gray-50 dark:bg-[#222] border border-gray-100 dark:border-gray-800">
+            <InboxIcon class="w-6 h-6 text-gray-300 dark:text-gray-600" />
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Document Repository Empty</h3>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1 max-w-xs mx-auto leading-relaxed">
+              Kasalukuyang walang nakaimbak na mga ulat. Ang mga uploads ng kliyente ay awtomatikong lilitaw rito sa sandaling maging available ang mga ito.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= MAIN FILE GRID WORKSPACE ================= -->
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div
+          v-for="(doc, index) in documents"
+          :key="doc.id || index"
+          class="group bg-white dark:bg-[#1a1a1a] border border-gray-200/70 dark:border-gray-800/70 rounded-xl p-5 shadow-2xs hover:border-gray-300 dark:hover:border-gray-700 hover:shadow-xs transition duration-200 flex flex-col justify-between relative"
+        >
+          <!-- Core Info Section -->
+          <div class="space-y-3">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0 flex-1">
+                <h2 class="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition" :title="doc.fileName">
+                  {{ doc.fileName }}
+                </h2>
+                <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium truncate mt-0.5">{{ doc.email }}</p>
+              </div>
+              <div class="p-1.5 rounded-lg bg-gray-50 dark:bg-[#222] border border-gray-100 dark:border-gray-800 shrink-0">
+                <FileIcon class="w-3.5 h-3.5 text-gray-400" />
+              </div>
+            </div>
+
+            <!-- Description Frame Payload -->
+            <div v-if="doc.description" class="p-2.5 rounded-lg bg-gray-50/50 dark:bg-[#222]/30 border border-gray-100 dark:border-gray-800/40">
+              <p class="text-xs text-gray-600 dark:text-gray-400 line-clamp-3 leading-relaxed">
+                {{ doc.description }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Bottom Meta Controls Bar -->
+          <div class="mt-5 pt-3.5 border-t border-gray-100 dark:border-gray-800/60 flex items-center justify-between text-[11px]">
+            <span class="flex items-center gap-1 text-gray-400 dark:text-gray-500 font-mono">
+              <CalendarIcon class="w-3 h-3 text-gray-300 dark:text-gray-600" /> 
+              <span>{{ formatDate(doc.createdAt?.seconds) }}</span>
+            </span>
+            
+            <!-- Quick Link Operations Group -->
+            <div class="flex items-center gap-1.5">
+              <a
+                :href="doc.fileUrl"
+                target="_blank"
+                rel="noopener"
+                title="View original copy"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-transparent hover:bg-gray-50 dark:hover:bg-[#222] text-gray-700 dark:text-gray-300 font-medium transition shadow-2xs active:scale-97"
+              >
+                <EyeIcon class="w-3 h-3 text-gray-400" /> 
+                <span>Open</span>
+              </a>
+              
+              <button
+                @click="deleteDocument(doc.id)"
+                title="Purge Document from Vault"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-transparent hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-600 dark:text-rose-400 font-medium transition active:scale-97"
+              >
+                <Trash2Icon class="w-3 h-3" /> 
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </AdminLayout>
+</template>
 <script setup>
 import { ref, onMounted } from 'vue'
 import {
@@ -86,8 +128,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/firebase'
 
-import AdminSidebar from '@/components/AdminSidebar.vue'
-import AdminTopbar from '@/components/AdminTopbar.vue'
+import AdminLayout from '@/components/AdminLayout.vue'
 import { FileTextIcon, CalendarIcon, EyeIcon, Trash2Icon } from 'lucide-vue-next'
 
 const documents = ref([])
