@@ -60,10 +60,10 @@
                   ₱{{ unpaidTotalAmount.toLocaleString('en-US',{ minimumFractionDigits: 2 }) }}
                 </p>
                 <div class="flex gap-1 items-end h-10 w-20">
-                  <div class="w-2.5 h-6 bg-red-100 rounded-full"></div>
-                  <div class="w-2.5 h-8 bg-red-100 rounded-full"></div>
-                  <div class="w-2.5 h-10 bg-red-200 rounded-full"></div>
-                  <div class="w-2.5 h-7 bg-red-100 rounded-full"></div>
+                  <div class="w-2.5 h-6 bg-red-200 rounded-full"></div>
+                  <div class="w-2.5 h-8 bg-red-300 rounded-full"></div>
+                  <div class="w-2.5 h-10 bg-red-500 rounded-full"></div>
+                  <div class="w-2.5 h-7 bg-red-200 rounded-full"></div>
                 </div>
             </div>
           </div>
@@ -76,7 +76,7 @@
               <p class="text-sm font-semibold text-slate-900">New Claims</p>
               <p class="text-2xl font-bold text-amber-700 mt-0.5">{{ unpaidClaims }} <span class="text-xs text-amber-500 font-medium">Pending</span></p>
             </div>
-            <svg class="w-16 h-8 text-amber-200 ml-auto" viewBox="0 0 100 30">
+            <svg class="w-16 h-8 text-amber-500 ml-auto" viewBox="0 0 100 30">
                 <polyline fill="none" stroke="currentColor" stroke-width="2" points="0,20 15,10 30,25 45,5 60,15 75,5 90,25" />
              </svg>
           </div>
@@ -89,7 +89,7 @@
               <p class="text-sm font-semibold text-slate-900">Total Settled Invoices</p>
               <p class="text-2xl font-bold text-teal-800 mt-0.5">{{ paidClaims }} <span class="text-xs text-teal-600 font-medium">Verified</span></p>
             </div>
-             <svg class="w-16 h-8 text-teal-200 ml-auto" viewBox="0 0 100 30">
+             <svg class="w-16 h-8 text-teal-500 ml-auto" viewBox="0 0 100 30">
                 <polyline fill="none" stroke="currentColor" stroke-width="2" points="0,25 15,15 30,20 45,5 60,15 75,10 90,5" />
              </svg>
           </div>
@@ -237,12 +237,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/firebase";
 import UserLayout from "@/components/UserLayout.vue";
+import { useAuth } from "@/composables/useAuth";
 import {
   AlertCircle,
   Clock,
@@ -257,18 +258,19 @@ import {
 } from "lucide-vue-next";
 
 const router = useRouter();
-const auth = getAuth();
+const { user, loading: authLoading } = useAuth();
 
 const invoices = ref([]);
 const appointments = ref([]);
-const loading = ref(false);
+const dataLoading = ref(false);
+const loading = computed(() => authLoading.value || dataLoading.value);
 
 const unpaidTotalAmount = ref(0);
 const unpaidClaims = ref(0);
 const paidClaims = ref(0);
 
 const fetchInvoicesByEmail = async (email) => {
-  loading.value = true;
+  dataLoading.value = true;
   try {
     const q = query(collection(db, "invoices"), where("email", "==", email));
     const snap = await getDocs(q);
@@ -291,7 +293,7 @@ const fetchInvoicesByEmail = async (email) => {
       }
     }
   } finally {
-    loading.value = false;
+    dataLoading.value = false;
   }
 };
 
@@ -302,14 +304,17 @@ const fetchAppointmentsByEmail = async (email) => {
     .sort((a, b) => (b.date?.seconds || 0) - (a.date?.seconds || 0));
 };
 
-onMounted(() => {
-  onAuthStateChanged(auth, async (user) => {
-    if (user?.email) {
-      await fetchInvoicesByEmail(user.email);
-      await fetchAppointmentsByEmail(user.email);
-    }
-  });
-});
+const initData = async () => {
+  if (user.value?.email) {
+    await Promise.all([
+      fetchInvoicesByEmail(user.value.email),
+      fetchAppointmentsByEmail(user.value.email)
+    ]);
+  }
+};
+
+onMounted(initData);
+watch(user, initData);
 
 const calculateInvoiceTotal = (inv) =>
   inv.services?.reduce((s, it) => s + (Number(it.amount) || 0), 0) || Number(inv.totalAmount || 0);
@@ -319,9 +324,18 @@ const formattedDate = (ts) =>
 
 const goToInvoices = () => router.push("/invoices");
 const goToAppointments = () => router.push("/appointment");
-const refreshPage = () => {
-  loading.value = true;
-  setTimeout(() => window.location.reload(), 300);
+const refreshPage = async () => {
+  if (user.value?.email) {
+    dataLoading.value = true;
+    try {
+      await Promise.all([
+        fetchInvoicesByEmail(user.value.email),
+        fetchAppointmentsByEmail(user.value.email)
+      ]);
+    } finally {
+      dataLoading.value = false;
+    }
+  }
 };
 
 const recentAppointments = computed(() => appointments.value.slice(0, 3));

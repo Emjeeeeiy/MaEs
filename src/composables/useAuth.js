@@ -3,15 +3,25 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { db } from '@/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
-export function useAuth() {
-  const user = ref(null);
-  const role = ref(null);
-  const loading = ref(true);
-  const error = ref(null);
+// Global state to share across components
+const user = ref(null);
+const role = ref(null);
+const loading = ref(true);
+const error = ref(null);
+let initialized = false;
 
-  const fetchRole = async (uid) => {
+export function useAuth() {
+  const fetchRole = async (firebaseUser) => {
     try {
-      const userDoc = await getDoc(doc(db, 'users', uid));
+      // Prioritize Custom Claims
+      const token = await firebaseUser.getIdTokenResult();
+      if (token.claims.role) {
+        role.value = token.claims.role;
+        return;
+      }
+
+      // Fallback to Firestore if claims aren't set yet
+      const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
       if (userDoc.exists()) {
         role.value = userDoc.data().role;
       }
@@ -21,20 +31,21 @@ export function useAuth() {
     }
   };
 
-  onMounted(() => {
+  if (!initialized) {
+    initialized = true;
     const auth = getAuth();
     onAuthStateChanged(auth, async (firebaseUser) => {
       loading.value = true;
       if (firebaseUser) {
         user.value = firebaseUser;
-        await fetchRole(firebaseUser.uid);
+        await fetchRole(firebaseUser);
       } else {
         user.value = null;
         role.value = null;
       }
       loading.value = false;
     });
-  });
+  }
 
   return {
     user,

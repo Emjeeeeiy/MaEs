@@ -96,7 +96,6 @@
                             <input
                               type="checkbox"
                               :checked="isServiceSelected(service)"
-                              @click.stop
                               class="h-5 w-5 rounded-lg border-slate-300 text-teal-600 focus:ring-teal-500 transition-all"
                             />
                           </div>
@@ -218,9 +217,17 @@ import { db } from "@/firebase";
 import { collection, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
+import { useAuth } from "@/composables/useAuth";
+import { useNotifications } from "@/composables/useNotifications";
+
 export default {
   name: "BillingPage",
   components: { UserLayout, FileText, List, Search, ChevronRight, RefreshCw, CheckCircle2, AlertCircle },
+  setup() {
+    const { user } = useAuth();
+    const { success, error: notifyError } = useNotifications();
+    return { user, success, notifyError };
+  },
   data() {
     return {
       services: [],
@@ -229,7 +236,6 @@ export default {
       selectedCategory: "",
       loading: true,
       buttonLoading: false,
-      toast: { show: false, message: "", type: "success" },
       orderedCategories: [
         "CHEMISTRY","SPECIAL CHEMISTRY","ELECTROLYTES","CLINICAL MICROSCOPY",
         "SPECIAL MICROSCOPY","URINE CHEMISTRY","HEMATOLOGY","SEROLOGY",
@@ -277,34 +283,26 @@ export default {
     isServiceSelected(service) {
       return this.selectedServices.some(s => s.id === service.id);
     },
-    showToast(message, type = "success") {
-      this.toast.message = message;
-      this.toast.type = type;
-      this.toast.show = true;
-      setTimeout(() => (this.toast.show = false), 3500);
-    },
     async fetchServices() {
       try {
         const snapshot = await getDocs(collection(db, "services"));
         this.services = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       } catch (err) {
-        this.showToast("Failed to fetch services", "error");
+        this.notifyError("Failed to fetch services");
       } finally { 
         this.loading = false; 
       }
     },
     generateShortId() { return `INV-${Math.random().toString(36).substring(2, 8).toUpperCase()}`; },
     async generateInvoice() {
-      if (!this.selectedServices.length) return this.showToast("Select at least one service.", "error");
-      const auth = getAuth();
-      const user = auth.currentUser;
-      if (!user) return this.showToast("You must be logged in.", "error");
+      if (!this.selectedServices.length) return this.notifyError("Select at least one service.");
+      if (!this.user) return this.notifyError("You must be logged in.");
 
       this.buttonLoading = true;
       try {
         const shortId = this.generateShortId();
         await addDoc(collection(db, "invoices"), {
-          email: user.email,
+          email: this.user.email,
           services: this.selectedServices,
           totalAmount: this.totalComputedAmount,
           status: "not paid",
@@ -312,9 +310,9 @@ export default {
           shortId,
         });
         this.selectedServices = [];
-        this.showToast(`Invoice ${shortId} generated! check your invoices tab.`, "success");
+        this.success(`Invoice ${shortId} generated! check your invoices tab.`);
       } catch (err) {
-        this.showToast("Failed to generate invoice.", "error");
+        this.notifyError("Failed to generate invoice.");
       } finally { 
         this.buttonLoading = false; 
       }

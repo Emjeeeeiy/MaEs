@@ -107,30 +107,35 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { collection, query, where, onSnapshot } from 'firebase/firestore'
 import { db } from '@/firebase'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
-import html2pdf from 'html2pdf.js'
 
 import UserLayout from '@/components/UserLayout.vue'
 import { 
   RefreshCw, FlaskConical, Download, 
   ClipboardCheck, ChevronRight 
 } from 'lucide-vue-next'
+import { useAuth } from '@/composables/useAuth'
 
+const { user, loading: authLoading } = useAuth()
 const invoices = ref([])
-const userEmail = ref('')
-const loading = ref(true)
+const dataLoading = ref(true)
+const loading = computed(() => authLoading.value || dataLoading.value)
+
+let unsubscribeSnapshot = null
 
 const listenForInvoices = () => {
-  if (!userEmail.value) return
-  const q = query(collection(db, 'invoices'), where('email', '==', userEmail.value))
-  onSnapshot(q, snap => {
+  if (!user.value?.email) return
+  
+  if (unsubscribeSnapshot) unsubscribeSnapshot()
+
+  const q = query(collection(db, 'invoices'), where('email', '==', user.value.email))
+  unsubscribeSnapshot = onSnapshot(q, snap => {
     invoices.value = snap.docs
       .map(d => ({ id: d.id, ...d.data() }))
       .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
-    loading.value = false
+    dataLoading.value = false
   })
 }
 
@@ -143,7 +148,8 @@ const formatDate = (ts) => {
   })
 }
 
-const exportPDF = (inv) => {
+const exportPDF = async (inv) => {
+  const html2pdf = (await import('html2pdf.js')).default;
   const exportDate = new Date().toLocaleString()
   const logoURL = `${window.location.origin}/MaEs_logo2.png`
 
@@ -199,18 +205,12 @@ const exportPDF = (inv) => {
 }
 
 const refresh = () => {
-  loading.value = true
+  dataLoading.value = true
   listenForInvoices()
 }
 
-onMounted(() => {
-  onAuthStateChanged(getAuth(), user => {
-    if (user) {
-      userEmail.value = user.email
-      listenForInvoices()
-    }
-  })
-})
+onMounted(listenForInvoices)
+watch(user, listenForInvoices)
 </script>
 
 <style scoped>

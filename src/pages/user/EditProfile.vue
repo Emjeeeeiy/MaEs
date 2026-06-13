@@ -123,7 +123,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { auth, db } from '@/firebase'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 
@@ -139,7 +139,9 @@ import {
   X,
 } from 'lucide-vue-next'
 import { useNotifications } from '@/composables/useNotifications'
+import { useAuth } from '@/composables/useAuth'
 
+const { user } = useAuth()
 const username = ref('')
 const email = ref('')
 const completeName = ref('')
@@ -152,15 +154,11 @@ const profileImage = ref('')
 const previewImage = ref('')
 const { success: notifySuccess, error: notifyError } = useNotifications()
 
-onMounted(async () => {
-  const user = auth.currentUser
-  if (!user) {
-    notifyError('User is not authenticated.')
-    return
-  }
+const initForm = async () => {
+  if (!user.value) return
 
   try {
-    const userRef = doc(db, 'users', user.uid)
+    const userRef = doc(db, 'users', user.value.uid)
     const docSnap = await getDoc(userRef)
 
     if (docSnap.exists()) {
@@ -180,7 +178,10 @@ onMounted(async () => {
   } catch (err) {
     notifyError('Failed to load profile data.')
   }
-})
+}
+
+onMounted(initForm)
+watch(user, initForm)
 
 const handleImageChange = (event) => {
   const file = event.target.files[0]
@@ -195,11 +196,10 @@ const handleImageChange = (event) => {
 }
 
 const updateProfile = async () => {
-  const user = auth.currentUser
-  if (!user) return
+  if (!user.value) return
 
   try {
-    const userRef = doc(db, 'users', user.uid)
+    const userRef = doc(db, 'users', user.value.uid)
     const updateData = {
       completeName: completeName.value,
       age: age.value,

@@ -1,22 +1,3 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
-
-@layer base {
-  :root {
-    color-scheme: light;
-    font-family: 'Inter', sans-serif;
-  }
-
-  html, body {
-    @apply bg-white text-slate-950;
-    margin: 0;
-    padding: 0;
-    background-color: #ffffff !important;
-    font-family: 'Inter', sans-serif;
-  }
-
-  #app {
-    @apply min-h-screen bg-white;
-    background-color: #ffffff !important;
-  }
-}
+@custom-variant dark (&:where(.dark, .dark *));

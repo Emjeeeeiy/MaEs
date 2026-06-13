@@ -156,7 +156,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { collection, getDocs, updateDoc, doc, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, updateDoc, doc, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/firebase";
 import AdminSidebar from "@/components/AdminSidebar.vue";
 import AdminTopbar from "@/components/AdminTopbar.vue";
@@ -219,6 +219,16 @@ const submitResults = async (invoice) => {
 
   try {
     await updateDoc(doc(db, "invoices", invoice.id), { services: updatedServices });
+    
+    // Send Notification to User
+    await addDoc(collection(db, 'notifications'), {
+      userEmail: invoice.email,
+      type: 'result-updated',
+      message: `Your medical results for ${updatedServices.map(s => s.serviceName).join(', ')} have been updated.`,
+      createdAt: serverTimestamp(),
+      read: false
+    })
+
     invoice.services = updatedServices;
     selectedInvoice.value = null;
     notifySuccess("Results saved successfully!");

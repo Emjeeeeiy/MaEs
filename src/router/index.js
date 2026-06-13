@@ -4,7 +4,7 @@ import { db } from '@/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
 // Public pages
-import LandingPage from '../pages/LandingPage.vue';
+const LandingPage = () => import('../pages/LandingPage.vue');
 const Login = () => import('../pages/Login.vue');
 const Register = () => import('../pages/Register.vue');
 const ResetPassword = () => import('../pages/ResetPassword.vue');
@@ -27,6 +27,7 @@ const AdminServices = () => import('../pages/admin/Services.vue');
 const AdminRfa = () => import('../pages/admin/Rfa.vue');
 const AdminAppointment = () => import('../pages/admin/Appointment.vue');
 const AdminResult = () => import('../pages/admin/Result.vue');
+const AdminSettings = () => import('../pages/admin/Settings.vue');
 
 // 404 Page
 const NotFound = () => import('../pages/NotFound.vue');
@@ -83,6 +84,12 @@ const routes = [
     component: AdminResult,
     meta: { requiresAdmin: true },
   },
+  {
+    path: '/admin-settings',
+    name: 'AdminSettings',
+    component: AdminSettings,
+    meta: { requiresAdmin: true },
+  },
 
   // User Routes
   { path: '/dashboard', name: 'Dashboard', component: UserDashboard, meta: { requiresAuth: true } },
@@ -120,30 +127,41 @@ function getCurrentUser() {
 
 // 🔒 Navigation Guards
 router.beforeEach(async (to, from, next) => {
-  const auth = getAuth();
   const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin);
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+  const isLoginPage = ['Login', 'Register'].includes(to.name);
 
   const currentUser = await getCurrentUser();
 
-  const hasAccount = localStorage.getItem('hasAccount'); // true if they already signed up
-
-  // Logic for landing page redirect
-  if (to.name === 'LandingPage' && hasAccount) {
-    // If user already has an account, redirect to login
-    return next('/login');
+  // If authenticated user tries to access login or register
+  if (currentUser && isLoginPage) {
+    try {
+      const token = await currentUser.getIdTokenResult();
+      return next(token.claims.admin ? '/admin-dashboard' : '/dashboard');
+    } catch (error) {
+      console.error('Redirect error:', error);
+      return next(); 
+    }
   }
 
   // Admin-only guard
   if (requiresAdmin) {
-    if (!currentUser) return next('/login');
+    if (!currentUser) return next({ name: 'Login', query: { redirect: to.fullPath } });
 
     try {
-      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-      const role = userDoc.exists() ? userDoc.data().role : null;
+      const token = await currentUser.getIdTokenResult();
+      if (token.claims.admin) return next();
 
-      if (role === 'admin') return next();
-      return next('/dashboard'); // redirect non-admins
+      // Fallback: Check Firestore only if claims aren't set
+      if (!token.claims.role) {
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        if (userDoc.exists() && userDoc.data().role === 'admin') {
+          await currentUser.getIdToken(true); // refresh to pick up claims
+          return next();
+        }
+      }
+      
+      return next('/dashboard'); 
     } catch (error) {
       console.error('Admin guard error:', error);
       return next('/login');
@@ -152,7 +170,7 @@ router.beforeEach(async (to, from, next) => {
 
   // Auth-only pages
   if (requiresAuth && !currentUser) {
-    return next('/login');
+    return next({ name: 'Login', query: { redirect: to.fullPath } });
   }
 
   return next();

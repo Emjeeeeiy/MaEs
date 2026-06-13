@@ -99,14 +99,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { auth, db } from "@/firebase";
-import { getDoc, doc, collection, updateDoc, deleteDoc, onSnapshot } from "firebase/firestore";
+import { ref, onMounted, watch } from "vue";
+import { db } from "@/firebase";
+import { getDoc, doc, collection, updateDoc, deleteDoc, onSnapshot, addDoc, serverTimestamp } from "firebase/firestore";
 import AdminSidebar from "@/components/AdminSidebar.vue";
 import AdminTopbar from "@/components/AdminTopbar.vue";
 import { User2Icon, Trash2Icon, CheckCircleIcon, SlashIcon, UsersIcon } from "lucide-vue-next";
 import { useNotifications } from "@/composables/useNotifications";
+import { useAuth } from "@/composables/useAuth";
 
+const { user } = useAuth();
 const users = ref([]);
 const errorMessage = ref("");
 const { success, error: notifyError } = useNotifications();
@@ -123,11 +125,10 @@ const formatLastActive = (lastActive) => {
 
 // Fetch users
 const fetchUsers = async () => {
-  try {
-    const currentUser = auth.currentUser;
-    if (!currentUser) throw new Error("Not authenticated");
+  if (!user.value) return;
 
-    const adminRef = doc(db, "users", currentUser.uid);
+  try {
+    const adminRef = doc(db, "users", user.value.uid);
     const adminSnap = await getDoc(adminRef);
 
     if (!adminSnap.exists() || adminSnap.data().role !== "admin") {
@@ -148,32 +149,62 @@ const fetchUsers = async () => {
 };
 
 // Role update
-const updateUserRole = async (user) => {
-  if (user.status === "deactivated") {
+const updateUserRole = async (userObj) => {
+  if (userObj.status === "deactivated") {
     notifyError("Cannot change role of a deactivated user.");
     return;
   }
   try {
-    await updateDoc(doc(db, "users", user.id), { role: user.role });
-    success(`Role updated to ${user.role}`);
+    await updateDoc(doc(db, "users", userObj.id), { role: userObj.role });
+
+    // Send Notification to User
+    await addDoc(collection(db, 'notifications'), {
+      userEmail: userObj.email,
+      type: 'role-updated',
+      message: `Your account role has been updated to ${userObj.role}.`,
+      createdAt: serverTimestamp(),
+      read: false
+    })
+
+    success(`Role updated to ${userObj.role}`);
   } catch (error) {
     notifyError("Error updating role: " + error.message);
   }
 };
 
 // Status actions
-const deactivateUser = async (user) => {
+const deactivateUser = async (userObj) => {
   try {
-    await updateDoc(doc(db, "users", user.id), { status: "deactivated" });
+    await updateDoc(doc(db, "users", userObj.id), { status: "deactivated" });
+
+    // Send Notification to User
+    await addDoc(collection(db, 'notifications'), {
+      userEmail: userObj.email,
+      type: 'status-updated',
+      message: `Your account status has been set to deactivated.`,
+      createdAt: serverTimestamp(),
+      read: false
+    })
+
     success("User deactivated successfully.");
   } catch (error) {
     notifyError("Error: " + error.message);
   }
 };
 
-const reactivateUser = async (user) => {
+const reactivateUser = async (userObj) => {
   try {
-    await updateDoc(doc(db, "users", user.id), { status: "active" });
+    await updateDoc(doc(db, "users", userObj.id), { status: "active" });
+
+    // Send Notification to User
+    await addDoc(collection(db, 'notifications'), {
+      userEmail: userObj.email,
+      type: 'status-updated',
+      message: `Your account status has been reactivated.`,
+      createdAt: serverTimestamp(),
+      read: false
+    })
+
     success("User reactivated successfully.");
   } catch (error) {
     notifyError("Error: " + error.message);
@@ -190,17 +221,18 @@ const deleteUser = async (userId) => {
 };
 
 // Confirm dialogs
-const confirmDeactivation = (user) => {
-  if (confirm(`Deactivate ${user.username}?`)) deactivateUser(user);
+const confirmDeactivation = (userObj) => {
+  if (confirm(`Deactivate ${userObj.username}?`)) deactivateUser(userObj);
 };
-const confirmReactivation = (user) => {
-  if (confirm(`Reactivate ${user.username}?`)) reactivateUser(user);
+const confirmReactivation = (userObj) => {
+  if (confirm(`Reactivate ${userObj.username}?`)) reactivateUser(userObj);
 };
 const confirmDeletion = (userId) => {
   if (confirm("Are you sure you want to delete this user?")) deleteUser(userId);
 };
 
 onMounted(fetchUsers);
+watch(user, fetchUsers);
 </script>
 
 <style scoped>

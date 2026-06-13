@@ -389,7 +389,7 @@ const approveDirect = async invoice => {
       message: `Your payment for ${invoice.services
         .map(s => s.serviceName)
         .join(', ')} has been approved.`,
-      timestamp: approvedAt,
+      createdAt: approvedAt,
       read: false
     })
 
@@ -422,7 +422,7 @@ const approveInvoice = async () => {
       message: `Your payment for ${invoice.services
         .map(s => s.serviceName)
         .join(', ')} has been approved.`,
-      timestamp: approvedAt,
+      createdAt: approvedAt,
       read: false
     })
 

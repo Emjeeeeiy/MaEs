@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-100 text-gray-800 overflow-x-hidden">
+  <div class="flex flex-col min-h-screen bg-linear-to-br from-gray-50 via-white to-gray-100 dark:from-[#1a1a1a] dark:via-[#1a1a1a] dark:to-[#1e1e1e] text-gray-800 dark:text-gray-200 overflow-x-hidden">
 
     <!-- Topbar -->
     <div class="fixed top-0 left-0 right-0 z-30">
@@ -14,22 +14,21 @@
       </aside>
 
       <!-- Main Content -->
-      <main class="flex-1 p-4 lg:p-6 space-y-8 overflow-y-auto h-[calc(100vh-3.5rem)] custom-scrollbar">
+      <main class="flex-1 p-4 lg:p-6 space-y-8 overflow-y-auto h-[calc(100vh-3.5rem)] custom-scrollbar dark:bg-[#1a1a1a]">
 
-        <!-- Dashboard Cards -->
         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-fadeIn">
           <div 
             v-for="(card, i) in dashboardCards"
             :key="i"
-            class="bg-white/90 backdrop-blur-md border border-gray-200 rounded-xl p-4 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+            class="bg-white/90 dark:bg-[#2a2a2a]/90 backdrop-blur-md border border-gray-200 dark:border-gray-700 rounded-xl p-4 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
           >
             <div class="flex items-center gap-3">
-              <div class="p-3 rounded-xl bg-linear-to-br from-green-100 to-green-200 text-green-700 shadow-inner">
+              <div class="p-3 rounded-xl bg-linear-to-br from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-800/20 text-green-700 dark:text-green-400 shadow-inner">
                 <component :is="card.icon" class="w-6 h-6" />
               </div>
               <div>
-                <p class="text-xs font-medium text-gray-500">{{ card.title }}</p>
-                <p class="text-xl font-bold text-gray-900">{{ card.value }}</p>
+                <p class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ card.title }}</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-gray-100">{{ card.value }}</p>
               </div>
             </div>
           </div>
@@ -49,14 +48,14 @@
         <section class="space-y-10 animate-fadeUp">
 
           <!-- Revenue Chart -->
-          <div class="border border-gray-200 rounded-xl p-4 bg-white/90 backdrop-blur-md shadow-md hover:shadow-lg transition chart-animate">
+          <div class="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white/90 dark:bg-[#2a2a2a]/90 backdrop-blur-md shadow-md hover:shadow-lg transition chart-animate">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-              <h2 class="text-base font-semibold text-gray-800 flex items-center gap-2">
+              <h2 class="text-base font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                 📈 Revenue Trend (Daily)
               </h2>
               <select
                 v-model="selectedWeek"
-                class="border border-gray-300 rounded-lg px-2 py-1.5 text-xs focus:ring-2 focus:ring-green-500"
+                class="border border-gray-300 dark:border-gray-600 dark:bg-[#1e1e1e] dark:text-gray-200 rounded-lg px-2 py-1.5 text-xs focus:ring-2 focus:ring-green-500"
               >
                 <option value="">All Weeks</option>
                 <option v-for="week in availableWeeks" :key="week.label" :value="week.label">
@@ -71,7 +70,7 @@
 
           <!-- Service Trends -->
           <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <h2 class="text-base font-semibold text-gray-800 flex items-center gap-2">
+            <h2 class="text-base font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
               📊 Service Trends
             </h2>
             <button 
@@ -86,9 +85,9 @@
           <div 
             v-for="(_, index) in serviceChartRefs"
             :key="index"
-            class="border border-gray-200 rounded-xl p-4 bg-white/90 backdrop-blur-md shadow-md hover:shadow-lg transition chart-animate"
+            class="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-white/90 dark:bg-[#2a2a2a]/90 backdrop-blur-md shadow-md hover:shadow-lg transition chart-animate"
           >
-            <h3 class="text-sm font-medium mb-3 text-gray-700">📌 Batch {{ index + 1 }}</h3>
+            <h3 class="text-sm font-medium mb-3 text-gray-700 dark:text-gray-300">📌 Batch {{ index + 1 }}</h3>
             <div class="h-60 sm:h-64 animate-chartEntry">
               <canvas :ref="(el) => (serviceChartRefs[index] = el)" class="h-full w-full" />
             </div>
@@ -131,8 +130,6 @@
 <script setup>
 import { ref, onMounted, nextTick, watch, computed } from 'vue'
 import { getFirestore, collection, getDocs } from 'firebase/firestore'
-import Chart from 'chart.js/auto'
-import * as XLSX from 'xlsx'
 import AdminSidebar from '@/components/AdminSidebar.vue'
 import AdminTopbar from '@/components/AdminTopbar.vue'
 import { ChartBarIcon, UsersIcon, CreditCardIcon, CurrencyDollarIcon } from '@heroicons/vue/24/solid'
@@ -149,6 +146,7 @@ const showServiceModal = ref(false)
 
 let serviceChartInstances = []
 let revenueChartInstance = null
+let Chart = null
 
 const sortedServiceTotals = computed(() =>
   Object.fromEntries(Object.entries(serviceCounts.value).sort((a, b) => b[1] - a[1]))
@@ -252,7 +250,12 @@ async function fetchDashboardData() {
   }
 }
 
-function drawCharts() {
+async function drawCharts() {
+  if (!Chart) {
+    const chartModule = await import('chart.js/auto')
+    Chart = chartModule.default
+  }
+
   serviceChartInstances.forEach((c) => c?.destroy())
   serviceChartInstances = []
 
@@ -348,7 +351,8 @@ function drawCharts() {
   })
 }
 
-function exportToExcel() {
+async function exportToExcel() {
+  const XLSX = await import('xlsx');
   const metricsData = dashboardCards.value.map((c) => ({
     Metric: c.title,
     Value: c.value,

@@ -69,7 +69,7 @@ export default {
 
 <style scoped>
 /* Optional: Smooth dropdown transition */
-div[ v-show ] {
+.relative > div {
   transition: all 0.2s ease-in-out;
 }
 </style>

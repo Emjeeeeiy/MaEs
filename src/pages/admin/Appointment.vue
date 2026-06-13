@@ -150,7 +150,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { collection, onSnapshot, updateDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore'
+import { collection, onSnapshot, updateDoc, deleteDoc, doc, serverTimestamp, addDoc } from 'firebase/firestore'
 import { db } from '@/firebase'
 import AdminSidebar from '@/components/AdminSidebar.vue'
 import AdminTopbar from '@/components/AdminTopbar.vue'
@@ -182,6 +182,9 @@ const formatTimestamp = (ts) => {
 const updateStatus = async (id, newStatus) => {
   try {
     const updateData = { status: newStatus }
+    const appt = appointments.value.find(a => a.id === id)
+    if (!appt) return
+
     if (newStatus === 'Approved') {
       updateData.approvedAt = serverTimestamp()
       updateData.declinedAt = null
@@ -190,6 +193,16 @@ const updateStatus = async (id, newStatus) => {
       updateData.approvedAt = null
     }
     await updateDoc(doc(db, 'appointments', id), updateData)
+
+    // Send Notification
+    await addDoc(collection(db, 'notifications'), {
+      userEmail: appt.email,
+      type: `appointment-${newStatus.toLowerCase()}`,
+      message: `Your appointment on ${appt.date} has been ${newStatus.toLowerCase()}.`,
+      createdAt: serverTimestamp(),
+      read: false
+    })
+
     notifySuccess(`Appointment ${newStatus.toLowerCase()} successfully!`)
   } catch (err) {
     console.error('Failed to update status:', err.message)

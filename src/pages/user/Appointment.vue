@@ -229,9 +229,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
-import { collection, addDoc, query, where, getDocs, Timestamp } from 'firebase/firestore'
+import { ref, onMounted, computed, watch } from 'vue'
+import { collection, addDoc, query, where, getDocs, Timestamp, writeBatch, doc } from 'firebase/firestore'
 import { db } from '@/firebase'
 
 import UserLayout from '@/components/UserLayout.vue'
@@ -241,12 +240,14 @@ import {
 } from 'lucide-vue-next'
 
 import { useNotifications } from '@/composables/useNotifications'
+import { useAuth } from '@/composables/useAuth'
 
-const loading = ref(true)
+const { user, loading: authLoading } = useAuth()
+const dataLoading = ref(true)
+const loading = computed(() => authLoading.value || dataLoading.value)
 const submitLoading = ref(false)
 const form = ref({ date: '', notes: '' })
 const appointments = ref([])
-const userEmail = ref('')
 const selectedServices = ref([])
 const showServiceModal = ref(false)
 const showAllModal = ref(false)
@@ -257,8 +258,8 @@ const { success, error: notifyError } = useNotifications();
 const today = new Date().toISOString().split('T')[0]
 
 const fetchAppointments = async () => {
-  if (!userEmail.value) return
-  const q = query(collection(db, 'appointments'), where('email', '==', userEmail.value))
+  if (!user.value?.email) return
+  const q = query(collection(db, 'appointments'), where('email', '==', user.value.email))
   const snap = await getDocs(q)
   appointments.value = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
 }
@@ -298,20 +299,33 @@ const submitAppointment = async () => {
 
   submitLoading.value = true
   try {
-    await addDoc(collection(db, 'appointments'), {
+    const batch = writeBatch(db)
+    const appRef = doc(collection(db, 'appointments'))
+    const userRef = doc(db, 'users', user.value.uid)
+    const now = Timestamp.now()
+
+    batch.set(appRef, {
       services: selectedServices.value,
       date: form.value.date,
       notes: form.value.notes,
-      email: userEmail.value,
+      email: user.value.email,
       status: 'Pending',
-      createdAt: Timestamp.now(),
+      createdAt: now,
     })
+
+    batch.update(userRef, {
+      lastAppointmentAt: now
+    })
+
+    await batch.commit()
+
     form.value = { date: '', notes: '' }
     selectedServices.value = []
     await fetchAppointments()
     success("Appointment successfully booked!")
   } catch (e) {
-    notifyError("Server error. Please try again.")
+    console.error("Booking error:", e)
+    notifyError("Failed to book appointment. Please try again (there is a 1-minute cooldown).")
   }
   submitLoading.value = false
 }
@@ -328,15 +342,15 @@ const statusColor = (status) => {
   return 'bg-rose-100 text-rose-700'
 }
 
-onMounted(() => {
-  onAuthStateChanged(getAuth(), async (user) => {
-    if (user) {
-      userEmail.value = user.email
-      await Promise.all([fetchAppointments(), fetchServices()])
-      loading.value = false
-    }
-  })
-})
+const initData = async () => {
+  if (user.value) {
+    await Promise.all([fetchAppointments(), fetchServices()])
+    dataLoading.value = false
+  }
+}
+
+onMounted(initData)
+watch(user, initData)
 </script>
 
 <style scoped>

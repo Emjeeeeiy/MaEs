@@ -53,7 +53,9 @@ export function useTawk() {
       // 👉 Dito mo ilalagay yung Tawk embed link galing sa dashboard
       const script = document.createElement('script');
       script.id = 'tawk-script';
-      script.src = 'https://embed.tawk.to/682390baa582f719105b0cc6/1ir5eqmhl';
+      const propertyId = import.meta.env.VITE_TAWK_PROPERTY_ID;
+      const widgetId = import.meta.env.VITE_TAWK_WIDGET_ID;
+      script.src = `https://embed.tawk.to/${propertyId}/${widgetId}`;
       script.async = true;
       script.charset = 'UTF-8';
       script.setAttribute('crossorigin', '*');

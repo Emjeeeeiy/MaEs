@@ -106,7 +106,7 @@
                 >
                   <BellIcon class="w-5 h-5" />
                   <span
-                    v-if="notifications.length"
+                    v-if="unreadCount"
                     class="absolute top-2 right-2 flex h-2 w-2"
                   >
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
@@ -122,7 +122,7 @@
                     <div class="p-4 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
                       <div class="flex items-center gap-2">
                         <span class="font-bold text-sm text-slate-900">Notifications</span>
-                        <span v-if="notifications.length" class="px-2 py-0.5 bg-rose-100 text-rose-600 text-[10px] font-bold rounded-full">{{ notifications.length }} New</span>
+                        <span v-if="unreadCount" class="px-2 py-0.5 bg-rose-100 text-rose-600 text-[10px] font-bold rounded-full">{{ unreadCount }} New</span>
                       </div>
                       <button 
                         v-if="notifications.length"
@@ -144,15 +144,36 @@
                       
                       <div
                         v-for="(notif, index) in notifications"
-                        :key="index"
-                        class="px-4 py-4 border-b border-slate-50 last:border-none hover:bg-slate-50 transition-colors group cursor-pointer"
+                        :key="notif.id || index"
+                        @click="handleNotificationClick(notif)"
+                        class="px-4 py-3.5 border-b border-slate-50 last:border-none hover:bg-slate-50 transition-colors group cursor-pointer relative"
+                        :class="{ 'bg-teal-50/10': !notif.read }"
                       >
-                        <div class="flex gap-4">
-                          <div class="mt-1 h-2 w-2 rounded-full bg-teal-500 shrink-0 group-hover:scale-125 transition-transform"></div>
-                          <div class="flex-1">
-                            <p class="text-sm text-slate-700 font-medium leading-relaxed group-hover:text-slate-900">{{ notif.message }}</p>
-                            <div class="flex items-center gap-2 mt-2">
-                              <CalendarIcon class="w-3 h-3 text-slate-300" />
+                        <!-- Unread visual dot -->
+                        <span v-if="!notif.read" class="absolute top-4 right-4 h-1.5 w-1.5 rounded-full bg-teal-500"></span>
+
+                        <div class="flex gap-3.5">
+                          <!-- Dynamic Icon Category Container -->
+                          <div 
+                            class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-105"
+                            :class="getNotifStyle(notif.type).bgClass"
+                          >
+                            <component 
+                              :is="getNotifStyle(notif.type).icon" 
+                              class="w-5 h-5" 
+                              :class="getNotifStyle(notif.type).iconClass"
+                            />
+                          </div>
+
+                          <div class="flex-1 min-w-0 pr-2">
+                            <p 
+                              class="text-xs text-slate-700 leading-relaxed group-hover:text-slate-900"
+                              :class="{ 'font-semibold': !notif.read, 'font-medium': notif.read }"
+                            >
+                              {{ notif.message }}
+                            </p>
+                            <div class="flex items-center gap-1.5 mt-2">
+                              <CalendarIcon class="w-3.5 h-3.5 text-slate-300" />
                               <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ formatDate(notif.createdAt?.seconds) }}</span>
                             </div>
                           </div>
@@ -160,7 +181,7 @@
                       </div>
                     </div>
                     <div class="p-3 border-t border-slate-50 bg-slate-50/30 text-center">
-                       <button class="text-xs font-bold text-teal-600 hover:text-teal-700">View All Notifications</button>
+                       <button class="text-xs font-bold text-teal-600 hover:text-teal-700" @click="notifDropdownOpen = false; router.push('/profile')">View All Notifications</button>
                     </div>
                   </div>
                 </transition>
@@ -340,6 +361,9 @@ import {
   SettingsIcon,
   LogOutIcon,
   SendIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  AlertCircleIcon,
 } from 'lucide-vue-next'
 import { getAuth, signOut } from 'firebase/auth'
 import { db, storage } from '@/firebase'
@@ -352,7 +376,9 @@ import {
   where,
   orderBy,
   getDocs,
-  deleteDoc
+  deleteDoc,
+  updateDoc,
+  doc
 } from 'firebase/firestore'
 import { ref as sRef, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { useNotifications } from '@/composables/useNotifications'
@@ -379,8 +405,78 @@ const selectedFile = ref(null)
 const docDescription = ref('')
 const uploading = ref(false)
 const fileInput = ref(null)
+const isInitialLoad = ref(true)
 
 const toggleNotifDropdown = () => notifDropdownOpen.value = !notifDropdownOpen.value
+
+const unreadCount = computed(() => notifications.value.filter(n => !n.read).length)
+
+const getNotifStyle = (type) => {
+  const defaultStyle = {
+    icon: BellIcon,
+    bgClass: 'bg-slate-50',
+    iconClass: 'text-slate-600'
+  }
+  
+  if (!type) return defaultStyle
+
+  if (type === 'appointment-approved') {
+    return {
+      icon: CheckCircleIcon,
+      bgClass: 'bg-emerald-50 border border-emerald-100',
+      iconClass: 'text-emerald-600'
+    }
+  } else if (type === 'appointment-declined') {
+    return {
+      icon: XCircleIcon,
+      bgClass: 'bg-rose-50 border border-rose-100',
+      iconClass: 'text-rose-600'
+    }
+  } else if (type === 'invoice-approved') {
+    return {
+      icon: CreditCardIcon,
+      bgClass: 'bg-indigo-50 border border-indigo-100',
+      iconClass: 'text-indigo-600'
+    }
+  } else if (type === 'result-updated') {
+    return {
+      icon: ClipboardDocumentCheckIcon,
+      bgClass: 'bg-teal-50 border border-teal-100',
+      iconClass: 'text-teal-600'
+    }
+  } else if (type === 'role-updated' || type === 'status-updated') {
+    return {
+      icon: AlertCircleIcon,
+      bgClass: 'bg-amber-50 border border-amber-100',
+      iconClass: 'text-amber-600'
+    }
+  }
+
+  return defaultStyle
+}
+
+const handleNotificationClick = async (notif) => {
+  if (!notif.read) {
+    try {
+      await updateDoc(doc(db, 'notifications', notif.id), { read: true })
+    } catch (err) {
+      console.error('Error marking notification as read:', err)
+    }
+  }
+
+  notifDropdownOpen.value = false
+  if (notif.type) {
+    if (notif.type.startsWith('appointment')) {
+      router.push('/appointment')
+    } else if (notif.type.startsWith('invoice')) {
+      router.push('/payments')
+    } else if (notif.type.startsWith('result')) {
+      router.push('/result')
+    } else if (notif.type.startsWith('role') || notif.type.startsWith('status')) {
+      router.push('/profile')
+    }
+  }
+}
 
 const pageTitle = computed(() => {
   const routeMap = {
@@ -411,7 +507,6 @@ const navItems = [
   { name: 'Appointments', path: '/appointment', icon: CalendarIcon },
   { name: 'Results', path: '/result', icon: ChartBarIcon },
   { name: 'Profile', path: '/profile', icon: UserCircleIcon },
-  { name: 'Settings', path: '/edit_profile', icon: SettingsIcon },
 ]
 
 function iconLink(path) {
@@ -444,8 +539,24 @@ onMounted(() => {
       where('userEmail', '==', userEmail),
       orderBy('createdAt', 'desc')
     )
+
     onSnapshot(notifQuery, (snapshot) => {
-      notifications.value = snapshot.docs.map(doc => doc.data())
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === 'added') {
+          const data = change.doc.data()
+          if (!isInitialLoad.value) {
+            // Trigger toast for new notifications
+            notifySuccess(data.message)
+          }
+        }
+      })
+
+      notifications.value = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }))
+
+      isInitialLoad.value = false
     })
   }
 })
@@ -469,7 +580,7 @@ const sendFeedback = async () => {
 
   try {
     if (imageFile.value) {
-      const fileRef = sRef(storage, `billingFeedbackImages/${Date.now()}-${imageFile.value.name}`)
+      const fileRef = sRef(storage, `billingFeedbackImages/${auth.currentUser.uid}/${Date.now()}-${imageFile.value.name}`)
       const snapshot = await uploadBytes(fileRef, imageFile.value)
       imageUrl = await getDownloadURL(snapshot.ref)
     }
@@ -503,7 +614,7 @@ const uploadDocument = async () => {
   uploading.value = true
 
   try {
-    const fileRef = sRef(storage, `financialDocuments/${Date.now()}-${selectedFile.value.name}`)
+    const fileRef = sRef(storage, `financialDocuments/${auth.currentUser.uid}/${Date.now()}-${selectedFile.value.name}`)
     const snapshot = await uploadBytes(fileRef, selectedFile.value)
     const fileUrl = await getDownloadURL(snapshot.ref)
 

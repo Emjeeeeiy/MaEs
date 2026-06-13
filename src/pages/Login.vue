@@ -16,14 +16,17 @@
           <div
             v-if="showPopup"
             class="mb-4 flex items-center gap-2.5 bg-white border border-slate-100 shadow-sm px-4 py-3 rounded-xl"
+            aria-live="polite"
           >
             <Loader2
               v-if="!loginSuccess"
               class="h-4 w-4 text-emerald-600 animate-spin"
+              aria-hidden="true"
             />
             <CheckCircle
               v-else
               class="h-4 w-4 text-emerald-600"
+              aria-hidden="true"
             />
             <span class="text-slate-700 text-xs font-semibold tracking-wide">
               {{ loginSuccess ? "Login Successful" : "Verifying system credentials..." }}
@@ -42,17 +45,18 @@
             </p>
           </div>
 
-          <div v-if="errorMessage" class="mb-4 p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-2 text-red-700 text-xs font-medium">
-            <span>⚠️</span> <span>{{ errorMessage }}</span>
+          <div v-if="errorMessage" role="alert" class="mb-4 p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-2 text-red-700 text-xs font-medium">
+            <span aria-hidden="true">⚠️</span> <span>{{ errorMessage }}</span>
           </div>
 
           <form @submit.prevent="loginUser" class="space-y-4">
 
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Email Address</label>
+              <label for="email" class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Email Address</label>
               <div class="relative">
-                <Mail class="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <Mail class="absolute left-3 top-3 h-4 w-4 text-slate-400" aria-hidden="true" />
                 <input
+                  id="email"
                   v-model="email"
                   type="email"
                   placeholder="name@hospital.com"
@@ -63,7 +67,7 @@
 
             <div>
               <div class="flex justify-between items-center mb-1.5">
-                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider">Password</label>
+                <label for="password" class="block text-xs font-semibold text-slate-600 uppercase tracking-wider">Password</label>
                 <button
                   type="button"
                   class="text-xs text-emerald-700 font-medium hover:text-emerald-600 transition"
@@ -74,8 +78,9 @@
               </div>
               
               <div class="relative">
-                <Lock class="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                <Lock class="absolute left-3 top-3 h-4 w-4 text-slate-400" aria-hidden="true" />
                 <input
+                  id="password"
                   v-model="password"
                   :type="showPassword ? 'text' : 'password'"
                   placeholder="••••••••"
@@ -85,9 +90,10 @@
                   type="button"
                   @click="toggleShowPassword"
                   class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 transition"
+                  :aria-label="showPassword ? 'Hide password' : 'Show password'"
                 >
-                  <Eye v-if="!showPassword" class="h-4 w-4" />
-                  <EyeOff v-else class="h-4 w-4" />
+                  <Eye v-if="!showPassword" class="h-4 w-4" aria-hidden="true" />
+                  <EyeOff v-else class="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -288,7 +294,7 @@ const loginUser = async () => {
       showPopup.value = false;
       return;
     }
-    await routeByRole(user.uid);
+    await routeByRole(user);
   } catch (err) {
     console.error(err);
     if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
@@ -310,7 +316,7 @@ const signInWithGoogle = async () => {
   try {
     const provider = new GoogleAuthProvider();
     const { user } = await signInWithPopup(auth, provider);
-    await routeByRole(user.uid);
+    await routeByRole(user);
   } catch (err) {
     console.error(err);
     errorMessage.value = "Google sign-in failed.";
@@ -319,9 +325,24 @@ const signInWithGoogle = async () => {
   }
 };
 
-const routeByRole = async (uid) => {
+const routeByRole = async (user) => {
   try {
-    const snap = await getDoc(doc(db, "users", uid));
+    // Check for custom claims first
+    const token = await user.getIdTokenResult();
+    if (token.claims.role) {
+      if (token.claims.role === "admin") {
+        loginSuccess.value = true;
+        success("Welcome back, Admin!");
+        setTimeout(() => {
+          showPopup.value = false;
+          router.push("/admin-dashboard");
+        }, 1000);
+        return;
+      }
+    }
+
+    // Fallback: Check Firestore
+    const snap = await getDoc(doc(db, "users", user.uid));
     if (!snap.exists()) {
       errorMessage.value = "User profile not found.";
       notifyError(errorMessage.value);

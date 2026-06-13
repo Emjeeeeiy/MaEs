@@ -65,7 +65,7 @@
               class="flex items-center gap-2 px-2 py-1.5 rounded-lg text-gray-200 text-xs hover:bg-green-900/30 hover:text-green-400 transition-all duration-200 truncate"
               active-class="bg-green-900/50 text-green-400 font-semibold"
             >
-              <Settings class="w-3.5 h-3.5 shrink-0" />
+              <Wrench class="w-3.5 h-3.5 shrink-0" />
               <span class="truncate">Service</span>
             </RouterLink>
           </li>
@@ -110,6 +110,16 @@
               <span class="truncate">Request for Assistance</span>
             </RouterLink>
           </li>
+          <li>
+            <RouterLink
+              to="/admin-settings"
+              class="flex items-center gap-2 px-2 py-1.5 rounded-lg text-gray-200 text-xs hover:bg-green-900/30 hover:text-green-400 transition-all duration-200 truncate"
+              active-class="bg-green-900/50 text-green-400 font-semibold"
+            >
+              <Settings class="w-3.5 h-3.5 shrink-0" />
+              <span class="truncate">Settings</span>
+            </RouterLink>
+          </li>
         </ul>
       </div>
     </div>
@@ -128,6 +138,7 @@ import {
   Calendar,
   BarChart,
   MessageSquare,
+  Wrench,
 } from "lucide-vue-next";
 
 // Replace with actual user info if dynamic

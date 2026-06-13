@@ -18,16 +18,17 @@
         </div>
 
         <!-- Error Alert Banner -->
-        <div v-if="errorMessage" class="p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-2 text-red-700 text-xs font-medium">
-          <span>⚠️</span> <span>{{ errorMessage }}</span>
+        <div v-if="errorMessage" role="alert" class="p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-2 text-red-700 text-xs font-medium">
+          <span aria-hidden="true">⚠️</span> <span>{{ errorMessage }}</span>
         </div>
 
         <!-- Username -->
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Username</label>
+          <label for="username" class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Username</label>
           <div class="relative">
-            <User class="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+            <User class="absolute left-3 top-3 h-4 w-4 text-slate-400" aria-hidden="true" />
             <input
+              id="username"
               v-model="username"
               type="text"
               required
@@ -39,10 +40,11 @@
 
         <!-- Email -->
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Email Address</label>
+          <label for="email" class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Email Address</label>
           <div class="relative">
-            <Mail class="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+            <Mail class="absolute left-3 top-3 h-4 w-4 text-slate-400" aria-hidden="true" />
             <input
+              id="email"
               v-model="email"
               type="email"
               required
@@ -54,33 +56,37 @@
 
         <!-- Password -->
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Password</label>
+          <label for="password" class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Password</label>
           <div class="relative">
-            <Lock class="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+            <Lock class="absolute left-3 top-3 h-4 w-4 text-slate-400" aria-hidden="true" />
             <input
+              id="password"
               v-model="password"
               :type="showPassword ? 'text' : 'password'"
               required
               placeholder="••••••••"
+              aria-describedby="password-constraints"
               class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-10 py-2.5 text-sm transition-all focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 focus:outline-none"
             />
             <button
               type="button"
               @click="showPassword = !showPassword"
               class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 transition"
+              :aria-label="showPassword ? 'Hide password' : 'Show password'"
             >
-              <Eye v-if="!showPassword" class="h-4 w-4" />
-              <EyeOff v-else class="h-4 w-4" />
+              <Eye v-if="!showPassword" class="h-4 w-4" aria-hidden="true" />
+              <EyeOff v-else class="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
         </div>
 
         <!-- Confirm Password -->
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Confirm Password</label>
+          <label for="confirm-password" class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Confirm Password</label>
           <div class="relative">
-            <Lock class="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+            <Lock class="absolute left-3 top-3 h-4 w-4 text-slate-400" aria-hidden="true" />
             <input
+              id="confirm-password"
               v-model="confirmPassword"
               :type="showConfirmPassword ? 'text' : 'password'"
               required
@@ -91,35 +97,36 @@
               type="button"
               @click="showConfirmPassword = !showConfirmPassword"
               class="absolute right-3 top-3 text-slate-400 hover:text-slate-600 transition"
+              :aria-label="showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'"
             >
-              <Eye v-if="!showConfirmPassword" class="h-4 w-4" />
-              <EyeOff v-else class="h-4 w-4" />
+              <Eye v-if="!showConfirmPassword" class="h-4 w-4" aria-hidden="true" />
+              <EyeOff v-else class="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
         </div>
 
         <!-- Password Rules Validation Dashboard Layout -->
-        <div v-if="password.length" class="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
+        <div v-if="password.length" id="password-constraints" class="p-3.5 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
           <p class="text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1">Security Criteria</p>
           <ul class="text-xs space-y-1 font-medium">
             <li :class="passwordValidation.hasUppercase ? 'text-emerald-700 flex items-center gap-1.5' : 'text-slate-400 flex items-center gap-1.5'">
-              <CheckCircle2 class="h-3.5 w-3.5 shrink-0" :class="passwordValidation.hasUppercase ? 'text-emerald-500' : 'text-slate-200'" />
+              <CheckCircle2 class="h-3.5 w-3.5 shrink-0" :class="passwordValidation.hasUppercase ? 'text-emerald-500' : 'text-slate-200'" aria-hidden="true" />
               Uppercase & lowercase characters
             </li>
             <li :class="passwordValidation.hasNumber ? 'text-emerald-700 flex items-center gap-1.5' : 'text-slate-400 flex items-center gap-1.5'">
-              <CheckCircle2 class="h-3.5 w-3.5 shrink-0" :class="passwordValidation.hasNumber ? 'text-emerald-500' : 'text-slate-200'" />
+              <CheckCircle2 class="h-3.5 w-3.5 shrink-0" :class="passwordValidation.hasNumber ? 'text-emerald-500' : 'text-slate-200'" aria-hidden="true" />
               Contains numerical sequences
             </li>
             <li :class="passwordValidation.hasSpecial ? 'text-emerald-700 flex items-center gap-1.5' : 'text-slate-400 flex items-center gap-1.5'">
-              <CheckCircle2 class="h-3.5 w-3.5 shrink-0" :class="passwordValidation.hasSpecial ? 'text-emerald-500' : 'text-slate-200'" />
+              <CheckCircle2 class="h-3.5 w-3.5 shrink-0" :class="passwordValidation.hasSpecial ? 'text-emerald-500' : 'text-slate-200'" aria-hidden="true" />
               Includes special symbol characters
             </li>
             <li :class="passwordValidation.minLength ? 'text-emerald-700 flex items-center gap-1.5' : 'text-slate-400 flex items-center gap-1.5'">
-              <CheckCircle2 class="h-3.5 w-3.5 shrink-0" :class="passwordValidation.minLength ? 'text-emerald-500' : 'text-slate-200'" />
+              <CheckCircle2 class="h-3.5 w-3.5 shrink-0" :class="passwordValidation.minLength ? 'text-emerald-500' : 'text-slate-200'" aria-hidden="true" />
               Minimum standard structural count (8+ chars)
             </li>
             <li :class="passwordsMatch ? 'text-emerald-700 flex items-center gap-1.5' : 'text-slate-400 flex items-center gap-1.5'">
-              <CheckCircle2 class="h-3.5 w-3.5 shrink-0" :class="passwordsMatch ? 'text-emerald-500' : 'text-slate-200'" />
+              <CheckCircle2 class="h-3.5 w-3.5 shrink-0" :class="passwordsMatch ? 'text-emerald-500' : 'text-slate-200'" aria-hidden="true" />
               Both passwords align and match perfectly
             </li>
           </ul>

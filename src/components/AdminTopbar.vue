@@ -241,6 +241,8 @@ const pageTitle = computed(() => {
       return 'Appointments'
     case '/admin-result':
       return 'Results'
+    case '/admin-settings':
+      return 'Admin Settings'
     default:
       return 'Admin Panel'
   }

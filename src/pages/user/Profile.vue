@@ -126,12 +126,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { auth, db } from "@/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import UserLayout from "@/components/UserLayout.vue";
 import { useRouter } from "vue-router";
+import { useAuth } from "@/composables/useAuth";
 import {
   User,
   Mail,
@@ -146,6 +147,7 @@ import {
 } from "lucide-vue-next";
 
 const router = useRouter();
+const { user, loading: authLoading } = useAuth();
 
 const username = ref("");
 const email = ref("");
@@ -158,9 +160,8 @@ const address = ref("");
 const profileImageUrl = ref("");
 const status = ref("inactive");
 const errorMessage = ref("");
-const loading = ref(true);
-
-let unsubscribeAuth = null;
+const dataLoading = ref(true);
+const loading = computed(() => authLoading.value || dataLoading.value);
 
 const updateStatusInDB = async (userId, newStatus) => {
   try {
@@ -173,9 +174,8 @@ const updateStatusInDB = async (userId, newStatus) => {
 
 const logout = async () => {
   try {
-    const user = auth.currentUser;
-    if (user) {
-      await updateStatusInDB(user.uid, "inactive");
+    if (user.value) {
+      await updateStatusInDB(user.value.uid, "inactive");
     }
     await signOut(auth);
     router.push("/login");
@@ -185,47 +185,44 @@ const logout = async () => {
   }
 };
 
-onMounted(() => {
-  unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      status.value = "inactive";
-      loading.value = false;
-      return;
+const fetchProfileData = async () => {
+  if (!user.value) {
+    status.value = "inactive";
+    dataLoading.value = false;
+    return;
+  }
+
+  try {
+    const userRef = doc(db, "users", user.value.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      const data = userSnap.data();
+      username.value = data.username || "";
+      email.value = data.email || "";
+      completeName.value = data.completeName || "";
+      age.value = data.age || "";
+      birthday.value = data.birthday || "";
+      cellphone.value = data.cellphone || "";
+      gender.value = data.gender || "";
+      address.value = data.address || "";
+      profileImageUrl.value = data.profileImageUrl || "";
+      status.value = "active";
+
+      await updateStatusInDB(user.value.uid, "active");
+    } else {
+      errorMessage.value = "User profile not found.";
     }
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    errorMessage.value = "Error fetching profile data.";
+  } finally {
+    dataLoading.value = false;
+  }
+};
 
-    try {
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-
-      if (userSnap.exists()) {
-        const data = userSnap.data();
-        username.value = data.username || "";
-        email.value = data.email || "";
-        completeName.value = data.completeName || "";
-        age.value = data.age || "";
-        birthday.value = data.birthday || "";
-        cellphone.value = data.cellphone || "";
-        gender.value = data.gender || "";
-        address.value = data.address || "";
-        profileImageUrl.value = data.profileImageUrl || "";
-        status.value = "active";
-
-        await updateStatusInDB(user.uid, "active");
-      } else {
-        errorMessage.value = "User profile not found.";
-      }
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-      errorMessage.value = "Error fetching profile data.";
-    } finally {
-      loading.value = false;
-    }
-  });
-});
-
-onUnmounted(() => {
-  if (unsubscribeAuth) unsubscribeAuth();
-});
+onMounted(fetchProfileData);
+watch(user, fetchProfileData);
 </script>
 
 <style scoped>
