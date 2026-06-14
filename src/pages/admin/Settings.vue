@@ -247,6 +247,49 @@
       </div>
     </div>
   </AdminLayout>
+
+  <!-- ================= GENERIC CONFIRMATION MODAL ================= -->
+  <transition name="fade">
+    <div
+      v-if="confirmationModal.show"
+      class="fixed inset-0 z-100 flex items-center justify-center bg-black/20 dark:bg-black/50 backdrop-blur-xs px-4"
+      @click="confirmationModal.show = false"
+    >
+      <div 
+        class="bg-white dark:bg-[#1a1a1a] w-full max-w-md p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl relative animate-fadeIn"
+        @click.stop
+      >
+        <div :class="['flex items-center gap-3 mb-4', confirmationModal.isDestructive ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400']">
+          <div :class="['p-3 rounded-2xl border', confirmationModal.isDestructive ? 'bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/30' : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30']">
+            <component :is="confirmationModal.icon || AlertTriangleIcon" class="w-6 h-6" />
+          </div>
+          <div>
+            <h3 class="text-lg font-black tracking-tight">{{ confirmationModal.title }}</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Please confirm your action.</p>
+          </div>
+        </div>
+        
+        <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8">
+          {{ confirmationModal.message }}
+        </p>
+        
+        <div class="flex justify-end gap-3">
+          <button
+            @click="confirmationModal.show = false"
+            class="px-6 py-3 rounded-2xl text-xs font-bold bg-gray-50 dark:bg-transparent hover:bg-gray-100 dark:hover:bg-[#222] border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 transition"
+          >
+            Cancel
+          </button>
+          <button
+            @click="handleConfirmedAction"
+            :class="['px-6 py-3 rounded-2xl text-xs font-bold text-white transition shadow-lg', confirmationModal.isDestructive ? 'bg-red-600 hover:bg-red-700 shadow-red-600/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20']"
+          >
+            {{ confirmationModal.confirmText }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </transition>
 </template>
 
 <script setup>
@@ -261,9 +304,10 @@ import {
   Monitor, 
   Zap, 
   Phone, 
-  Save,
+  Save as SaveIcon,
   CheckCircle2,
-  LayoutDashboard
+  LayoutDashboard,
+  AlertTriangle as AlertTriangleIcon
 } from 'lucide-vue-next'
 
 const { success: notifySuccess, error: notifyError } = useNotifications()
@@ -271,6 +315,36 @@ const { success: notifySuccess, error: notifyError } = useNotifications()
 const activeTab = ref('general')
 const saving = ref(false)
 const isDarkMode = ref(localStorage.getItem('theme') === 'dark')
+
+// Confirmation Modal State
+const confirmationModal = ref({
+  show: false,
+  title: '',
+  message: '',
+  confirmText: '',
+  isDestructive: false,
+  icon: null,
+  action: null
+});
+
+const handleConfirmedAction = () => {
+  if (confirmationModal.value.action) {
+    confirmationModal.value.action();
+  }
+  confirmationModal.value.show = false;
+};
+
+const openConfirm = (config) => {
+  confirmationModal.value = {
+    show: true,
+    title: config.title || 'Are you sure?',
+    message: config.message || 'This action cannot be undone.',
+    confirmText: config.confirmText || 'Confirm',
+    isDestructive: config.isDestructive || false,
+    icon: config.icon || AlertTriangleIcon,
+    action: config.action
+  };
+};
 
 const landingData = ref({
   hero: {
@@ -345,36 +419,43 @@ const saveLandingSettings = async () => {
 }
 
 const resetToDefaults = () => {
-  if (confirm('Are you sure you want to reset all landing page content to defaults?')) {
-    landingData.value = {
-      hero: {
-        title: 'MaEs Paytrack',
-        subtitle: 'A beautifully minimal, fully digital hospital billing platform engineered for absolute efficiency, transparency, and administrative ease.',
-        cta1: 'Get Started Free',
-        cta2: 'Sign In to Dashboard'
-      },
-      workflow: [
-        { title: 'Secure Registration', description: 'Create an administrative or staff hub account linked directly to your secure hospital node.' },
-        { title: 'Log Admissions', description: 'Input patient vitals, personal data, and treatments received into our clean digital records ledger.' },
-        { title: 'Auto-Generate', description: 'The engine compiles active items instantly, generating clean itemized invoices without manual math.' },
-        { title: 'Track Settlements', description: 'Process secure digital mobile payments while monitoring real-time balance sheets seamlessly.' }
-      ],
-      features: [
-        { title: 'Digital Patient Invoicing', description: 'Instantly break down complex stays into easily understandable itemized invoices for rooms, medications, and dynamic physician fees.' },
-        { title: 'GCash & Cash Reconciliation', description: 'Supports modern e-wallets alongside standard over-the-counter payments to keep collections simple for patient relatives.' },
-        { title: 'Real-time Analytics Dashboard', description: 'Gain an instant birds-eye insight on total collections, outstanding receivables, and peak admissions volume on a single clean interface.' }
-      ],
-      benefits: [
-        { title: 'Eradicate Manual Labor', description: 'Transition your frontline medical secretaries away from confusing paper logs or messy spreadsheets into structured cloud automation.' },
-        { title: 'Precision Accounting', description: 'Protect against clerical human computation error patterns and minimize discrepancy issues between admissions desks and internal cashiers.' },
-        { title: 'Transparent Operations', description: 'Deliver absolute financial clarity to patients and regulatory auditors alike with transparent data storage structures.' }
-      ],
-      contact: {
-        phone: '+639-310-783-528',
-        email: 'meghlabibis@gmail.com'
+  openConfirm({
+    title: 'Reset Landing Page?',
+    message: 'Sigurado ka bang nais mong ibalik sa default ang lahat ng content ng landing page? Ang aksyong ito ay magpapalit sa iyong mga kasalukuyang customized labels at descriptions.',
+    confirmText: 'Yes, Reset to Default',
+    isDestructive: true,
+    action: () => {
+      landingData.value = {
+        hero: {
+          title: 'MaEs Paytrack',
+          subtitle: 'A beautifully minimal, fully digital hospital billing platform engineered for absolute efficiency, transparency, and administrative ease.',
+          cta1: 'Get Started Free',
+          cta2: 'Sign In to Dashboard'
+        },
+        workflow: [
+          { title: 'Secure Registration', description: 'Create an administrative or staff hub account linked directly to your secure hospital node.' },
+          { title: 'Log Admissions', description: 'Input patient vitals, personal data, and treatments received into our clean digital records ledger.' },
+          { title: 'Auto-Generate', description: 'The engine compiles active items instantly, generating clean itemized invoices without manual math.' },
+          { title: 'Track Settlements', description: 'Process secure digital mobile payments while monitoring real-time balance sheets seamlessly.' }
+        ],
+        features: [
+          { title: 'Digital Patient Invoicing', description: 'Instantly break down complex stays into easily understandable itemized invoices for rooms, medications, and dynamic physician fees.' },
+          { title: 'GCash & Cash Reconciliation', description: 'Supports modern e-wallets alongside standard over-the-counter payments to keep collections simple for patient relatives.' },
+          { title: 'Real-time Analytics Dashboard', description: 'Gain an instant birds-eye insight on total collections, outstanding receivables, and peak admissions volume on a single clean interface.' }
+        ],
+        benefits: [
+          { title: 'Eradicate Manual Labor', description: 'Transition your frontline medical secretaries away from confusing paper logs or messy spreadsheets into structured cloud automation.' },
+          { title: 'Precision Accounting', description: 'Protect against clerical human computation error patterns and minimize discrepancy issues between admissions desks and internal cashiers.' },
+          { title: 'Transparent Operations', description: 'Deliver absolute financial clarity to patients and regulatory auditors alike with transparent data storage structures.' }
+        ],
+        contact: {
+          phone: '+639-310-783-528',
+          email: 'meghlabibis@gmail.com'
+        }
       }
+      notifySuccess('Reset successful. Click commit to save changes.');
     }
-  }
+  });
 }
 
 onMounted(() => {
@@ -402,4 +483,8 @@ onMounted(() => {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #4b5563;
 }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+.animate-fadeIn { animation: fadeIn 0.4s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 </style>

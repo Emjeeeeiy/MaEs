@@ -136,7 +136,7 @@
                     </button>
                   </div>
                   
-                  <div class="overflow-y-auto max-h-[32rem] custom-scrollbar">
+                  <div class="overflow-y-auto max-h-128 custom-scrollbar">
                     <div v-if="!notifications.length" class="flex flex-col items-center justify-center py-12 px-4 text-center">
                       <div class="w-14 h-14 bg-gray-50 dark:bg-[#1e1e1e] rounded-2xl flex items-center justify-center mb-3">
                         <BellIcon class="w-7 h-7 text-gray-300 dark:text-gray-600" />
@@ -278,6 +278,12 @@ const { success: notifySuccess } = useNotifications()
 
 const logout = async () => {
   try {
+    if (auth.currentUser) {
+      await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+        onlineStatus: 'offline',
+        lastActive: serverTimestamp()
+      })
+    }
     await signOut(auth)
     notifySuccess('Logged out successfully.')
     router.push('/login')

@@ -28,7 +28,8 @@
                 <th class="px-5 py-3.5 text-left font-medium">Username</th>
                 <th class="px-5 py-3.5 text-left font-medium">Email</th>
                 <th class="px-5 py-3.5 text-left font-medium">Role</th>
-                <th class="px-5 py-3.5 text-left font-medium">Status</th>
+                <th class="px-5 py-3.5 text-left font-medium">Presence</th>
+                <th class="px-5 py-3.5 text-left font-medium">Account Status</th>
                 <th class="px-5 py-3.5 text-left font-medium">Last Active</th>
                 <th class="px-5 py-3.5 text-right font-medium">Actions</th>
               </tr>
@@ -41,8 +42,14 @@
               >
                 <td class="px-5 py-3.5 font-medium text-gray-900 dark:text-white">
                   <div class="flex items-center gap-2.5">
-                    <div class="p-1.5 rounded-lg bg-gray-50 dark:bg-[#222] border border-gray-100 dark:border-gray-800 text-gray-400">
-                      <User2Icon class="w-3.5 h-3.5" />
+                    <div class="relative">
+                      <div class="p-1.5 rounded-lg bg-gray-50 dark:bg-[#222] border border-gray-100 dark:border-gray-800 text-gray-400">
+                        <User2Icon class="w-3.5 h-3.5" />
+                      </div>
+                      <div 
+                        :class="['absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-[#1a1a1a]', 
+                        user.onlineStatus === 'online' ? 'bg-emerald-500' : 'bg-gray-300']"
+                      ></div>
                     </div>
                     <span>{{ user.username || "Unknown" }}</span>
                   </div>
@@ -61,6 +68,15 @@
                       <option value="admin">Admin</option>
                     </select>
                     <ChevronDownIcon class="w-3 h-3 absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  </div>
+                </td>
+
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center gap-1.5">
+                    <div :class="['w-1.5 h-1.5 rounded-full', user.onlineStatus === 'online' ? 'bg-emerald-500 animate-pulse' : 'bg-gray-300']"></div>
+                    <span :class="['text-[10px] font-black uppercase tracking-widest', user.onlineStatus === 'online' ? 'text-emerald-600' : 'text-gray-400']">
+                      {{ user.onlineStatus === 'online' ? 'Online' : 'Offline' }}
+                    </span>
                   </div>
                 </td>
                 
@@ -122,6 +138,49 @@
 
     </div>
   </AdminLayout>
+
+  <!-- ================= GENERIC CONFIRMATION MODAL ================= -->
+  <transition name="fade">
+    <div
+      v-if="confirmationModal.show"
+      class="fixed inset-0 z-100 flex items-center justify-center bg-black/20 dark:bg-black/50 backdrop-blur-xs px-4"
+      @click="confirmationModal.show = false"
+    >
+      <div 
+        class="bg-white dark:bg-[#1a1a1a] w-full max-w-md p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl relative animate-fadeIn"
+        @click.stop
+      >
+        <div :class="['flex items-center gap-3 mb-4', confirmationModal.isDestructive ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400']">
+          <div :class="['p-3 rounded-2xl border', confirmationModal.isDestructive ? 'bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/30' : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30']">
+            <component :is="confirmationModal.icon || AlertTriangleIcon" class="w-6 h-6" />
+          </div>
+          <div>
+            <h3 class="text-lg font-black tracking-tight">{{ confirmationModal.title }}</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Please confirm your action.</p>
+          </div>
+        </div>
+        
+        <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8">
+          {{ confirmationModal.message }}
+        </p>
+        
+        <div class="flex justify-end gap-3">
+          <button
+            @click="confirmationModal.show = false"
+            class="px-6 py-3 rounded-2xl text-xs font-bold bg-gray-50 dark:bg-transparent hover:bg-gray-100 dark:hover:bg-[#222] border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 transition"
+          >
+            Cancel
+          </button>
+          <button
+            @click="handleConfirmedAction"
+            :class="['px-6 py-3 rounded-2xl text-xs font-bold text-white transition shadow-lg', confirmationModal.isDestructive ? 'bg-red-600 hover:bg-red-700 shadow-red-600/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20']"
+          >
+            {{ confirmationModal.confirmText }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </transition>
 </template>
 
 <script setup>
@@ -136,7 +195,9 @@ import {
   Slash as SlashIcon, 
   Users as UsersIcon,
   AlertCircle as AlertCircleIcon,
-  ChevronDown as ChevronDownIcon
+  ChevronDown as ChevronDownIcon,
+  AlertTriangle as AlertTriangleIcon,
+  X as XIcon
 } from "lucide-vue-next";
 import { useNotifications } from "@/composables/useNotifications";
 import { useAuth } from "@/composables/useAuth";
@@ -145,6 +206,36 @@ const { user } = useAuth();
 const users = ref([]);
 const errorMessage = ref("");
 const { success, error: notifyError } = useNotifications();
+
+// Confirmation Modal State
+const confirmationModal = ref({
+  show: false,
+  title: '',
+  message: '',
+  confirmText: '',
+  isDestructive: false,
+  icon: null,
+  action: null
+});
+
+const handleConfirmedAction = () => {
+  if (confirmationModal.value.action) {
+    confirmationModal.value.action();
+  }
+  confirmationModal.value.show = false;
+};
+
+const openConfirm = (config) => {
+  confirmationModal.value = {
+    show: true,
+    title: config.title || 'Are you sure?',
+    message: config.message || 'This action cannot be undone.',
+    confirmText: config.confirmText || 'Confirm',
+    isDestructive: config.isDestructive || false,
+    icon: config.icon || AlertTriangleIcon,
+    action: config.action
+  };
+};
 
 // Format timestamp
 const formatLastActive = (lastActive) => {
@@ -253,15 +344,39 @@ const deleteUser = async (userId) => {
   }
 };
 
-// Confirm dialogs
+// Updated Confirm dialogs with custom modal
 const confirmDeactivation = (userObj) => {
-  if (confirm(`Deactivate ${userObj.username}?`)) deactivateUser(userObj);
+  openConfirm({
+    title: 'Deactivate Account?',
+    message: `Sigurado ka bang nais mong i-deactivate ang account ni ${userObj.username}? Hindi muna makakapag-login ang user na ito hanggang sa ma-reactivate.`,
+    confirmText: 'Yes, Deactivate',
+    isDestructive: true,
+    icon: SlashIcon,
+    action: () => deactivateUser(userObj)
+  });
 };
+
 const confirmReactivation = (userObj) => {
-  if (confirm(`Reactivate ${userObj.username}?`)) reactivateUser(userObj);
+  openConfirm({
+    title: 'Reactivate Account?',
+    message: `Nais mo bang ibalik ang access ni ${userObj.username} sa system?`,
+    confirmText: 'Yes, Reactivate',
+    isDestructive: false,
+    icon: CheckCircleIcon,
+    action: () => reactivateUser(userObj)
+  });
 };
+
 const confirmDeletion = (userId) => {
-  if (confirm("Are you sure you want to delete this user?")) deleteUser(userId);
+  const userObj = users.value.find(u => u.id === userId);
+  openConfirm({
+    title: 'Delete User Account?',
+    message: `Ang operasyong ito ay permanenteng aalisin ang lahat ng data ni ${userObj?.username || 'user'} sa system. Hindi na ito maibabalik.`,
+    confirmText: 'Yes, Delete Permanently',
+    isDestructive: true,
+    icon: Trash2Icon,
+    action: () => deleteUser(userId)
+  });
 };
 
 onMounted(fetchUsers);

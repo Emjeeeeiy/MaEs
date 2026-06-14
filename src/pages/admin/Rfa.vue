@@ -115,7 +115,51 @@
 
     </div>
   </AdminLayout>
+
+  <!-- ================= GENERIC CONFIRMATION MODAL ================= -->
+  <transition name="fade">
+    <div
+      v-if="confirmationModal.show"
+      class="fixed inset-0 z-100 flex items-center justify-center bg-black/20 dark:bg-black/50 backdrop-blur-xs px-4"
+      @click="confirmationModal.show = false"
+    >
+      <div 
+        class="bg-white dark:bg-[#1a1a1a] w-full max-w-md p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl relative animate-fadeIn"
+        @click.stop
+      >
+        <div :class="['flex items-center gap-3 mb-4', confirmationModal.isDestructive ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400']">
+          <div :class="['p-3 rounded-2xl border', confirmationModal.isDestructive ? 'bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/30' : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30']">
+            <component :is="confirmationModal.icon || AlertTriangleIcon" class="w-6 h-6" />
+          </div>
+          <div>
+            <h3 class="text-lg font-black tracking-tight">{{ confirmationModal.title }}</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Please confirm your action.</p>
+          </div>
+        </div>
+        
+        <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8">
+          {{ confirmationModal.message }}
+        </p>
+        
+        <div class="flex justify-end gap-3">
+          <button
+            @click="confirmationModal.show = false"
+            class="px-6 py-3 rounded-2xl text-xs font-bold bg-gray-50 dark:bg-transparent hover:bg-gray-100 dark:hover:bg-[#222] border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 transition"
+          >
+            Cancel
+          </button>
+          <button
+            @click="handleConfirmedAction"
+            :class="['px-6 py-3 rounded-2xl text-xs font-bold text-white transition shadow-lg', confirmationModal.isDestructive ? 'bg-red-600 hover:bg-red-700 shadow-red-600/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20']"
+          >
+            {{ confirmationModal.confirmText }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </transition>
 </template>
+
 <script setup>
 import { ref, onMounted } from 'vue'
 import {
@@ -129,10 +173,51 @@ import {
 import { db } from '@/firebase'
 
 import AdminLayout from '@/components/AdminLayout.vue'
-import { FileTextIcon, CalendarIcon, EyeIcon, Trash2Icon } from 'lucide-vue-next'
+import { 
+  FileTextIcon, 
+  CalendarIcon, 
+  EyeIcon, 
+  Trash2Icon, 
+  Inbox as InboxIcon, 
+  File as FileIcon,
+  AlertTriangle as AlertTriangleIcon
+} from 'lucide-vue-next'
+
+import { useNotifications } from '@/composables/useNotifications'
 
 const documents = ref([])
 const loading = ref(true)
+const { success: notifySuccess, error: notifyError } = useNotifications()
+
+// Confirmation Modal State
+const confirmationModal = ref({
+  show: false,
+  title: '',
+  message: '',
+  confirmText: '',
+  isDestructive: false,
+  icon: null,
+  action: null
+});
+
+const handleConfirmedAction = () => {
+  if (confirmationModal.value.action) {
+    confirmationModal.value.action();
+  }
+  confirmationModal.value.show = false;
+};
+
+const openConfirm = (config) => {
+  confirmationModal.value = {
+    show: true,
+    title: config.title || 'Are you sure?',
+    message: config.message || 'This action cannot be undone.',
+    confirmText: config.confirmText || 'Confirm',
+    isDestructive: config.isDestructive || false,
+    icon: config.icon || AlertTriangleIcon,
+    action: config.action
+  };
+};
 
 // 🔥 Real-time fetch of financial documents
 const fetchDocuments = () => {
@@ -148,7 +233,7 @@ const fetchDocuments = () => {
 
 // Format timestamp
 const formatDate = (timestamp) => {
-  if (!timestamp) return 'N/A'
+  if (!timestamp) return ''
   const date = new Date(timestamp * 1000)
   return (
     date.toLocaleDateString() +
@@ -160,16 +245,23 @@ const formatDate = (timestamp) => {
 // Delete document
 const deleteDocument = async (id) => {
   if (!id) return
-  if (confirm('Are you sure you want to delete this document?')) {
-    try {
-      await deleteDoc(doc(db, 'financialDocuments', id))
-      documents.value = documents.value.filter(d => d.id !== id)
-      alert('Document deleted successfully!')
-    } catch (err) {
-      console.error('Error deleting document:', err)
-      alert('Failed to delete document.')
+  openConfirm({
+    title: 'Purge Document?',
+    message: 'Sigurado ka bang nais mong burahin ang dokumentong ito mula sa vault? Ang aksyong ito ay permanenteng aalisin ang file sa system.',
+    confirmText: 'Yes, Purge Document',
+    isDestructive: true,
+    icon: Trash2Icon,
+    action: async () => {
+      try {
+        await deleteDoc(doc(db, 'financialDocuments', id))
+        documents.value = documents.value.filter(d => d.id !== id)
+        notifySuccess('Document deleted successfully!')
+      } catch (err) {
+        console.error('Error deleting document:', err)
+        notifyError('Failed to delete document.')
+      }
     }
-  }
+  });
 }
 
 onMounted(fetchDocuments)
@@ -180,4 +272,8 @@ onMounted(fetchDocuments)
 div:hover {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+.animate-fadeIn { animation: fadeIn 0.4s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 </style>

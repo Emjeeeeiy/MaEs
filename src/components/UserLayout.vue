@@ -4,14 +4,27 @@
     <aside
       class="hidden lg:flex flex-col bg-white border-r border-slate-200/60 w-64 shrink-0 h-full z-30 transition-all duration-300"
     >
-      <!-- Logo Section -->
-      <div class="h-16 flex items-center px-6 border-b border-slate-50">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center shadow-lg shadow-teal-200">
-             <img src="/MaEs_logo.png" class="w-6 h-6 object-contain brightness-0 invert" alt="Logo" />
+      <!-- Personalized Header Section -->
+      <div class="h-16 flex items-center px-6 border-b border-slate-50 bg-slate-50/20">
+        <router-link to="/profile" class="flex items-center gap-3 group">
+          <div class="w-9 h-9 rounded-xl overflow-hidden bg-white flex items-center justify-center shrink-0 border border-slate-200 group-hover:border-teal-500 transition-all shadow-sm">
+            <img 
+              v-if="userProfile?.profileImageBase64 || userProfile?.profileImageUrl" 
+              :src="userProfile?.profileImageBase64 || userProfile?.profileImageUrl" 
+              class="w-full h-full object-cover"
+              alt="Profile"
+            />
+            <div v-else class="w-full h-full flex items-center justify-center text-teal-700 font-bold text-sm bg-teal-50">
+              {{ userEmail ? userEmail.charAt(0).toUpperCase() : 'U' }}
+            </div>
           </div>
-          <span class="font-bold text-lg tracking-tight text-slate-800">MaEs</span>
-        </div>
+          <div class="flex flex-col min-w-0">
+            <span class="font-bold text-lg tracking-tight text-slate-800 leading-none">MaEs</span>
+            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter truncate w-24 group-hover:text-teal-600 transition-colors">
+              {{ userProfile?.username || userEmail.split('@')[0] }}
+            </span>
+          </div>
+        </router-link>
       </div>
 
       <!-- Navigation Section -->
@@ -41,19 +54,6 @@
           </button>
         </div>
       </nav>
-
-      <!-- User Profile Card -->
-      <div class="p-4 border-t border-slate-50 bg-slate-50/30">
-        <div class="flex items-center gap-3 p-2 rounded-2xl bg-white border border-slate-100 shadow-sm">
-          <div class="w-9 h-9 rounded-xl bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-sm">
-            {{ userEmail ? userEmail.charAt(0).toUpperCase() : 'U' }}
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-xs font-bold text-slate-800 truncate">{{ userEmail.split('@')[0] }}</p>
-            <p class="text-[10px] text-slate-400 truncate">{{ userEmail }}</p>
-          </div>
-        </div>
-      </div>
     </aside>
 
     <!-- Main Wrapper -->
@@ -407,6 +407,8 @@ const uploading = ref(false)
 const fileInput = ref(null)
 const isInitialLoad = ref(true)
 
+const userProfile = ref(null)
+
 const toggleNotifDropdown = () => notifDropdownOpen.value = !notifDropdownOpen.value
 
 const unreadCount = computed(() => notifications.value.filter(n => !n.read).length)
@@ -521,6 +523,12 @@ function iconLink(path) {
 
 const handleLogout = async () => {
   try {
+    if (auth.currentUser) {
+      await updateDoc(doc(db, 'users', auth.currentUser.uid), {
+        onlineStatus: 'offline',
+        lastActive: serverTimestamp()
+      })
+    }
     await signOut(auth)
     notifySuccess('Logged out successfully')
     router.push('/login')
@@ -532,6 +540,14 @@ const handleLogout = async () => {
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+
+  if (user) {
+    onSnapshot(doc(db, 'users', user.uid), (snap) => {
+      if (snap.exists()) {
+        userProfile.value = snap.data()
+      }
+    })
+  }
 
   if (userEmail) {
     const notifQuery = query(

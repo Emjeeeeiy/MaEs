@@ -311,6 +311,49 @@
 
     </div>
   </AdminLayout>
+
+  <!-- ================= GENERIC CONFIRMATION MODAL ================= -->
+  <transition name="fade">
+    <div
+      v-if="confirmationModal.show"
+      class="fixed inset-0 z-100 flex items-center justify-center bg-black/20 dark:bg-black/50 backdrop-blur-xs px-4"
+      @click="confirmationModal.show = false"
+    >
+      <div 
+        class="bg-white dark:bg-[#1a1a1a] w-full max-w-md p-8 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-2xl relative animate-fadeIn"
+        @click.stop
+      >
+        <div :class="['flex items-center gap-3 mb-4', confirmationModal.isDestructive ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400']">
+          <div :class="['p-3 rounded-2xl border', confirmationModal.isDestructive ? 'bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/30' : 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30']">
+            <component :is="confirmationModal.icon || AlertTriangleIcon" class="w-6 h-6" />
+          </div>
+          <div>
+            <h3 class="text-lg font-black tracking-tight">{{ confirmationModal.title }}</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Please confirm your action.</p>
+          </div>
+        </div>
+        
+        <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8">
+          {{ confirmationModal.message }}
+        </p>
+        
+        <div class="flex justify-end gap-3">
+          <button
+            @click="confirmationModal.show = false"
+            class="px-6 py-3 rounded-2xl text-xs font-bold bg-gray-50 dark:bg-transparent hover:bg-gray-100 dark:hover:bg-[#222] border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 transition"
+          >
+            Cancel
+          </button>
+          <button
+            @click="handleConfirmedAction"
+            :class="['px-6 py-3 rounded-2xl text-xs font-bold text-white transition shadow-lg', confirmationModal.isDestructive ? 'bg-red-600 hover:bg-red-700 shadow-red-600/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20']"
+          >
+            {{ confirmationModal.confirmText }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </transition>
 </template>
 
 <script setup>
@@ -323,7 +366,7 @@ import {
   ClipboardList as ClipboardListIcon, 
   Eye as EyeIcon, 
   Check as CheckIcon, 
-  Trash as TrashIcon, 
+  Trash2 as Trash2Icon, 
   ArrowLeft as ArrowLeftIcon,
   Search as SearchIcon,
   ChevronDown as ChevronDownIcon,
@@ -350,6 +393,36 @@ const showReceiptModal = ref(false)
 const currentReceiptBase64 = ref('')
 const userLastPayments = ref({})
 const { success: notifySuccess, error: notifyError } = useNotifications()
+
+// Confirmation Modal State
+const confirmationModal = ref({
+  show: false,
+  title: '',
+  message: '',
+  confirmText: '',
+  isDestructive: false,
+  icon: null,
+  action: null
+});
+
+const handleConfirmedAction = () => {
+  if (confirmationModal.value.action) {
+    confirmationModal.value.action();
+  }
+  confirmationModal.value.show = false;
+};
+
+const openConfirm = (config) => {
+  confirmationModal.value = {
+    show: true,
+    title: config.title || 'Are you sure?',
+    message: config.message || 'This action cannot be undone.',
+    confirmText: config.confirmText || 'Confirm',
+    isDestructive: config.isDestructive || false,
+    icon: config.icon || AlertTriangleIcon,
+    action: config.action
+  };
+};
 
 const discountedAmount = computed(() =>
   approveIdType.value ? approveAmount.value * 0.8 : approveAmount.value
@@ -548,14 +621,22 @@ const closeReceiptModal = () => {
 
 // ================= DELETE =================
 const deleteInvoice = async id => {
-  if (!confirm('Are you sure you want to delete this invoice?')) return
-  try {
-    await deleteDoc(doc(db, 'invoices', id))
-    notifySuccess('Invoice deleted successfully!')
-    invoices.value = invoices.value.filter(inv => inv.id !== id)
-  } catch (error) {
-    notifyError('Error deleting invoice: ' + error.message)
-  }
+  openConfirm({
+    title: 'Purge Invoice?',
+    message: 'Sigurado ka bang nais mong burahin ang invoice na ito? Ang operasyong ito ay permanenteng aalisin ang record sa system at hindi na maaaring ibalik.',
+    confirmText: 'Yes, Purge Record',
+    isDestructive: true,
+    icon: Trash2Icon,
+    action: async () => {
+      try {
+        await deleteDoc(doc(db, 'invoices', id))
+        notifySuccess('Invoice deleted successfully!')
+        invoices.value = invoices.value.filter(inv => inv.id !== id)
+      } catch (error) {
+        notifyError('Error deleting invoice: ' + error.message)
+      }
+    }
+  });
 }
 
 // ================= INIT =================
