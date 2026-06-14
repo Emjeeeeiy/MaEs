@@ -101,7 +101,22 @@
               <div class="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg">
                 <TrendingUpIcon class="w-4 h-4" />
               </div>
-              <h2 class="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">Revenue Trend (Daily)</h2>
+              <h2 class="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">Revenue Trend</h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                v-for="period in timePeriods"
+                :key="period"
+                @click="selectedTimePeriod = period"
+                :class="[
+                  'px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-all',
+                  selectedTimePeriod === period
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700'
+                ]"
+              >
+                {{ period }}
+              </button>
             </div>
           </div>
           <div class="h-80">
@@ -407,6 +422,8 @@ const recentUsers = ref([])
 const selectedWeek = ref('')
 const availableWeeks = ref([])
 const showServiceModal = ref(false)
+const selectedTimePeriod = ref('Daily')
+const timePeriods = ['Daily', 'Weekly', 'Monthly', 'Yearly']
 
 let serviceChartInstances = []
 let revenueChartInstance = null
@@ -488,6 +505,47 @@ function getFilteredData(dataMap) {
     if (date >= week.from && date <= week.to) filtered[date] = value
   }
   return filtered
+}
+
+function aggregateRevenueByPeriod(dataMap, period) {
+  const aggregated = {}
+  
+  Object.entries(dataMap).forEach(([dateStr, amount]) => {
+    const date = new Date(dateStr)
+    let key
+    
+    switch (period) {
+      case 'Weekly': {
+        const weekStart = new Date(date)
+        const day = weekStart.getDay() || 7
+        weekStart.setDate(weekStart.getDate() - day + 1)
+        key = weekStart.toISOString().split('T')[0]
+        break
+      }
+      case 'Monthly': {
+        key = dateStr.substring(0, 7) // YYYY-MM
+        break
+      }
+      case 'Yearly': {
+        key = dateStr.substring(0, 4) // YYYY
+        break
+      }
+      case 'Daily':
+      default:
+        key = dateStr
+    }
+    
+    aggregated[key] = (aggregated[key] || 0) + amount
+  })
+  
+  return aggregated
+}
+
+function getRevenueChartData() {
+  const aggregated = aggregateRevenueByPeriod(revenueTrend.value, selectedTimePeriod.value)
+  const labels = Object.keys(aggregated).sort()
+  const values = labels.map(d => aggregated[d])
+  return { labels, values }
 }
 
 async function fetchDashboardData() {
@@ -617,20 +675,20 @@ async function drawCharts() {
   // Revenue Chart
   if (revenueChartRef.value) {
     const filtered = getFilteredData(revenueTrend.value)
-    const labels = Object.keys(filtered).sort()
-    const values = labels.map(d => filtered[d])
+    const { labels, values } = getRevenueChartData()
+    const periodLabel = selectedTimePeriod.value
     revenueChartInstance = new Chart(revenueChartRef.value.getContext('2d'), {
       type: 'line',
       data: {
         labels,
         datasets: [{
-          label: 'Revenue',
+          label: `Revenue (${periodLabel})`,
           data: values,
           borderColor: '#3b82f6',
           backgroundColor: 'rgba(59, 130, 246, 0.05)',
           fill: true,
           tension: 0.4,
-          pointRadius: 3,
+          pointRadius: selectedTimePeriod.value === 'Yearly' ? 4 : 3,
           pointBackgroundColor: '#3b82f6',
           borderWidth: 2
         }]
@@ -777,6 +835,7 @@ onMounted(async () => {
 })
 
 watch(selectedWeek, drawCharts)
+watch(selectedTimePeriod, drawCharts)
 </script>
 
 <style scoped>
